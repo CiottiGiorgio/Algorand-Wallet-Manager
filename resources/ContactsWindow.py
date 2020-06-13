@@ -1,6 +1,8 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 from resources.CustomListWidgetItem import ContactListItem, ContactListWidget
+from algosdk.encoding import is_valid_address
 from os import path, remove
+from functools import partial
 
 
 class ContactsWindow(QtWidgets.QWidget):
@@ -41,9 +43,7 @@ class ContactsWindow(QtWidgets.QWidget):
 
         # MenuBar
         self.menu_bar = QtWidgets.QMenuBar()
-        self.menu_new_contact = self.menu_bar.addAction("New contact")
-
-        self.menu_new_contact.setDisabled(True)
+        self.menu_new_contact = self.menu_bar.addAction("New contact", partial(self.new_contact))
 
         main_layout.setMenuBar(self.menu_bar)
 
@@ -64,11 +64,7 @@ class ContactsWindow(QtWidgets.QWidget):
         self.list_contacts.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.list_contacts.customContextMenuRequested.connect(self.show_context_menu)
 
-        for widget in self.contact_widgets:
-            item = ContactListItem()
-            item.setSizeHint(widget.minimumSizeHint())
-            self.list_contacts.addItem(item)
-            self.list_contacts.setItemWidget(item, widget)
+        self.add_contact(self.contact_widgets)
 
         # If we enable sorting it gets an error when we add an item without widget yet because list doesn't know
         #  how to compare items without a widget. You can't insert the widget inside the item and then insert item
@@ -92,10 +88,8 @@ class ContactsWindow(QtWidgets.QWidget):
     def show_context_menu(self, pos):
         if item := self.list_contacts.itemAt(pos):
             menu = QtWidgets.QMenu()
-            menu_edit = menu.addAction(self.icon_edit, "Edit", lambda: None)
-            menu_delete = menu.addAction(self.icon_delete, "Delete", lambda: self.delete_contact(item))
-
-            menu_edit.setDisabled(True)
+            menu.addAction(self.icon_edit, "Edit", partial(self.edit_contact, item))
+            menu.addAction(self.icon_delete, "Delete", partial(self.delete_contact, item))
 
             global_pos = self.list_contacts.mapToGlobal(pos)
             menu.exec(global_pos)
@@ -115,17 +109,57 @@ class ContactsWindow(QtWidgets.QWidget):
             else:
                 self.list_contacts.item(i).setHidden(True)
 
+    def new_contact(self):
+        edit_window = ContactsEditing(self)
+        edit_window.exec()
+        if edit_window.return_value:
+            self.contact_widgets.append(edit_window.return_value)
+            self.add_contact(edit_window.return_value)
+
+    def edit_contact(self, item):
+        inputs = item.child_widget.extrapolate()
+        inputs = (item.child_widget.label_pixmap.pixmap(), inputs[1], inputs[2])
+        edit_window = ContactsEditing(self, inputs)
+        edit_window.exec()
+        if edit_window.return_value:
+            self.delete_contact(item)
+            self.contact_widgets.append(edit_window.return_value)
+            self.add_contact(edit_window.return_value)
+
+    # Adds a list of widgets in order to do bulk insert and call self.update_json_contacts just one time
+    def add_contact(self, widgets):
+        if not isinstance(widgets, list):
+            widgets = [widgets]
+
+        for widget in widgets:
+            item = ContactListItem()
+            item.setSizeHint(widget.minimumSizeHint())
+            self.list_contacts.addItem(item)
+            self.list_contacts.setItemWidget(item, widget)
+
+        self.update_json_contacts()
+
+        # In this case we need to re-sort the list
+        self.list_contacts.sortItems()
+
     # We remove the item from the list and we delete the widget contained inside from self.contact_widgets
     def delete_contact(self, item):
+        # Saving internally reference to item in list and to widget in item
         row = self.list_contacts.row(item)
-        widget = self.list_contacts.itemWidget(item)
+        widget = item.child_widget
+
+        # Saving pic_name before deleting widget to delete pic from hard disk
         pic_name = widget.extrapolate()[0]
+
+        # Deleting item from list and deleting widget from contact_widgets
         self.list_contacts.takeItem(row)
         self.contact_widgets.remove(widget)
         if pic_name:
             remove(path.join(path.expanduser("~"), ".Algorand Wallet Manager/thumbnails", pic_name))
 
+        # Update json inside parent memory
         self.update_json_contacts()
+
         # We don't need to re-sort the list because a delete doesn't change a correct sorting
 
     # This method makes sure that any change in self.contact_widgets is reflected in parent().contacts_from_json
@@ -138,3 +172,57 @@ class ContactsWindow(QtWidgets.QWidget):
             )
 
         self.parent().contacts_from_json_file = temp_list
+
+
+class ContactsEditing(QtWidgets.QDialog):
+    def __init__(self, parent, pre_filled=None):
+        super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
+
+        self.return_value = None
+
+        self.setWindowTitle(
+            "Edit contact" if pre_filled else "New contact"
+        )
+        self.setFixedSize(300, 300)
+
+        main_layout = QtWidgets.QVBoxLayout()
+
+        main_layout.addWidget(QtWidgets.QLabel("Name:"))
+        self.edit_name = QtWidgets.QLineEdit()
+        self.edit_name.setFixedHeight(25)
+        self.edit_name.setText(
+            pre_filled[1] if pre_filled else ""
+        )
+        main_layout.addWidget(self.edit_name)
+
+        main_layout.addWidget(QtWidgets.QLabel("Address:"))
+        self.edit_address = QtWidgets.QLineEdit()
+        self.edit_address.setFixedHeight(25)
+        self.edit_address.setText(
+            pre_filled[2] if pre_filled else ""
+        )
+        main_layout.addWidget(self.edit_address)
+
+        main_layout.addWidget(QtWidgets.QLabel("Photo:"))
+        self.label_pic = QtWidgets.QLabel()
+        self.label_pic.setPixmap(
+            pre_filled[0] if pre_filled else QtGui.QPixmap()
+        )
+        main_layout.addWidget(self.label_pic)
+
+        main_layout.addStretch(1)
+
+        self.button_ok = QtWidgets.QPushButton("OK")
+        self.button_ok.clicked.connect(self.button_ok_clicked)
+        button_layout = QtWidgets.QHBoxLayout()
+        button_layout.addStretch(1)
+        button_layout.addWidget(self.button_ok)
+
+        main_layout.addLayout(button_layout)
+
+        self.setLayout(main_layout)
+
+    @QtCore.pyqtSlot()
+    def button_ok_clicked(self):
+        self.return_value = ContactListWidget(None, self.edit_name.text(), self.edit_address.text())
+        self.close()

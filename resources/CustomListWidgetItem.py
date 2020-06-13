@@ -73,7 +73,6 @@ class ContactListWidget(QtWidgets.QWidget):
         self.label_pixmap.setPixmap(QtGui.QPixmap(path.join(self.contact_pic_path, self.contact_pic_name)).scaled(30, 30)
                                     if contact_pic_name else
                                     self.icon_generic_user)
-        QtGui.QPixmap()
         main_layout.addWidget(self.label_pixmap)
 
         main_layout.addSpacing(5)
@@ -117,4 +116,4 @@ class ContactListWidget(QtWidgets.QWidget):
         self.button_delete.show()
 
     def extrapolate(self):
-        return [self.contact_pic_name, self.label_name.text(), self.label_info.text()]
+        return self.contact_pic_name, self.label_name.text(), self.label_info.text()
