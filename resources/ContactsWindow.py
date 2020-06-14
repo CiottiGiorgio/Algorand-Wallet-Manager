@@ -117,9 +117,7 @@ class ContactsWindow(QtWidgets.QWidget):
             self.add_contact(edit_window.return_value)
 
     def edit_contact(self, item):
-        inputs = item.child_widget.extrapolate()
-        inputs = (item.child_widget.label_pixmap.pixmap(), inputs[1], inputs[2])
-        edit_window = ContactsEditing(self, inputs)
+        edit_window = ContactsEditing(self, item)
         edit_window.exec()
         if edit_window.return_value:
             self.delete_contact(item)
@@ -175,6 +173,9 @@ class ContactsWindow(QtWidgets.QWidget):
 
 
 class ContactsEditing(QtWidgets.QDialog):
+    icon_valid = QtGui.QPixmap(path.abspath("graphics/valid.png"))
+    icon_not_valid = QtGui.QPixmap(path.abspath("graphics/not valid.png"))
+
     def __init__(self, parent, pre_filled=None):
         super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
 
@@ -190,24 +191,21 @@ class ContactsEditing(QtWidgets.QDialog):
         main_layout.addWidget(QtWidgets.QLabel("Name:"))
         self.edit_name = QtWidgets.QLineEdit()
         self.edit_name.setFixedHeight(25)
-        self.edit_name.setText(
-            pre_filled[1] if pre_filled else ""
-        )
+        self.edit_name_action = self.edit_name.addAction(QtGui.QIcon(), QtWidgets.QLineEdit.TrailingPosition)
         main_layout.addWidget(self.edit_name)
+
+        main_layout.addSpacing(10)
 
         main_layout.addWidget(QtWidgets.QLabel("Address:"))
         self.edit_address = QtWidgets.QLineEdit()
         self.edit_address.setFixedHeight(25)
-        self.edit_address.setText(
-            pre_filled[2] if pre_filled else ""
-        )
+        self.edit_address_action = self.edit_name.addAction(QtGui.QIcon(), QtWidgets.QLineEdit.TrailingPosition)
         main_layout.addWidget(self.edit_address)
+
+        main_layout.addSpacing(10)
 
         main_layout.addWidget(QtWidgets.QLabel("Photo:"))
         self.label_pic = QtWidgets.QLabel()
-        self.label_pic.setPixmap(
-            pre_filled[0] if pre_filled else QtGui.QPixmap()
-        )
         main_layout.addWidget(self.label_pic)
 
         main_layout.addStretch(1)
@@ -220,7 +218,48 @@ class ContactsEditing(QtWidgets.QDialog):
 
         main_layout.addLayout(button_layout)
 
+        if pre_filled:
+            self.edit_name.setText(pre_filled.widget_name)
+            self.edit_address.setText(pre_filled.widget_info)
+            self.label_pic.setPixmap(pre_filled.widget_pixmap)
+        else:
+            self.label_pic.setPixmap(ContactListWidget.pixmap_generic_user)
+
+        self.edit_name.textChanged.connect(self.validate_inputs)
+        self.edit_address.textChanged.connect(self.validate_inputs)
+        self.validate_inputs()
+
         self.setLayout(main_layout)
+
+    @QtCore.pyqtSlot(str)
+    def validate_inputs(self):
+        name_state = self.edit_name.text() != ""
+        address_state = is_valid_address(self.edit_address.text())
+
+        self.edit_name.removeAction(self.edit_name_action)
+        if name_state:
+            self.edit_name_action = self.edit_name.addAction(
+                QtGui.QIcon(self.icon_valid), QtWidgets.QLineEdit.LeadingPosition
+            )
+        else:
+            self.edit_name_action = self.edit_name.addAction(
+                QtGui.QIcon(self.icon_not_valid), QtWidgets.QLineEdit.LeadingPosition
+            )
+
+        self.edit_address.removeAction(self.edit_address_action)
+        if address_state:
+            self.edit_address_action = self.edit_address.addAction(
+                QtGui.QIcon(self.icon_valid), QtWidgets.QLineEdit.LeadingPosition
+            )
+        else:
+            self.edit_address_action = self.edit_address.addAction(
+                QtGui.QIcon(self.icon_not_valid), QtWidgets.QLineEdit.LeadingPosition
+            )
+
+        if name_state and address_state:
+            self.button_ok.setEnabled(True)
+        else:
+            self.button_ok.setEnabled(False)
 
     @QtCore.pyqtSlot()
     def button_ok_clicked(self):

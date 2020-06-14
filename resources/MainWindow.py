@@ -20,12 +20,12 @@ class WalletFrame(QtWidgets.QFrame):
         self.list_wallet = QtWidgets.QListWidget()
         self.list_wallet.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
 
-        for wallet in ["Wallets will be", "displayed in this list"]:
-            widget = WalletListWidget(wallet, "Locked")
-            item = WalletListItem()
-            item.setSizeHint(widget.minimumSizeHint())
-            self.list_wallet.addItem(item)
-            self.list_wallet.setItemWidget(item, widget)
+        # for wallet in ["Wallets will be", "displayed in this list"]:
+        #     widget = WalletListWidget(wallet, "Locked")
+        #     item = WalletListItem()
+        #     item.setSizeHint(widget.minimumSizeHint())
+        #     self.list_wallet.addItem(item)
+        #     self.list_wallet.setItemWidget(item, widget)
 
         main_layout.addWidget(self.list_wallet)
 
@@ -58,7 +58,7 @@ class WalletFrame(QtWidgets.QFrame):
         wallet_button_layout.addWidget(self.button_export)
 
         for button in [self.button_manage, self.button_rename, self.button_new, self.button_import, self.button_delete, self.button_export]:
-            button.setDisabled(True)
+            button.setEnabled(False)
 
         # Setting the frame main layout
         self.setLayout(main_layout)

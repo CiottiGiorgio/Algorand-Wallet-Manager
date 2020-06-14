@@ -11,6 +11,8 @@ def main():
     main_window = MainWindow()
     main_window.show()
 
+    main_window.show_contacts()
+
     app.exec()
 
 

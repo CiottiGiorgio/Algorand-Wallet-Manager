@@ -49,16 +49,24 @@ class ContactListItem(QtWidgets.QListWidgetItem):
         return self.listWidget().itemWidget(self)
 
     # This changes the method into being an attribute that is only computed the first time.
-    # This is made under the assumption that the widget inside a given item doesn't change AND
-    #  this will be useful for dynamic filtering with search bar.
+    # This is made under the assumption that the widget inside a given item doesn't change.
+    # This will be useful for dynamic filtering with search bar.
     @cached_property
-    def label_name(self):
+    def widget_name(self):
         return self.child_widget.label_name.text()
+
+    @cached_property
+    def widget_info(self):
+        return self.child_widget.label_info.text()
+
+    @cached_property
+    def widget_pixmap(self):
+        return self.child_widget.label_pixmap.pixmap()
 
 
 class ContactListWidget(QtWidgets.QWidget):
     # Static loading of graphic resources
-    icon_generic_user = QtGui.QPixmap(path.abspath("graphics/generic_user.png")).scaled(30, 30)
+    pixmap_generic_user = QtGui.QPixmap(path.abspath("graphics/generic_user.png")).scaled(30, 30)
 
     contact_pic_path = path.join(path.expanduser("~"), ".Algorand Wallet Manager/thumbnails")
 
@@ -72,7 +80,7 @@ class ContactListWidget(QtWidgets.QWidget):
         self.label_pixmap = QtWidgets.QLabel()
         self.label_pixmap.setPixmap(QtGui.QPixmap(path.join(self.contact_pic_path, self.contact_pic_name)).scaled(30, 30)
                                     if contact_pic_name else
-                                    self.icon_generic_user)
+                                    self.pixmap_generic_user)
         main_layout.addWidget(self.label_pixmap)
 
         main_layout.addSpacing(5)
@@ -89,31 +97,10 @@ class ContactListWidget(QtWidgets.QWidget):
 
         main_layout.addStretch(1)
 
-        main_layout.addLayout(button_layout := QtWidgets.QHBoxLayout())
-        button_layout.setSpacing(0)
-
-        self.button_edit = QtWidgets.QPushButton("Edit")
-        self.button_edit.setFixedWidth(40)
-        button_layout.addWidget(self.button_edit)
-
-        self.button_delete = QtWidgets.QPushButton("Delete")
-        self.button_delete.setFixedWidth(40)
-        button_layout.addWidget(self.button_delete)
-
         self.setLayout(main_layout)
-
-        self.hide_buttons()
 
     def __lt__(self, other):
         return self.label_name.text() < other.label_name.text()
-
-    def hide_buttons(self):
-        self.button_edit.hide()
-        self.button_delete.hide()
-
-    def show_buttons(self):
-        self.button_edit.show()
-        self.button_delete.show()
 
     def extrapolate(self):
         return self.contact_pic_name, self.label_name.text(), self.label_info.text()
