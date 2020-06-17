@@ -1,7 +1,6 @@
-from PyQt5 import QtWidgets, QtGui
+from PySide2 import QtWidgets, QtGui
 import algosdk
 from resources.ContactsWindow import ContactsWindow
-from resources.CustomListWidgetItem import WalletListItem, WalletListWidget
 from os import path, mkdir
 import json
 

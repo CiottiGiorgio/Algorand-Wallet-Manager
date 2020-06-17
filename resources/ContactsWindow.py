@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, QtGui, QtCore
+from PySide2 import QtWidgets, QtGui, QtCore
 from resources.CustomListWidgetItem import ContactListItem, ContactListWidget
 from algosdk.encoding import is_valid_address
 from os import path, remove
@@ -84,7 +84,7 @@ class ContactsWindow(QtWidgets.QWidget):
         a0.accept()
 
     # PyQt5 slot to create a custom context menu on an item in self.contacts_list
-    @QtCore.pyqtSlot(QtCore.QPoint)
+    @QtCore.Slot(QtCore.QPoint)
     def show_context_menu(self, pos):
         if item := self.list_contacts.itemAt(pos):
             menu = QtWidgets.QMenu()
@@ -92,10 +92,10 @@ class ContactsWindow(QtWidgets.QWidget):
             menu.addAction(self.icon_delete, "Delete", partial(self.delete_contact, item))
 
             global_pos = self.list_contacts.mapToGlobal(pos)
-            menu.exec(global_pos)
+            menu.exec_(global_pos)
 
     # PyQt5 slot to hide and show items that are filtered through search bar
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def filter_contacts(self, new_text):
         for i in range(self.list_contacts.count()):
             # We do matching this way because "in" operator search for exact correspondence. Instead we would like to
@@ -103,7 +103,7 @@ class ContactsWindow(QtWidgets.QWidget):
             #  the user might look for a contact using a string that doesnt exists in any label_name.
             #  Eg.: search_text="py mo" label_name="Monty Python"
             if all([
-                match.lower() in self.list_contacts.item(i).label_name.lower() for match in new_text.split(" ")
+                match.lower() in self.list_contacts.item(i).widget_name.lower() for match in new_text.split(" ")
             ]):
                 self.list_contacts.item(i).setHidden(False)
             else:
@@ -191,6 +191,7 @@ class ContactsEditing(QtWidgets.QDialog):
         main_layout.addWidget(QtWidgets.QLabel("Name:"))
         self.edit_name = QtWidgets.QLineEdit()
         self.edit_name.setFixedHeight(25)
+        self.edit_name.setPlaceholderText("Insert a name for your contact")
         self.edit_name_action = self.edit_name.addAction(QtGui.QIcon(), QtWidgets.QLineEdit.TrailingPosition)
         main_layout.addWidget(self.edit_name)
 
@@ -199,7 +200,8 @@ class ContactsEditing(QtWidgets.QDialog):
         main_layout.addWidget(QtWidgets.QLabel("Address:"))
         self.edit_address = QtWidgets.QLineEdit()
         self.edit_address.setFixedHeight(25)
-        self.edit_address_action = self.edit_name.addAction(QtGui.QIcon(), QtWidgets.QLineEdit.TrailingPosition)
+        self.edit_address.setPlaceholderText("Insert a valid Algorand address")
+        self.edit_address_action = self.edit_address.addAction(QtGui.QIcon(), QtWidgets.QLineEdit.TrailingPosition)
         main_layout.addWidget(self.edit_address)
 
         main_layout.addSpacing(10)
@@ -231,7 +233,7 @@ class ContactsEditing(QtWidgets.QDialog):
 
         self.setLayout(main_layout)
 
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def validate_inputs(self):
         name_state = self.edit_name.text() != ""
         address_state = is_valid_address(self.edit_address.text())
@@ -239,21 +241,21 @@ class ContactsEditing(QtWidgets.QDialog):
         self.edit_name.removeAction(self.edit_name_action)
         if name_state:
             self.edit_name_action = self.edit_name.addAction(
-                QtGui.QIcon(self.icon_valid), QtWidgets.QLineEdit.LeadingPosition
+                QtGui.QIcon(self.icon_valid), QtWidgets.QLineEdit.TrailingPosition
             )
         else:
             self.edit_name_action = self.edit_name.addAction(
-                QtGui.QIcon(self.icon_not_valid), QtWidgets.QLineEdit.LeadingPosition
+                QtGui.QIcon(self.icon_not_valid), QtWidgets.QLineEdit.TrailingPosition
             )
 
         self.edit_address.removeAction(self.edit_address_action)
         if address_state:
             self.edit_address_action = self.edit_address.addAction(
-                QtGui.QIcon(self.icon_valid), QtWidgets.QLineEdit.LeadingPosition
+                QtGui.QIcon(self.icon_valid), QtWidgets.QLineEdit.TrailingPosition
             )
         else:
             self.edit_address_action = self.edit_address.addAction(
-                QtGui.QIcon(self.icon_not_valid), QtWidgets.QLineEdit.LeadingPosition
+                QtGui.QIcon(self.icon_not_valid), QtWidgets.QLineEdit.TrailingPosition
             )
 
         if name_state and address_state:
@@ -261,7 +263,7 @@ class ContactsEditing(QtWidgets.QDialog):
         else:
             self.button_ok.setEnabled(False)
 
-    @QtCore.pyqtSlot()
+    @QtCore.Slot()
     def button_ok_clicked(self):
         self.return_value = ContactListWidget(None, self.edit_name.text(), self.edit_address.text())
         self.close()

@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets
+from PySide2 import QtWidgets
 
 
 def main():
@@ -13,7 +13,7 @@ def main():
 
     main_window.show_contacts()
 
-    app.exec()
+    app.exec_()
 
 
 if __name__ == '__main__':

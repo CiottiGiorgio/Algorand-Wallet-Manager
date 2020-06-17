@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, QtGui
+from PySide2 import QtWidgets, QtGui
 from functools import cached_property
 from os import path
 
