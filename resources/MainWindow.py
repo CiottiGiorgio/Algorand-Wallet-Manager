@@ -120,11 +120,11 @@ class MainWindow(QtWidgets.QMainWindow):
         # self.menu_contacts.setEnabled(True) can't be called here because .show() is not blocking
         #  but the menu is reactivated in the destruction of contacts_window inside overloading of closeEvent()
 
-    def closeEvent(self, a0):
+    def closeEvent(self, event: QtGui.QCloseEvent):
         # I don't know if there is a reasonable chance that two different list give out the same hash.
         if self.contacts_from_json_file_hash != str(self.contacts_from_json_file).__hash__():
             self.dump_memory_contacts_to_json()
-        a0.accept()
+        event.accept()
 
     def dump_memory_contacts_to_json(self):
         try:

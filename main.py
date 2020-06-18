@@ -1,5 +1,7 @@
 from PySide2 import QtWidgets
 
+# TODO write docstring for class and methods
+
 
 def main():
     app = QtWidgets.QApplication([])

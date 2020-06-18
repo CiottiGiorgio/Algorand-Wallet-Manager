@@ -1,6 +1,7 @@
 from PySide2 import QtWidgets, QtGui, QtCore
 from functools import cached_property
 from os import path
+from typing import Tuple
 
 # TODO: credit author with
 #  "Icon made by "Freepik", "Those Icons", "Pixel perfect" from www.flaticon.com"
@@ -8,11 +9,10 @@ from os import path
 
 class WalletListItem(QtWidgets.QListWidgetItem):
     pass
-    # Empty class just in case
 
 
 class WalletListWidget(QtWidgets.QWidget):
-    def __init__(self, wallet_name, wallet_info):
+    def __init__(self, wallet_name: str, wallet_info: str):
         super().__init__()
 
         main_layout = QtWidgets.QHBoxLayout()
@@ -75,7 +75,7 @@ class ContactListWidget(QtWidgets.QWidget):
 
     contact_pic_path = path.join(path.expanduser("~"), ".Algorand Wallet Manager/thumbnails")
 
-    def __init__(self, contact_pic_name, contact_name, contact_info):
+    def __init__(self, contact_pic_name: str, contact_name: str, contact_info: str):
         super().__init__()
 
         self.contact_pic_name = contact_pic_name
@@ -110,11 +110,11 @@ class ContactListWidget(QtWidgets.QWidget):
         return self.label_name.text() < other.label_name.text()
 
     @staticmethod
-    def derive_profile_pic(pixmap):
+    def derive_profile_pic(pixmap: QtGui.QPixmap) -> QtGui.QPixmap:
         # Crop a the maximum square possible from the middle of the pixmap
         width, height = pixmap.width(), pixmap.height()
         side = min(width, height)
-        square_top_left_corner = QtCore.QPoint(width/2 - side/2, height/2 - side/2)
+        square_top_left_corner = QtCore.QPoint(width//2 - side//2, height//2 - side//2)
         cropping_rect = QtCore.QRect(square_top_left_corner, QtCore.QSize(side, side))
 
         result = pixmap.copy(cropping_rect)
@@ -128,5 +128,5 @@ class ContactListWidget(QtWidgets.QWidget):
 
         return result.scaled(40, 40, QtCore.Qt.IgnoreAspectRatio, QtCore.Qt.SmoothTransformation)
 
-    def extrapolate(self):
+    def extrapolate(self) -> Tuple[str, str, str]:
         return self.contact_pic_name, self.label_name.text(), self.label_info.text()

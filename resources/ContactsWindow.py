@@ -6,6 +6,7 @@ from shutil import copyfile
 from string import ascii_letters, digits
 from random import sample
 from functools import partial
+from typing import Union, List
 
 
 class ContactsWindow(QtWidgets.QWidget):
@@ -20,7 +21,7 @@ class ContactsWindow(QtWidgets.QWidget):
     #  if it has to be loaded each time the window starts for every contact in the list
     contact_widgets = list()
 
-    def __init__(self, parent):
+    def __init__(self, parent: QtWidgets.QWidget):
         # This line is necessary because a widget gets it's own window if it doesn't have a parent OR
         #  if it has a parent but has QtCore.Qt.Window flag set
         super().__init__(parent, QtCore.Qt.Window)
@@ -82,13 +83,13 @@ class ContactsWindow(QtWidgets.QWidget):
 
     # We capture the closing event of the window to restore the enabled status of contact menu action.
     #  Then we propagate the event upward to the parent.
-    def closeEvent(self, a0):
+    def closeEvent(self, event: QtGui.QCloseEvent):
         self.parent().menu_contacts.setEnabled(True)
-        a0.accept()
+        event.accept()
 
     # PyQt5 slot to create a custom context menu on an item in self.contacts_list
     @QtCore.Slot(QtCore.QPoint)
-    def show_context_menu(self, pos):
+    def show_context_menu(self, pos: QtCore.QPoint):
         if item := self.list_contacts.itemAt(pos):
             menu = QtWidgets.QMenu()
             menu.addAction(self.icon_edit, "Edit", partial(self.edit_contact, item))
@@ -99,7 +100,7 @@ class ContactsWindow(QtWidgets.QWidget):
 
     # PyQt5 slot to hide and show items that are filtered through search bar
     @QtCore.Slot(str)
-    def filter_contacts(self, new_text):
+    def filter_contacts(self, new_text: str):
         for i in range(self.list_contacts.count()):
             # We do matching this way because "in" operator search for exact correspondence. Instead we would like to
             #  filter all the item for with every single word matches against some part of label_name. This is because
@@ -119,7 +120,7 @@ class ContactsWindow(QtWidgets.QWidget):
             self.contact_widgets.append(edit_window.return_value)
             self.add_contact(edit_window.return_value)
 
-    def edit_contact(self, item):
+    def edit_contact(self, item: ContactListItem):
         edit_window = ContactsEditing(self, item)
         edit_window.exec_()
         if edit_window.return_value:
@@ -131,7 +132,7 @@ class ContactsWindow(QtWidgets.QWidget):
             self.add_contact(edit_window.return_value)
 
     # Adds a list of widgets in order to do bulk insert and call self.update_json_contacts just one time
-    def add_contact(self, widgets):
+    def add_contact(self, widgets: Union[ContactListWidget, List[ContactListWidget]]):
         if not isinstance(widgets, list):
             widgets = [widgets]
 
@@ -147,7 +148,7 @@ class ContactsWindow(QtWidgets.QWidget):
         self.list_contacts.sortItems()
 
     # We remove the item from the list and we delete the widget contained inside from self.contact_widgets
-    def delete_contact(self, item, delete_thumbnail=True):
+    def delete_contact(self, item: ContactListItem, delete_thumbnail: bool = True):
         # Saving internally reference to item in list and to widget in item
         row = self.list_contacts.row(item)
         widget = item.child_widget
@@ -180,14 +181,14 @@ class ContactsWindow(QtWidgets.QWidget):
 
 class ContactsEditing(QtWidgets.QDialog):
     @staticmethod
-    def random_file_name(length=16):
+    def random_file_name(length: int = 16):
         character_pool = frozenset(ascii_letters + digits)
         return "".join(sample(character_pool, length))
 
     icon_valid = QtGui.QPixmap(path.abspath("graphics/valid.png"))
     icon_not_valid = QtGui.QPixmap(path.abspath("graphics/not valid.png"))
 
-    def __init__(self, parent, pre_filled=None):
+    def __init__(self, parent: QtWidgets.QWidget, pre_filled: ContactListWidget = None):
         super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
 
         self.external_pic_full_path = None
@@ -275,7 +276,7 @@ class ContactsEditing(QtWidgets.QDialog):
 
         self.setLayout(main_layout)
 
-    @QtCore.Slot(str)
+    @QtCore.Slot()
     def validate_inputs(self):
         name_state = self.edit_name.text() != ""
         address_state = is_valid_address(self.edit_address.text())
