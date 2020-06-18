@@ -2,6 +2,9 @@ from PySide2 import QtWidgets, QtGui, QtCore
 from resources.CustomListWidgetItem import ContactListItem, ContactListWidget
 from algosdk.encoding import is_valid_address
 from os import path, remove
+from shutil import copyfile
+from string import ascii_letters, digits
+from random import sample
 from functools import partial
 
 
@@ -43,7 +46,7 @@ class ContactsWindow(QtWidgets.QWidget):
 
         # MenuBar
         self.menu_bar = QtWidgets.QMenuBar()
-        self.menu_new_contact = self.menu_bar.addAction("New contact", partial(self.new_contact))
+        self.menu_new_contact = self.menu_bar.addAction("New contact", self.new_contact)
 
         main_layout.setMenuBar(self.menu_bar)
 
@@ -111,16 +114,19 @@ class ContactsWindow(QtWidgets.QWidget):
 
     def new_contact(self):
         edit_window = ContactsEditing(self)
-        edit_window.exec()
+        edit_window.exec_()
         if edit_window.return_value:
             self.contact_widgets.append(edit_window.return_value)
             self.add_contact(edit_window.return_value)
 
     def edit_contact(self, item):
         edit_window = ContactsEditing(self, item)
-        edit_window.exec()
+        edit_window.exec_()
         if edit_window.return_value:
-            self.delete_contact(item)
+            self.delete_contact(
+                item,
+                True if item.widget_pic_name != edit_window.return_value.contact_pic_name else False
+            )
             self.contact_widgets.append(edit_window.return_value)
             self.add_contact(edit_window.return_value)
 
@@ -141,7 +147,7 @@ class ContactsWindow(QtWidgets.QWidget):
         self.list_contacts.sortItems()
 
     # We remove the item from the list and we delete the widget contained inside from self.contact_widgets
-    def delete_contact(self, item):
+    def delete_contact(self, item, delete_thumbnail=True):
         # Saving internally reference to item in list and to widget in item
         row = self.list_contacts.row(item)
         widget = item.child_widget
@@ -152,8 +158,8 @@ class ContactsWindow(QtWidgets.QWidget):
         # Deleting item from list and deleting widget from contact_widgets
         self.list_contacts.takeItem(row)
         self.contact_widgets.remove(widget)
-        if pic_name:
-            remove(path.join(path.expanduser("~"), ".Algorand Wallet Manager/thumbnails", pic_name))
+        if pic_name and delete_thumbnail:
+            remove(path.join(ContactListWidget.contact_pic_path, pic_name))
 
         # Update json inside parent memory
         self.update_json_contacts()
@@ -173,18 +179,24 @@ class ContactsWindow(QtWidgets.QWidget):
 
 
 class ContactsEditing(QtWidgets.QDialog):
+    @staticmethod
+    def random_file_name(length=16):
+        character_pool = frozenset(ascii_letters + digits)
+        return "".join(sample(character_pool, length))
+
     icon_valid = QtGui.QPixmap(path.abspath("graphics/valid.png"))
     icon_not_valid = QtGui.QPixmap(path.abspath("graphics/not valid.png"))
 
     def __init__(self, parent, pre_filled=None):
         super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
 
+        self.external_pic_full_path = None
         self.return_value = None
 
         self.setWindowTitle(
             "Edit contact" if pre_filled else "New contact"
         )
-        self.setFixedSize(300, 300)
+        self.setFixedSize(350, 320)
 
         main_layout = QtWidgets.QVBoxLayout()
 
@@ -207,25 +219,55 @@ class ContactsEditing(QtWidgets.QDialog):
         main_layout.addSpacing(10)
 
         main_layout.addWidget(QtWidgets.QLabel("Photo:"))
+        self.pic_name = None
+        photo_layout = QtWidgets.QHBoxLayout()
         self.label_pic = QtWidgets.QLabel()
-        main_layout.addWidget(self.label_pic)
+        photo_layout.addWidget(self.label_pic)
+
+        photo_button_layout = QtWidgets.QVBoxLayout()
+
+        self.button_pic_modify = QtWidgets.QPushButton("Change")
+        self.button_pic_modify.clicked.connect(self.button_pic_modify_clicked)
+        photo_button_layout.addWidget(self.button_pic_modify)
+
+        self.button_pic_delete = QtWidgets.QPushButton("Delete")
+        self.button_pic_delete.clicked.connect(self.button_pic_delete_clicked)
+        photo_button_layout.addWidget(self.button_pic_delete)
+
+        photo_layout.addLayout(photo_button_layout)
+
+        photo_layout.addStretch(1)
+
+        main_layout.addLayout(photo_layout)
 
         main_layout.addStretch(1)
 
-        self.button_ok = QtWidgets.QPushButton("OK")
-        self.button_ok.clicked.connect(self.button_ok_clicked)
+        self.button_confirm = QtWidgets.QPushButton("Confirm")
+        self.button_confirm.clicked.connect(self.button_confirm_clicked)
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addStretch(1)
-        button_layout.addWidget(self.button_ok)
+        button_layout.addWidget(self.button_confirm)
 
         main_layout.addLayout(button_layout)
 
         if pre_filled:
             self.edit_name.setText(pre_filled.widget_name)
             self.edit_address.setText(pre_filled.widget_info)
-            self.label_pic.setPixmap(pre_filled.widget_pixmap)
+            self.pic_name = pre_filled.widget_pic_name
+            self.label_pic.setPixmap(pre_filled.widget_pixmap.scaled(
+                128, 128,
+                QtCore.Qt.KeepAspectRatio,
+                QtCore.Qt.SmoothTransformation
+            ))
         else:
-            self.label_pic.setPixmap(ContactListWidget.pixmap_generic_user)
+            self.label_pic.setPixmap(ContactListWidget.pixmap_generic_user.scaled(
+                128, 128,
+                QtCore.Qt.KeepAspectRatio,
+                QtCore.Qt.SmoothTransformation
+            ))
+
+        if not self.pic_name:
+            self.button_pic_delete.setEnabled(False)
 
         self.edit_name.textChanged.connect(self.validate_inputs)
         self.edit_address.textChanged.connect(self.validate_inputs)
@@ -258,12 +300,49 @@ class ContactsEditing(QtWidgets.QDialog):
                 QtGui.QIcon(self.icon_not_valid), QtWidgets.QLineEdit.TrailingPosition
             )
 
-        if name_state and address_state:
-            self.button_ok.setEnabled(True)
-        else:
-            self.button_ok.setEnabled(False)
+        # Disable button if any of those two conditions is False. Enable otherwise.
+        self.button_confirm.setEnabled(name_state and address_state)
 
     @QtCore.Slot()
-    def button_ok_clicked(self):
-        self.return_value = ContactListWidget(None, self.edit_name.text(), self.edit_address.text())
+    def button_pic_modify_clicked(self):
+        file_name = QtWidgets.QFileDialog.getOpenFileName(
+            self,
+            "Choose a picture for contact thumbnail",
+            path.join(path.expanduser("~"), "Pictures"),
+            "Image Files (*.png *.jpg *.bmp)"
+        )
+        if file_name[0] != "":
+            self.external_pic_full_path = file_name[0]
+            self.label_pic.setPixmap(QtGui.QPixmap(file_name[0]).scaled(
+                128, 128,
+                QtCore.Qt.KeepAspectRatio,
+                QtCore.Qt.SmoothTransformation
+            ))
+
+            self.button_pic_delete.setEnabled(True)
+
+    @QtCore.Slot()
+    def button_pic_delete_clicked(self):
+        self.external_pic_full_path = None
+        self.pic_name = None
+        self.label_pic.setPixmap(ContactListWidget.pixmap_generic_user.scaled(
+            128, 128,
+            QtCore.Qt.KeepAspectRatio,
+            QtCore.Qt.SmoothTransformation
+        ))
+        self.button_pic_delete.setEnabled(False)
+
+    @QtCore.Slot()
+    def button_confirm_clicked(self):
+        if self.external_pic_full_path:
+            old_extension = "." + self.external_pic_full_path.split(".")[-1]
+            while True:
+                rnd_file_name = self.random_file_name() + old_extension
+                if not path.exists(path.join(ContactListWidget.contact_pic_path, rnd_file_name)):
+                    break
+            copyfile(self.external_pic_full_path, path.join(ContactListWidget.contact_pic_path, rnd_file_name))
+            pic_name = rnd_file_name
+        else:
+            pic_name = self.pic_name
+        self.return_value = ContactListWidget(pic_name, self.edit_name.text(), self.edit_address.text())
         self.close()
