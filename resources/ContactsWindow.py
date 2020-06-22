@@ -1,36 +1,92 @@
+"""
+This file describes the main contact window, its child widgets and some data structure needed.
+
+ContactsWindow class is the main purpose of this file.
+"""
+
+
+# PySide 2
 from PySide2 import QtWidgets, QtGui, QtCore
-from resources.CustomListWidgetItem import ContactListItem, ContactListWidget
+
+# Algorand
 from algosdk.encoding import is_valid_address
-from os import path, remove
+
+# Local project
+import resources.Constants as ProjectConstants
+from resources.Entities import Contact, ContactJSONDecoder
+from resources.CustomListWidgetItem import ContactListItem, ContactListWidget
+
+# Python standard libraries
+import os
+from sys import stderr
 from shutil import copyfile
 from string import ascii_letters, digits
 from random import sample
 from functools import partial
 from typing import Union, List
+import json
+
+
+# There probably is a more efficient way of doing this. This is the faster way to code this functionality right now.
+#  An alternative could be overriding writing methods to the list and making sure that a bool flag starts at False
+#  and becomes True at the first change. .save_state() then becomes just resetting this flag with False again.
+class ListJsonContacts(list):
+    """
+    Subclass of standard python list
+
+    This class is useful for taking a snapshot of itself in time A and then checking if the content has changed in
+    time B with A <= B.
+    """
+    def __init__(self):
+        super().__init__()
+
+        self.old_hash = None
+
+    def save_state(self):
+        self.old_hash = str(self).__hash__()
+
+    def has_changed(self) -> bool:
+        return str(self).__hash__() != self.old_hash
 
 
 class ContactsWindow(QtWidgets.QWidget):
-    # Static loading of graphic resources
-    # This is not done because there will be multiple instances of this class but rather to avoid loading
-    #  this icon every time the user opens Contacts window
-    icon_search = QtGui.QIcon(path.abspath("graphics/search.png"))
-    icon_edit = QtGui.QIcon(path.abspath("graphics/edit.png"))
-    icon_delete = QtGui.QIcon(path.abspath("graphics/delete.png"))
+    """
+    Contact list window.
 
-    # We make a list of ContactListItem static because each item has an image that could create IO bottleneck
-    #  if it has to be loaded each time the window starts for every contact in the list
+    This subclass of QWidget spawn a new window with the functionality to manage a contact list.
+    I have decided that this class will also host static information about contacts. Other classes might need this
+    info such as the transaction window (e.g.: when sending algos or assets you get suggestions when typing in the
+    receiver of such transaction).
+    """
+    # These icons are static because we want to avoid having to reload them from the disk each time this class is
+    #  instantiated
+    icon_search = QtGui.QIcon(os.path.abspath("graphics/search.png"))
+    icon_edit = QtGui.QIcon(os.path.abspath("graphics/edit.png"))
+    icon_delete = QtGui.QIcon(os.path.abspath("graphics/delete.png"))
+
+    # This list will host the content of the contacts.json file. This is static because other classes might need to
+    #  read contacts and create their own widgets.
+    #  However this class will be the only one to load it and change it. Other classes shall only read from it.
+    # A crucial point is that this list gets loaded with the static method load_contacts_json_file as soon as this
+    #  class is done with the definition because other class might need its data even if this class never
+    #  gets instantiated
+    contacts_from_json_file = ListJsonContacts()
+
+    # We make a list of ContactListItem static because each item has a profile pic that could create IO bottleneck
+    #  if it has to be loaded each time this class is instantiated.
+    # However we create the list of widget for ContactsWindow only the first time that this class is
+    #  instantiated because only this class needs its ContactListWidget.
     contact_widgets = list()
 
     def __init__(self, parent: QtWidgets.QWidget):
         # This line is necessary because a widget gets it's own window if it doesn't have a parent OR
-        #  if it has a parent but has QtCore.Qt.Window flag set
+        #  if it has a parent but has QtCore.Qt.Window flag set.
         super().__init__(parent, QtCore.Qt.Window)
 
-        # Initialize list of ContactListItem
+        # Populate contact_widgets with info from json file.
         if not self.contact_widgets:
-            for contact in self.parent().contacts_from_json_file:
-                widget = ContactListWidget(*contact)
-                self.contact_widgets.append(widget)
+            for contact in self.contacts_from_json_file:
+                self.contact_widgets.append(ContactListWidget(contact))
 
         # Title, window size & position
         self.setWindowTitle("Contacts")
@@ -40,15 +96,13 @@ class ContactsWindow(QtWidgets.QWidget):
         # With this next line we spawn the ContactWindow 50 pixels distant from parent in x axis and
         #  we align the centers of the two window losing half of the difference in height on the longer window.
         self.move(self.parent().pos() +
-                  QtCore.QPoint(parent_size.width() + 50, -1 * (height - parent_size.height())//2))
+                  QtCore.QPoint(parent_size.width() + 50, -1 * (height - parent_size.height()) // 2))
 
-        # Main Layout
         main_layout = QtWidgets.QVBoxLayout(self)
 
         # MenuBar
         self.menu_bar = QtWidgets.QMenuBar()
         self.menu_new_contact = self.menu_bar.addAction("New contact", self.new_contact)
-
         main_layout.setMenuBar(self.menu_bar)
 
         # Search input
@@ -62,17 +116,17 @@ class ContactsWindow(QtWidgets.QWidget):
         self.line_search.textChanged.connect(self.filter_contacts)
         main_layout.addWidget(self.line_search)
 
-        # Contacts "list" (more like a vertical layout scrollable)
+        # List of contacts
         self.list_contacts = QtWidgets.QListWidget()
         self.list_contacts.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
         self.list_contacts.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.list_contacts.customContextMenuRequested.connect(self.show_context_menu)
-
         self.add_contact(self.contact_widgets)
 
-        # If we enable sorting it gets an error when we add an item without widget yet because list doesn't know
-        #  how to compare items without a widget. You can't insert the widget inside the item and then insert item
-        #  inside list. Qt is dumb. I'm so disappointed in this library to the point i'm questioning
+        # If we enable sorting we get an error when we add an item without widget because list doesn't know
+        #  how to compare ContactsListItem without a ContactsListWidget inside.
+        #  You can't insert the widget inside the item and then insert item inside the list.
+        # Qt is dumb. I'm so disappointed in this library to the point i'm questioning
         #  all my life choices that led to this moment.
         self.list_contacts.sortItems()
 
@@ -82,12 +136,11 @@ class ContactsWindow(QtWidgets.QWidget):
         self.setLayout(main_layout)
 
     # We capture the closing event of the window to restore the enabled status of contact menu action.
-    #  Then we propagate the event upward to the parent.
+    #  Then we propagate the event upward to the superclass.
     def closeEvent(self, event: QtGui.QCloseEvent):
         self.parent().menu_contacts.setEnabled(True)
         event.accept()
 
-    # PyQt5 slot to create a custom context menu on an item in self.contacts_list
     @QtCore.Slot(QtCore.QPoint)
     def show_context_menu(self, pos: QtCore.QPoint):
         if item := self.list_contacts.itemAt(pos):
@@ -98,9 +151,10 @@ class ContactsWindow(QtWidgets.QWidget):
             global_pos = self.list_contacts.mapToGlobal(pos)
             menu.exec_(global_pos)
 
-    # PyQt5 slot to hide and show items that are filtered through search bar
     @QtCore.Slot(str)
     def filter_contacts(self, new_text: str):
+        # I suspect this code runs in O(n^2) but haven't checked. Meh. As long as it is fast in practice there is no
+        #  reason to think for a better solution
         for i in range(self.list_contacts.count()):
             # We do matching this way because "in" operator search for exact correspondence. Instead we would like to
             #  filter all the item for with every single word matches against some part of label_name. This is because
@@ -124,13 +178,16 @@ class ContactsWindow(QtWidgets.QWidget):
         edit_window = ContactsEditing(self, item)
         edit_window.exec_()
         if edit_window.return_value:
+            # We only delete because we need to replace. If the new picture is the same as the old one we set
+            #  the second parameter to False because we don't need to delete the picture from hard disk.
             self.delete_contact(
                 item,
-                True if item.widget_pic_name != edit_window.return_value.contact_pic_name else False
+                True if item.widget_pic_name != edit_window.return_value.pic_name else False
             )
             self.contact_widgets.append(edit_window.return_value)
             self.add_contact(edit_window.return_value)
 
+    # FIXME add_contact only adds to the list and not to the contact_widgets while delete_contact deletes from both.
     # Adds a list of widgets in order to do bulk insert and call self.update_json_contacts just one time
     def add_contact(self, widgets: Union[ContactListWidget, List[ContactListWidget]]):
         if not isinstance(widgets, list):
@@ -154,13 +211,13 @@ class ContactsWindow(QtWidgets.QWidget):
         widget = item.child_widget
 
         # Saving pic_name before deleting widget to delete pic from hard disk
-        pic_name = widget.extrapolate()[0]
+        pic_name = widget.get_contact().pic_name
 
         # Deleting item from list and deleting widget from contact_widgets
         self.list_contacts.takeItem(row)
         self.contact_widgets.remove(widget)
         if pic_name and delete_thumbnail:
-            remove(path.join(ContactListWidget.contact_pic_path, pic_name))
+            os.remove(os.path.join(ProjectConstants.fullpath_thumbnails, pic_name))
 
         # Update json inside parent memory
         self.update_json_contacts()
@@ -173,20 +230,57 @@ class ContactsWindow(QtWidgets.QWidget):
 
         for i in range(self.list_contacts.count()):
             temp_list.append(
-                self.list_contacts.itemWidget(self.list_contacts.item(i)).extrapolate()
+                self.list_contacts.itemWidget(self.list_contacts.item(i)).get_contact()
             )
 
-        self.parent().contacts_from_json_file = temp_list
+        ContactsWindow.contacts_from_json_file = ListJsonContacts()
+        ContactsWindow.contacts_from_json_file.extend(temp_list)
+
+    @staticmethod
+    def load_contacts_json_file():
+        try:
+            if not os.path.exists(ProjectConstants.fullpath_contacts_json):
+                with open(ProjectConstants.fullpath_contacts_json, 'w') as f:
+                    f.write("[]")
+            with open(ProjectConstants.fullpath_contacts_json) as f:
+                # ContactJSONDecoder is subclassing the default JSONDecoder because it doesn't automatically
+                #  know how to create a Contact instance from a dictionary
+                ContactsWindow.contacts_from_json_file.extend(json.load(f, cls=ContactJSONDecoder))
+        except Exception as e:
+            print("Could not load contacts from json file", file=stderr)
+            print(e, file=stderr)
+            quit()
+        # Saving the hash of the list when is equal to the correspondent json file. If new hash != old hash
+        #  the content gets dumped back in the disk
+        ContactsWindow.contacts_from_json_file.save_state()
+
+    @staticmethod
+    def dump_contacts_json_file():
+        try:
+            with open(ProjectConstants.fullpath_contacts_json, "w") as f:
+                # To encode Contact class into json object we just output the dictionary of the instance instead of
+                #  the whole instance
+                json.dump(ContactsWindow.contacts_from_json_file, f, default=lambda x: x.__dict__, indent='\t')
+        except Exception as e:
+            print("Could not save contacts to json file", file=stderr)
+            print(e, file=stderr)
 
 
 class ContactsEditing(QtWidgets.QDialog):
+    """
+    This class implements the window to edit / create a contact
+    """
+    character_pool = frozenset(ascii_letters + digits)
+
     @staticmethod
     def random_file_name(length: int = 16):
-        character_pool = frozenset(ascii_letters + digits)
-        return "".join(sample(character_pool, length))
+        """
+        Returns a random string of default length = 16 with characters contained inside character_pool
+        """
+        return "".join(sample(ContactsEditing.character_pool, length))
 
-    icon_valid = QtGui.QPixmap(path.abspath("graphics/valid.png"))
-    icon_not_valid = QtGui.QPixmap(path.abspath("graphics/not valid.png"))
+    icon_valid = QtGui.QPixmap(os.path.abspath("graphics/valid.png"))
+    icon_not_valid = QtGui.QPixmap(os.path.abspath("graphics/not valid.png"))
 
     def __init__(self, parent: QtWidgets.QWidget, pre_filled: ContactListWidget = None):
         super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
@@ -281,6 +375,8 @@ class ContactsEditing(QtWidgets.QDialog):
         name_state = self.edit_name.text() != ""
         address_state = is_valid_address(self.edit_address.text())
 
+        name_state, address_state = True, True
+
         self.edit_name.removeAction(self.edit_name_action)
         if name_state:
             self.edit_name_action = self.edit_name.addAction(
@@ -309,7 +405,7 @@ class ContactsEditing(QtWidgets.QDialog):
         file_name = QtWidgets.QFileDialog.getOpenFileName(
             self,
             "Choose a picture for contact thumbnail",
-            path.join(path.expanduser("~"), "Pictures"),
+            os.path.join(os.path.expanduser("~"), "Pictures"),
             "Image Files (*.png *.jpg *.bmp)"
         )
         if file_name[0] != "":
@@ -339,11 +435,14 @@ class ContactsEditing(QtWidgets.QDialog):
             old_extension = "." + self.external_pic_full_path.split(".")[-1]
             while True:
                 rnd_file_name = self.random_file_name() + old_extension
-                if not path.exists(path.join(ContactListWidget.contact_pic_path, rnd_file_name)):
+                if not os.path.exists(os.path.join(ProjectConstants.fullpath_thumbnails, rnd_file_name)):
                     break
-            copyfile(self.external_pic_full_path, path.join(ContactListWidget.contact_pic_path, rnd_file_name))
+            copyfile(
+                self.external_pic_full_path,
+                os.path.join(ProjectConstants.fullpath_thumbnails, rnd_file_name)
+            )
             pic_name = rnd_file_name
         else:
             pic_name = self.pic_name
-        self.return_value = ContactListWidget(pic_name, self.edit_name.text(), self.edit_address.text())
+        self.return_value = ContactListWidget(Contact(pic_name, self.edit_name.text(), self.edit_address.text()))
         self.close()

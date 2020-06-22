@@ -1,4 +1,12 @@
+# PySide 2
 from PySide2 import QtWidgets, QtGui, QtCore
+
+# Local project
+import resources.Constants as ProjectConstants
+from resources.Entities import Contact
+
+
+# Python standard libraries
 from functools import cached_property
 from os import path
 from typing import Tuple
@@ -37,7 +45,7 @@ class WalletListWidget(QtWidgets.QWidget):
 
 
 # Of course once a ContactListWidget has been assigned to a ContactListItem it's wrong to swap with a
-#  second ContactListWidget becuase then the cached properties will be different
+#  second ContactListWidget because then the cached properties will be different
 class ContactListItem(QtWidgets.QListWidgetItem):
     def __lt__(self, other):
         return self.child_widget < other.child_widget
@@ -53,52 +61,51 @@ class ContactListItem(QtWidgets.QListWidgetItem):
     # This will be useful for dynamic filtering with search bar.
     @cached_property
     def widget_name(self):
-        return self.child_widget.contact_name
+        return self.child_widget.name
 
     @cached_property
     def widget_info(self):
-        return self.child_widget.contact_info
+        return self.child_widget.info
 
     @cached_property
     def widget_pic_name(self):
-        return self.child_widget.contact_pic_name
+        return self.child_widget.pic_name
 
     @cached_property
     def widget_pixmap(self):
-        return self.child_widget.contact_pixmap
+        return self.child_widget.pixmap
 
 
 class ContactListWidget(QtWidgets.QWidget):
-    # Static loading of graphic resources
     pixmap_generic_user = QtGui.QPixmap(path.abspath("graphics/generic_user.png"))
     bitmap_user_mask = QtGui.QBitmap.fromImage(path.abspath("graphics/user_pic_mask.png"))
 
-    contact_pic_path = path.join(path.expanduser("~"), ".Algorand Wallet Manager/thumbnails")
-
-    def __init__(self, contact_pic_name: str, contact_name: str, contact_info: str):
+    def __init__(self, contact: Contact):
         super().__init__()
 
-        self.contact_pic_name = contact_pic_name
-        self.contact_name = contact_name
-        self.contact_info = contact_info
-        self.contact_pixmap = QtGui.QPixmap(path.join(self.contact_pic_path, self.contact_pic_name))\
-            if self.contact_pic_name else self.pixmap_generic_user
+        self.pic_name = contact.pic_name
+        self.name = contact.name
+        self.info = contact.info
+        self.pixmap = QtGui.QPixmap(
+            path.join(ProjectConstants.path_user_data, ProjectConstants.folder_thumbnails, self.pic_name))\
+            if self.pic_name else\
+            self.pixmap_generic_user
 
         main_layout = QtWidgets.QHBoxLayout()
 
         self.label_pixmap = QtWidgets.QLabel()
-        self.label_pixmap.setPixmap(self.derive_profile_pic(self.contact_pixmap))
+        self.label_pixmap.setPixmap(self.derive_profile_pic(self.pixmap))
         main_layout.addWidget(self.label_pixmap)
 
         main_layout.addSpacing(5)
 
         main_layout.addLayout(label_layout := QtWidgets.QVBoxLayout())
 
-        self.label_name = QtWidgets.QLabel(self.contact_name)
+        self.label_name = QtWidgets.QLabel(self.name)
         self.label_name.setStyleSheet("font: 13pt;")
         label_layout.addWidget(self.label_name)
 
-        self.label_info = QtWidgets.QLabel(self.contact_info)
+        self.label_info = QtWidgets.QLabel(self.info)
         self.label_info.setStyleSheet("font: 8pt;")
         label_layout.addWidget(self.label_info)
 
@@ -128,5 +135,5 @@ class ContactListWidget(QtWidgets.QWidget):
 
         return result.scaled(40, 40, QtCore.Qt.IgnoreAspectRatio, QtCore.Qt.SmoothTransformation)
 
-    def extrapolate(self) -> Tuple[str, str, str]:
-        return self.contact_pic_name, self.label_name.text(), self.label_info.text()
+    def get_contact(self) -> Contact:
+        return Contact(self.pic_name, self.label_name.text(), self.label_info.text())
