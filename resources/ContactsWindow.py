@@ -13,7 +13,7 @@ from algosdk.encoding import is_valid_address
 
 # Local project
 import resources.Constants as ProjectConstants
-from resources.Entities import Contact, ContactJSONDecoder
+from resources.Entities import Contact
 from resources.CustomListWidgetItem import ContactListItem, ContactListWidget
 
 # Python standard libraries
@@ -24,7 +24,7 @@ from string import ascii_letters, digits
 from random import sample
 from functools import partial
 from typing import Union, List
-import json
+import jsonpickle
 
 
 # There probably is a more efficient way of doing this. This is the faster way to code this functionality right now.
@@ -245,7 +245,7 @@ class ContactsWindow(QtWidgets.QWidget):
             with open(ProjectConstants.fullpath_contacts_json) as f:
                 # ContactJSONDecoder is subclassing the default JSONDecoder because it doesn't automatically
                 #  know how to create a Contact instance from a dictionary
-                ContactsWindow.contacts_from_json_file.extend(json.load(f, cls=ContactJSONDecoder))
+                ContactsWindow.contacts_from_json_file = jsonpickle.decode(f.read())
         except Exception as e:
             print("Could not load contacts from json file", file=stderr)
             print(e, file=stderr)
@@ -260,7 +260,7 @@ class ContactsWindow(QtWidgets.QWidget):
             with open(ProjectConstants.fullpath_contacts_json, "w") as f:
                 # To encode Contact class into json object we just output the dictionary of the instance instead of
                 #  the whole instance
-                json.dump(ContactsWindow.contacts_from_json_file, f, default=lambda x: x.__dict__, indent='\t')
+                f.write(jsonpickle.encode(ContactsWindow.contacts_from_json_file, indent="\t"))
         except Exception as e:
             print("Could not save contacts to json file", file=stderr)
             print(e, file=stderr)
