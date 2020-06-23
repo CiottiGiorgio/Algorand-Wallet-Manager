@@ -233,7 +233,11 @@ class ContactsWindow(QtWidgets.QWidget):
                 self.list_contacts.itemWidget(self.list_contacts.item(i)).get_contact()
             )
 
-        ContactsWindow.contacts_from_json_file = ListJsonContacts()
+        # Very important here that we don't mess with the original instance of the object ListJsonContacts.
+        #  Right now it has the attribute .old_hash set and we don't want to reset it.
+        # (Although probably nothing bad would happen because it would just set it to None and would still be
+        #  different from any hash of the list. Still, is better to not destroy the original object).
+        ContactsWindow.contacts_from_json_file.clear()
         ContactsWindow.contacts_from_json_file.extend(temp_list)
 
     @staticmethod

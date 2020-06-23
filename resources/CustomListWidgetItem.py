@@ -9,7 +9,6 @@ from resources.Entities import Contact
 # Python standard libraries
 from functools import cached_property
 from os import path
-from typing import Tuple
 
 # TODO: credit author with
 #  "Icon made by "Freepik", "Those Icons", "Pixel perfect" from www.flaticon.com"
