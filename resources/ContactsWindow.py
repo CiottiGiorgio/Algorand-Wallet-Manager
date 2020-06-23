@@ -27,6 +27,8 @@ from typing import Union, List
 import jsonpickle
 
 
+# TODO .old_hash appears in json serialization. We don't need to save its state so make sure that only the list appears
+#  in serialization
 # There probably is a more efficient way of doing this. This is the faster way to code this functionality right now.
 #  An alternative could be overriding writing methods to the list and making sure that a bool flag starts at False
 #  and becomes True at the first change. .save_state() then becomes just resetting this flag with False again.
@@ -121,7 +123,10 @@ class ContactsWindow(QtWidgets.QWidget):
         self.list_contacts.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
         self.list_contacts.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.list_contacts.customContextMenuRequested.connect(self.show_context_menu)
-        self.add_contact(self.contact_widgets)
+
+        # Populate list
+        for widget in self.contact_widgets:
+            self.add_item(widget)
 
         # If we enable sorting we get an error when we add an item without widget because list doesn't know
         #  how to compare ContactsListItem without a ContactsListWidget inside.
@@ -154,7 +159,7 @@ class ContactsWindow(QtWidgets.QWidget):
     @QtCore.Slot(str)
     def filter_contacts(self, new_text: str):
         # I suspect this code runs in O(n^2) but haven't checked. Meh. As long as it is fast in practice there is no
-        #  reason to think for a better solution
+        #  reason to think of a better solution.
         for i in range(self.list_contacts.count()):
             # We do matching this way because "in" operator search for exact correspondence. Instead we would like to
             #  filter all the item for with every single word matches against some part of label_name. This is because
@@ -167,85 +172,61 @@ class ContactsWindow(QtWidgets.QWidget):
             else:
                 self.list_contacts.item(i).setHidden(True)
 
+    # I know this is confusing but it makes sense to add an item but only pass a widget because the item is
+    #  the same every time.
+    # N.B.: Keep in mind that this method does not insert the widget into self.contact_widgets
+    def add_item(self, widget: ContactListWidget):
+        item = ContactListItem()
+        item.setSizeHint(widget.minimumSizeHint())
+        self.list_contacts.addItem(item)
+        self.list_contacts.setItemWidget(item, widget)
+
+    # N.B.: Keep in mind that this method removes the widget from self.contact_widgets
+    def remove_item(self, item: ContactListItem):
+        self.list_contacts.takeItem(self.list_contacts.row(item))
+        self.contact_widgets.remove(item.child_widget)
+
+    @QtCore.Slot()
     def new_contact(self):
-        edit_window = ContactsEditing(self)
-        edit_window.exec_()
-        if edit_window.return_value:
-            self.contact_widgets.append(edit_window.return_value)
-            self.add_contact(edit_window.return_value)
+        new_contact_window = ContactsEditing(self)
+        new_contact_window.exec_()
+        if new_contact_window.return_value:
+            new_widget = new_contact_window.return_value
 
+            self.contacts_from_json_file.append(new_widget.contact)
+            self.contact_widgets.append(new_widget)
+            self.add_item(new_widget)
+
+    @QtCore.Slot(ContactListItem)
     def edit_contact(self, item: ContactListItem):
-        edit_window = ContactsEditing(self, item)
-        edit_window.exec_()
-        if edit_window.return_value:
-            # We only delete because we need to replace. If the new picture is the same as the old one we set
-            #  the second parameter to False because we don't need to delete the picture from hard disk.
-            self.delete_contact(
-                item,
-                True if item.widget_pic_name != edit_window.return_value.pic_name else False
-            )
-            self.contact_widgets.append(edit_window.return_value)
-            self.add_contact(edit_window.return_value)
+        edit_contact_window = ContactsEditing(self, item.child_widget)
+        edit_contact_window.exec_()
+        if edit_contact_window.return_value:
+            new_widget = edit_contact_window.return_value
+            old_contact, new_contact = item.child_widget.contact, new_widget.contact
 
-    # FIXME add_contact only adds to the list and not to the contact_widgets while delete_contact deletes from both.
-    # Adds a list of widgets in order to do bulk insert and call self.update_json_contacts just one time
-    def add_contact(self, widgets: Union[ContactListWidget, List[ContactListWidget]]):
-        if not isinstance(widgets, list):
-            widgets = [widgets]
+            self.remove_item(item)
+            self.contacts_from_json_file.remove(item.child_widget.contact)
+            if old_contact.pic_name != new_contact.pic_name:
+                old_contact.release()
+            self.contacts_from_json_file.append(new_contact)
+            self.add_item(new_widget)
 
-        for widget in widgets:
-            item = ContactListItem()
-            item.setSizeHint(widget.minimumSizeHint())
-            self.list_contacts.addItem(item)
-            self.list_contacts.setItemWidget(item, widget)
+    @QtCore.Slot(ContactListItem)
+    def delete_contact(self, item: ContactListItem):
+        contact = item.child_widget.contact
 
-        self.update_json_contacts()
-
-        # In this case we need to re-sort the list
-        self.list_contacts.sortItems()
-
-    # We remove the item from the list and we delete the widget contained inside from self.contact_widgets
-    def delete_contact(self, item: ContactListItem, delete_thumbnail: bool = True):
-        # Saving internally reference to item in list and to widget in item
-        row = self.list_contacts.row(item)
-        widget = item.child_widget
-
-        # Saving pic_name before deleting widget to delete pic from hard disk
-        pic_name = widget.get_contact().pic_name
-
-        # Deleting item from list and deleting widget from contact_widgets
-        self.list_contacts.takeItem(row)
-        self.contact_widgets.remove(widget)
-        if pic_name and delete_thumbnail:
-            os.remove(os.path.join(ProjectConstants.fullpath_thumbnails, pic_name))
-
-        # Update json inside parent memory
-        self.update_json_contacts()
-
-        # We don't need to re-sort the list because a delete doesn't change a correct sorting
-
-    # This method makes sure that any change in self.contact_widgets is reflected in parent().contacts_from_json
-    def update_json_contacts(self):
-        temp_list = list()
-
-        for i in range(self.list_contacts.count()):
-            temp_list.append(
-                self.list_contacts.itemWidget(self.list_contacts.item(i)).get_contact()
-            )
-
-        # Very important here that we don't mess with the original instance of the object ListJsonContacts.
-        #  Right now it has the attribute .old_hash set and we don't want to reset it.
-        # (Although probably nothing bad would happen because it would just set it to None and would still be
-        #  different from any hash of the list. Still, is better to not destroy the original object).
-        ContactsWindow.contacts_from_json_file.clear()
-        ContactsWindow.contacts_from_json_file.extend(temp_list)
+        self.remove_item(item)
+        self.contacts_from_json_file.remove(contact)
+        contact.release()
 
     @staticmethod
     def load_contacts_json_file():
         try:
             if not os.path.exists(ProjectConstants.fullpath_contacts_json):
                 with open(ProjectConstants.fullpath_contacts_json, 'w') as f:
-                    f.write("[]")
+                    # Create a file with an empty list that is an instance of ListJsonContacts)
+                    f.write(jsonpickle.encode(ListJsonContacts(), indent='\t'))
             with open(ProjectConstants.fullpath_contacts_json) as f:
                 # ContactJSONDecoder is subclassing the default JSONDecoder because it doesn't automatically
                 #  know how to create a Contact instance from a dictionary
@@ -255,7 +236,7 @@ class ContactsWindow(QtWidgets.QWidget):
             print(e, file=stderr)
             quit()
         # Saving the hash of the list when is equal to the correspondent json file. If new hash != old hash
-        #  the content gets dumped back in the disk
+        #  the content gets dumped back in the disk.
         ContactsWindow.contacts_from_json_file.save_state()
 
     @staticmethod
@@ -350,10 +331,10 @@ class ContactsEditing(QtWidgets.QDialog):
         main_layout.addLayout(button_layout)
 
         if pre_filled:
-            self.edit_name.setText(pre_filled.widget_name)
-            self.edit_address.setText(pre_filled.widget_info)
-            self.pic_name = pre_filled.widget_pic_name
-            self.label_pic.setPixmap(pre_filled.widget_pixmap.scaled(
+            self.edit_name.setText(pre_filled.name)
+            self.edit_address.setText(pre_filled.info)
+            self.pic_name = pre_filled.pic_name
+            self.label_pic.setPixmap(pre_filled.pixmap.scaled(
                 128, 128,
                 QtCore.Qt.KeepAspectRatio,
                 QtCore.Qt.SmoothTransformation

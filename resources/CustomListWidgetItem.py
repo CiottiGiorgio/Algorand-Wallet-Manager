@@ -82,12 +82,16 @@ class ContactListWidget(QtWidgets.QWidget):
     def __init__(self, contact: Contact):
         super().__init__()
 
+        # We might need to extract this reference to the contact when we want to delete the contact and not just
+        #  the widget.
+        self.contact = contact
+
         self.pic_name = contact.pic_name
         self.name = contact.name
         self.info = contact.info
         self.pixmap = QtGui.QPixmap(
-            path.join(ProjectConstants.path_user_data, ProjectConstants.folder_thumbnails, self.pic_name))\
-            if self.pic_name else\
+            path.join(ProjectConstants.path_user_data, ProjectConstants.folder_thumbnails, self.contact.pic_name)) if \
+            self.pic_name else \
             self.pixmap_generic_user
 
         main_layout = QtWidgets.QHBoxLayout()
@@ -113,7 +117,7 @@ class ContactListWidget(QtWidgets.QWidget):
         self.setLayout(main_layout)
 
     def __lt__(self, other):
-        return self.label_name.text() < other.label_name.text()
+        return self.name < other.name
 
     @staticmethod
     def derive_profile_pic(pixmap: QtGui.QPixmap) -> QtGui.QPixmap:
@@ -133,6 +137,3 @@ class ContactListWidget(QtWidgets.QWidget):
         result.setMask(temp_mask)
 
         return result.scaled(40, 40, QtCore.Qt.IgnoreAspectRatio, QtCore.Qt.SmoothTransformation)
-
-    def get_contact(self) -> Contact:
-        return Contact(self.pic_name, self.label_name.text(), self.label_info.text())
