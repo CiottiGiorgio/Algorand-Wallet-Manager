@@ -12,13 +12,9 @@ from PySide2 import QtWidgets, QtGui, QtCore
 import resources.Constants as ProjectConstants
 from resources.Entities import Contact
 
-
 # Python standard libraries
 from functools import cached_property
 from os import path
-
-# TODO: credit author with
-#  "Icon made by "Freepik", "Those Icons", "Pixel perfect" from www.flaticon.com"
 
 
 class WalletListItem(QtWidgets.QListWidgetItem):
@@ -95,7 +91,7 @@ class ContactListWidget(QtWidgets.QWidget):
     Widget that represents a contact
     """
     pixmap_generic_user = QtGui.QPixmap(path.abspath("graphics/generic_user.png"))
-    bitmap_user_mask = QtGui.QBitmap.fromImage(path.abspath("graphics/user_pic_mask.png"))
+    bitmap_user_mask = QtGui.QBitmap.fromImage(QtGui.QImage(path.abspath("graphics/user_pic_mask.png")))
 
     def __init__(self, contact: Contact):
         super().__init__()

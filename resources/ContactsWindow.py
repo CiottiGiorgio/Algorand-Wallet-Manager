@@ -143,7 +143,7 @@ class ContactsWindow(QtWidgets.QWidget):
     # We capture the closing event of the window to restore the enabled status of contact menu action.
     #  Then we propagate the event upward to the superclass.
     def closeEvent(self, event: QtGui.QCloseEvent):
-        self.parent().menu_contacts.setEnabled(True)
+        self.parent().menu_action_contacts.setEnabled(True)
         event.accept()
 
     @QtCore.Slot(QtCore.QPoint)
