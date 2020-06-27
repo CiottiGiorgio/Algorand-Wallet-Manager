@@ -158,6 +158,9 @@ class ContactsWindow(QtWidgets.QWidget):
 
     @QtCore.Slot(str)
     def filter_contacts(self, new_text: str):
+        """
+        This method show only those ContactListItems that fit the new search bar content. Hides the rest.
+        """
         # I suspect this code runs in O(n^2) but haven't checked. Meh. As long as it is fast in practice there is no
         #  reason to think of a better solution.
         for i in range(self.list_contacts.count()):
@@ -172,9 +175,11 @@ class ContactsWindow(QtWidgets.QWidget):
             else:
                 self.list_contacts.item(i).setHidden(True)
 
+    # N.B.: The next methods that end in "_item" are only "macros" to manage items in the list
+    #  to really delete a contact from persistent memory use methods that end in "_contact"
+
     # I know this is confusing but it makes sense to add an item but only pass a widget because the item is
     #  the same every time.
-    # N.B.: Keep in mind that this method does not insert the widget into self.contact_widgets
     def add_item(self, widget: ContactListWidget):
         item = ContactListItem()
         item.setSizeHint(widget.minimumSizeHint())
@@ -222,6 +227,9 @@ class ContactsWindow(QtWidgets.QWidget):
 
     @staticmethod
     def load_contacts_json_file():
+        """
+        This method loads contacts.json into memory through jsonpickle parser.
+        """
         try:
             if not os.path.exists(ProjectConstants.fullpath_contacts_json):
                 with open(ProjectConstants.fullpath_contacts_json, 'w') as f:
@@ -241,6 +249,9 @@ class ContactsWindow(QtWidgets.QWidget):
 
     @staticmethod
     def dump_contacts_json_file():
+        """
+        This method dumps memory content into disk through jsonpickle parser.
+        """
         try:
             with open(ProjectConstants.fullpath_contacts_json, "w") as f:
                 # To encode Contact class into json object we just output the dictionary of the instance instead of
@@ -260,7 +271,7 @@ class ContactsEditing(QtWidgets.QDialog):
     @staticmethod
     def random_file_name(length: int = 16):
         """
-        Returns a random string of default length = 16 with characters contained inside character_pool
+        Returns a random string of default length = 16 with characters contained inside character_pool.
         """
         return "".join(sample(ContactsEditing.character_pool, length))
 
@@ -357,6 +368,9 @@ class ContactsEditing(QtWidgets.QDialog):
 
     @QtCore.Slot()
     def validate_inputs(self):
+        """
+        This method makes sure inputs are valid. Otherwise confirm button is disabled.
+        """
         name_state = self.edit_name.text() != ""
         address_state = is_valid_address(self.edit_address.text())
 

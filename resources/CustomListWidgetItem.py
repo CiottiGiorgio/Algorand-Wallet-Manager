@@ -1,3 +1,10 @@
+"""
+Custom classes for QListWidget
+
+Subclasses for QListWidgetItem are needed because of the way an item can reference the widget inside itself.
+"""
+
+
 # PySide 2
 from PySide2 import QtWidgets, QtGui, QtCore
 
@@ -19,6 +26,9 @@ class WalletListItem(QtWidgets.QListWidgetItem):
 
 
 class WalletListWidget(QtWidgets.QWidget):
+    """
+    Wallet widget for the list in WalletFrame
+    """
     def __init__(self, wallet_name: str, wallet_info: str):
         super().__init__()
 
@@ -46,6 +56,11 @@ class WalletListWidget(QtWidgets.QWidget):
 # Of course once a ContactListWidget has been assigned to a ContactListItem it's wrong to swap with a
 #  second ContactListWidget because then the cached properties will be different
 class ContactListItem(QtWidgets.QListWidgetItem):
+    """
+    Item used in the contacts list
+
+    Most of its features are only available when a ContactListWidget is inside it
+    """
     def __lt__(self, other):
         return self.child_widget < other.child_widget
 
@@ -76,6 +91,9 @@ class ContactListItem(QtWidgets.QListWidgetItem):
 
 
 class ContactListWidget(QtWidgets.QWidget):
+    """
+    Widget that represents a contact
+    """
     pixmap_generic_user = QtGui.QPixmap(path.abspath("graphics/generic_user.png"))
     bitmap_user_mask = QtGui.QBitmap.fromImage(path.abspath("graphics/user_pic_mask.png"))
 
@@ -121,19 +139,22 @@ class ContactListWidget(QtWidgets.QWidget):
 
     @staticmethod
     def derive_profile_pic(pixmap: QtGui.QPixmap) -> QtGui.QPixmap:
-        # Crop a the maximum square possible from the middle of the pixmap
+        """
+        This method returns the icon for the profile picture starting from a full picture
+        """
+        # Crop a the maximum square possible from the middle of the QPixmap.
         width, height = pixmap.width(), pixmap.height()
         side = min(width, height)
         square_top_left_corner = QtCore.QPoint(width//2 - side//2, height//2 - side//2)
         cropping_rect = QtCore.QRect(square_top_left_corner, QtCore.QSize(side, side))
-
         result = pixmap.copy(cropping_rect)
+
+        # Clipping a circle
         temp_mask = ContactListWidget.bitmap_user_mask.scaled(
             side, side,
             QtCore.Qt.IgnoreAspectRatio,
             QtCore.Qt.SmoothTransformation
         )
-
         result.setMask(temp_mask)
 
         return result.scaled(40, 40, QtCore.Qt.IgnoreAspectRatio, QtCore.Qt.SmoothTransformation)
