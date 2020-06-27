@@ -12,10 +12,11 @@ from PySide2 import QtWidgets, QtGui
 import algosdk
 
 # Local project
+import resources.Constants as ProjectConstants
 from resources.ContactsWindow import ContactsWindow
 
 # Python standard libraries
-from os import path
+from os import path, mkdir
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -49,6 +50,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @staticmethod
     def initialize():
+        # Create user data folders
+        if not path.exists(ProjectConstants.path_user_data):
+            mkdir(ProjectConstants.path_user_data)
+        if not path.exists(ProjectConstants.fullpath_thumbnails):
+            mkdir(ProjectConstants.fullpath_thumbnails)
+
         ContactsWindow.load_contacts_json_file()
 
     def show_contacts(self):

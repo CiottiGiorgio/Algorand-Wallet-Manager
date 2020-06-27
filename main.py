@@ -7,9 +7,7 @@ This main function will initialize PySide2 & MainWindow and manage the starting 
 from PySide2 import QtWidgets
 
 # TODO write docstring for class and methods
-# TODO create user data folder if it doesn't exists
 # TODO learn about unit test and decide if we need those
-# TODO check if the code that edit and create new contact makes sense
 
 
 def main():
@@ -26,8 +24,6 @@ def main():
 
     main_window = MainWindow()
     main_window.show()
-
-    main_window.show_contacts()
 
     app.exec_()
 
