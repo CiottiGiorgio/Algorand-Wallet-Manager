@@ -27,28 +27,30 @@ from typing import Union, List
 import jsonpickle
 
 
-# TODO .old_hash appears in json serialization. We don't need to save its state so make sure that only the list appears
-#  in serialization
-# There probably is a more efficient way of doing this. This is the faster way to code this functionality right now.
-#  An alternative could be overriding writing methods to the list and making sure that a bool flag starts at False
-#  and becomes True at the first change. .save_state() then becomes just resetting this flag with False again.
-class ListJsonContacts(list):
+class ListJsonContacts:
     """
-    Subclass of standard python list
+    Composition of standard python list
 
     This class is useful for taking a snapshot of itself in time A and then checking if the content has changed in
     time B with A <= B.
     """
     def __init__(self):
-        super().__init__()
-
+        self.list = list()
         self.old_hash = None
 
+    def __getstate__(self):
+        result = self.__dict__.copy()
+        del result["old_hash"]
+        return result
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
     def save_state(self):
-        self.old_hash = str(self).__hash__()
+        self.old_hash = str(self.list).__hash__()
 
     def has_changed(self) -> bool:
-        return str(self).__hash__() != self.old_hash
+        return str(self.list).__hash__() != self.old_hash
 
 
 class ContactsWindow(QtWidgets.QWidget):
@@ -87,7 +89,7 @@ class ContactsWindow(QtWidgets.QWidget):
 
         # Populate contact_widgets with info from json file.
         if not self.contact_widgets:
-            for contact in self.contacts_from_json_file:
+            for contact in self.contacts_from_json_file.list:
                 self.contact_widgets.append(ContactListWidget(contact))
 
         # Title, window size & position
@@ -198,7 +200,7 @@ class ContactsWindow(QtWidgets.QWidget):
         if new_contact_window.return_value:
             new_widget = new_contact_window.return_value
 
-            self.contacts_from_json_file.append(new_widget.contact)
+            self.contacts_from_json_file.list.append(new_widget.contact)
             self.contact_widgets.append(new_widget)
             self.add_item(new_widget)
 
@@ -211,10 +213,10 @@ class ContactsWindow(QtWidgets.QWidget):
             old_contact, new_contact = item.child_widget.contact, new_widget.contact
 
             self.remove_item(item)
-            self.contacts_from_json_file.remove(item.child_widget.contact)
+            self.contacts_from_json_file.list.remove(item.child_widget.contact)
             if old_contact.pic_name != new_contact.pic_name:
                 old_contact.release()
-            self.contacts_from_json_file.append(new_contact)
+            self.contacts_from_json_file.list.append(new_contact)
             self.add_item(new_widget)
 
     @QtCore.Slot(ContactListItem)
@@ -222,7 +224,7 @@ class ContactsWindow(QtWidgets.QWidget):
         contact = item.child_widget.contact
 
         self.remove_item(item)
-        self.contacts_from_json_file.remove(contact)
+        self.contacts_from_json_file.list.remove(contact)
         contact.release()
 
     @staticmethod
