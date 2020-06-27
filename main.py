@@ -6,7 +6,7 @@ This main function will initialize PySide2 & MainWindow and manage the starting 
 # PySide2
 from PySide2 import QtWidgets
 
-# TODO write docstring for class and methods
+
 # TODO learn about unit test and decide if we need those
 
 

@@ -6,7 +6,7 @@ MainWindow class is the fundamental interface from which the program offers its 
 
 
 # PySide2
-from PySide2 import QtWidgets, QtGui
+from PySide2 import QtWidgets, QtGui, QtCore
 
 # Algorand
 import algosdk
@@ -14,6 +14,7 @@ import algosdk
 # Local project
 import resources.Constants as ProjectConstants
 from resources.ContactsWindow import ContactsWindow
+from resources.AboutMenu import InfoWindow, CreditsWindow
 
 # Python standard libraries
 from os import path, mkdir
@@ -34,16 +35,21 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setFixedSize(500, 300)
 
         # MenuBar initialization
-        self.menu_new_transaction = self.menuBar().addAction("New transaction")
-        self.menu_contacts = self.menuBar().addAction("Contacts")
-        self.menu_settings = self.menuBar().addAction("Settings")
-        self.menu_info = self.menuBar().addAction("Info")
+        self.menu_action_new_transaction = self.menuBar().addAction("New transaction")
+        self.menu_action_contacts = self.menuBar().addAction("Contacts")
+        self.menu_action_settings = self.menuBar().addAction("Settings")
 
-        for menu_action in [self.menu_new_transaction, self.menu_settings, self.menu_info]:
-            menu_action.setDisabled(True)
+        self.menu_about = self.menuBar().addMenu("About")
+        self.menu_action_info = self.menu_about.addAction("Info")
+        self.menu_action_credits = self.menu_about.addAction("Credits")
+
+        for menu_action in [self.menu_action_new_transaction, self.menu_action_settings]:
+            menu_action.setEnabled(False)
 
         # MenuBar signal connection
-        self.menu_contacts.triggered.connect(self.show_contacts)
+        self.menu_action_contacts.triggered.connect(self.show_contacts)
+        self.menu_action_info.triggered.connect(self.show_info)
+        self.menu_action_credits.triggered.connect(self.show_credits)
 
         wallet_frame = WalletFrame()
         self.setCentralWidget(wallet_frame)
@@ -62,10 +68,19 @@ class MainWindow(QtWidgets.QMainWindow):
         # We disable the action on the menu of the main window to prevent the user from opening
         #  multiple contacts window. With QWidget the main window stays active and firing multiple times
         #  is not desirable.
-        self.menu_contacts.setEnabled(False)
+        self.menu_action_contacts.setEnabled(False)
         contacts_window = ContactsWindow(self)
         contacts_window.show()
         # Menu is reactivated in the destruction of contacts_window inside overloading of closeEvent()
+
+    def show_info(self):
+        # Info window is QDialog so we don't need to worry about multiple instances
+        info_window = InfoWindow(self)
+        info_window.exec_()
+
+    def show_credits(self):
+        credits_window = CreditsWindow(self)
+        credits_window.exec_()
 
     def closeEvent(self, event: QtGui.QCloseEvent):
         # I don't know if there is a reasonable chance that two different list give out the same hash.
@@ -125,7 +140,8 @@ class WalletFrame(QtWidgets.QFrame):
         wallet_button_layout.addWidget(self.button_delete)
         wallet_button_layout.addWidget(self.button_export)
 
-        for button in [self.button_manage, self.button_rename, self.button_new, self.button_import, self.button_delete, self.button_export]:
+        for button in [self.button_manage, self.button_rename, self.button_new,
+                       self.button_import, self.button_delete, self.button_export]:
             button.setEnabled(False)
 
         # Setting the frame main layout
