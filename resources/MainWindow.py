@@ -14,10 +14,13 @@ import algosdk
 # Local project
 import resources.Constants as ProjectConstants
 from resources.ContactsWindow import ContactsWindow
+from resources.SettingsWindow import SettingsWindow
 from resources.AboutMenu import InfoWindow, CreditsWindow
 
 # Python standard libraries
 from os import path, mkdir
+from functools import partial
+from typing import Type
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -28,6 +31,9 @@ class MainWindow(QtWidgets.QMainWindow):
     """
     def __init__(self):
         super().__init__()
+
+        # Anti memory leak
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         # Window icon, title & size
         self.setWindowIcon(QtGui.QIcon(path.abspath("graphics/python_icon.ico")))
@@ -43,16 +49,27 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menu_action_info = self.menu_about.addAction("Info")
         self.menu_action_credits = self.menu_about.addAction("Credits")
 
-        for menu_action in [self.menu_action_new_transaction, self.menu_action_settings]:
+        for menu_action in [self.menu_action_new_transaction]:
             menu_action.setEnabled(False)
 
-        # MenuBar signal connection
-        self.menu_action_contacts.triggered.connect(self.show_contacts)
-        self.menu_action_info.triggered.connect(self.show_info)
-        self.menu_action_credits.triggered.connect(self.show_credits)
+        # MenuBar signal connection.
+        # Using partial could be troubling because of circular dependency between memory in python.
+        #  It's ok for now because there are no multiple instances of MainWindow and those partial get destroyed when
+        #  application closes.
+        self.menu_action_contacts.triggered.connect(
+            partial(self.exec_dialog, ContactsWindow)
+        )
+        self.menu_action_settings.triggered.connect(
+            partial(self.exec_dialog, SettingsWindow)
+        )
+        self.menu_action_info.triggered.connect(
+            partial(self.exec_dialog, InfoWindow)
+        )
+        self.menu_action_credits.triggered.connect(
+            partial(self.exec_dialog, CreditsWindow)
+        )
 
-        wallet_frame = WalletFrame()
-        self.setCentralWidget(wallet_frame)
+        self.setCentralWidget(wallet_frame := WalletFrame())
 
     @staticmethod
     def initialize():
@@ -64,33 +81,20 @@ class MainWindow(QtWidgets.QMainWindow):
 
         ContactsWindow.load_contacts_json_file()
 
-    def show_contacts(self):
-        # We disable the action on the menu of the main window to prevent the user from opening
-        #  multiple contacts window. With QWidget the main window stays active and firing multiple times
-        #  is not desirable.
-        self.menu_action_contacts.setEnabled(False)
-        contacts_window = ContactsWindow(self)
-        contacts_window.show()
-        # Menu is reactivated in the destruction of contacts_window inside overloading of closeEvent()
-
-    def show_info(self):
-        # Info window is QDialog so we don't need to worry about multiple instances
-        info_window = InfoWindow(self)
-        info_window.exec_()
-
-    def show_credits(self):
-        credits_window = CreditsWindow(self)
-        credits_window.exec_()
+    def exec_dialog(self, dialog: Type[QtWidgets.QDialog]):
+        child_dialog = dialog(self)
+        child_dialog.exec_()
 
     def closeEvent(self, event: QtGui.QCloseEvent):
         # I don't know if there is a reasonable chance that two different list give out the same hash.
+        #  Usually output space is much larger than input space but haven't checked.
         if ContactsWindow.contacts_from_json_file.has_changed():
             ContactsWindow.dump_contacts_json_file()
         event.accept()
 
 
 # The idea of using a frame is that the content of the MainWindow will change and it will be really
-#  easy to do because all it will take is hide one frame and show the other
+#  easy to do because all it will take is hide one frame and show the other.
 class WalletFrame(QtWidgets.QFrame):
     def __init__(self):
         super().__init__()
@@ -99,16 +103,9 @@ class WalletFrame(QtWidgets.QFrame):
         main_layout = QtWidgets.QHBoxLayout()
 
         # List of wallet in the connected Algorand node
-        #  scrolling is PerPixel because otherwise the list scrolls PerItem and it's not desirable
+        #  scrolling is PerPixel because otherwise the list scrolls PerItem and it's not desirable.
         self.list_wallet = QtWidgets.QListWidget()
         self.list_wallet.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
-
-        # for wallet in ["Wallets will be", "displayed in this list"]:
-        #     widget = WalletListWidget(wallet, "Locked")
-        #     item = WalletListItem()
-        #     item.setSizeHint(widget.minimumSizeHint())
-        #     self.list_wallet.addItem(item)
-        #     self.list_wallet.setItemWidget(item, widget)
 
         main_layout.addWidget(self.list_wallet)
 
@@ -133,7 +130,7 @@ class WalletFrame(QtWidgets.QFrame):
         self.button_export.setFixedWidth(button_fixed_width)
 
         wallet_button_layout.addWidget(self.button_manage)
-        wallet_button_layout.addStretch(1)  # There is a spacing here.
+        wallet_button_layout.addStretch(1)
         wallet_button_layout.addWidget(self.button_rename)
         wallet_button_layout.addWidget(self.button_new)
         wallet_button_layout.addWidget(self.button_import)

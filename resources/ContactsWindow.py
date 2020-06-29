@@ -53,7 +53,7 @@ class ListJsonContacts:
         return str(self.list).__hash__() != self.old_hash
 
 
-class ContactsWindow(QtWidgets.QWidget):
+class ContactsWindow(QtWidgets.QDialog):
     """
     Contact list window.
 
@@ -85,7 +85,10 @@ class ContactsWindow(QtWidgets.QWidget):
     def __init__(self, parent: QtWidgets.QWidget):
         # This line is necessary because a widget gets it's own window if it doesn't have a parent OR
         #  if it has a parent but has QtCore.Qt.Window flag set.
-        super().__init__(parent, QtCore.Qt.Window)
+        super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
+
+        # Anti memory leak
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         # Populate contact_widgets with info from json file.
         if not self.contact_widgets:
@@ -137,16 +140,7 @@ class ContactsWindow(QtWidgets.QWidget):
         #  all my life choices that led to this moment.
         self.list_contacts.sortItems()
 
-        main_layout.addWidget(self.list_contacts)
-        main_layout.setStretch(3, 1)
-
-        self.setLayout(main_layout)
-
-    # We capture the closing event of the window to restore the enabled status of contact menu action.
-    #  Then we propagate the event upward to the superclass.
-    def closeEvent(self, event: QtGui.QCloseEvent):
-        self.parent().menu_action_contacts.setEnabled(True)
-        event.accept()
+        main_layout.addWidget(self.list_contacts, 1)
 
     @QtCore.Slot(QtCore.QPoint)
     def show_context_menu(self, pos: QtCore.QPoint):
@@ -283,6 +277,9 @@ class ContactsEditing(QtWidgets.QDialog):
     def __init__(self, parent: QtWidgets.QWidget, pre_filled: ContactListWidget = None):
         super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
 
+        # Anti memory leak
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+
         self.external_pic_full_path = None
         self.return_value = None
 
@@ -375,8 +372,6 @@ class ContactsEditing(QtWidgets.QDialog):
         """
         name_state = self.edit_name.text() != ""
         address_state = is_valid_address(self.edit_address.text())
-
-        name_state, address_state = True, True
 
         self.edit_name.removeAction(self.edit_name_action)
         if name_state:
