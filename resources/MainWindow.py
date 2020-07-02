@@ -21,8 +21,7 @@ from resources.AboutMenu import InfoWindow, CreditsWindow
 from sys import stderr
 from os import path, mkdir
 from functools import partial
-from typing import Type
-import copy
+from typing import Type, Dict
 import jsonpickle
 
 
@@ -85,10 +84,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # Create json files
         if not path.exists(file := ProjectConstants.fullpath_contacts_json):
             with open(file, 'w') as f:
-                f.write(jsonpickle.encode(ListJsonContacts()))
+                f.write(jsonpickle.encode(ListJsonContacts(), indent='\t'))
         if not path.exists(file := ProjectConstants.fullpath_settings_json):
             with open(file, 'w') as f:
-                f.write(jsonpickle.encode(DictJsonSettings()))
+                f.write(jsonpickle.encode(DictJsonSettings(), indent='\t'))
 
         # Load json files and save their state
         ContactsWindow.contacts_from_json_file = MainWindow.load_json_file(ProjectConstants.fullpath_contacts_json)

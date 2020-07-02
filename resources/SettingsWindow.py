@@ -7,41 +7,21 @@ This file contains the setting window class and related static attributes and me
 from PySide2 import QtWidgets, QtCore
 
 # Local project
-import resources.Constants as ProjectConstants
-
-# Python standard libraries
-from sys import stderr
-from os import path
-from typing import Dict
-import jsonpickle
+from resources.DataStructures import ChangeContainer
 
 
-# TODO remove duplicated code with ListJsonContacts.
-class DictJsonSettings:
+class DictJsonSettings(ChangeContainer):
     def __init__(self):
-        self.dict = dict()
+        super().__init__()
+        self.memory = dict()
 
-        self.dict["selected"] = 0
-        self.dict["local"] = ""
-        self.dict["algod"] = {"url": "", "port": "", "token": ""}
-        self.dict["kmd"] = {"url": "", "port": "", "token": ""}
-        self.dict["indexer"] = {"url": "", "port": "", "token": ""}
+        self.memory["selected"] = 0
 
-        self.old_hash = None
+        self.memory["local"] = ""
 
-    def __getstate__(self) -> Dict:
-        result = self.__dict__.copy()
-        del result["old_hash"]
-        return result
-
-    def __setstate__(self, state: Dict):
-        self.__dict__.update(state)
-
-    def save_state(self):
-        self.old_hash = str(self.dict).__hash__()
-
-    def has_changed(self) -> bool:
-        return str(self.dict).__hash__() != self.old_hash
+        self.memory["algod"] = {"url": "", "port": "", "token": ""}
+        self.memory["kmd"] = {"url": "", "port": "", "token": ""}
+        self.memory["indexer"] = {"url": "", "port": "", "token": ""}
 
 
 class SettingsWindow(QtWidgets.QDialog):
@@ -136,7 +116,7 @@ class SettingsWindow(QtWidgets.QDialog):
         main_layout.addWidget(self.button_confirm, alignment=QtCore.Qt.AlignRight)
 
         # Restoring fields
-        settings = SettingsWindow.settings_from_json_file.dict  # This is just to make code look shorter
+        settings = SettingsWindow.settings_from_json_file.memory  # This is just to make code look shorter
 
         if settings["selected"] == 0:
             self.local_radio.setChecked(True)
@@ -155,7 +135,7 @@ class SettingsWindow(QtWidgets.QDialog):
 
     @QtCore.Slot()
     def button_confirm_clicked(self):
-        settings = SettingsWindow.settings_from_json_file.dict
+        settings = SettingsWindow.settings_from_json_file.memory
 
         if self.local_radio.isChecked():
             settings["selected"] = 0

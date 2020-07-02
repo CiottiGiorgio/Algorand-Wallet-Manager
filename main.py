@@ -7,9 +7,6 @@ This main function will initialize PySide2 & MainWindow and manage the starting 
 from PySide2 import QtWidgets
 
 
-# TODO learn about unit test and decide if we need those
-
-
 def main():
     # Manager of all things regarding a widget-based Qt5 app.
     #  Eg.: mainloop, events, initialization, finalization, ...

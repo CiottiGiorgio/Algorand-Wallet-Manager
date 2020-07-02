@@ -13,44 +13,22 @@ from algosdk.encoding import is_valid_address
 
 # Local project
 import resources.Constants as ProjectConstants
+from resources.DataStructures import ChangeContainer
 from resources.Entities import Contact
 from resources.CustomListWidgetItem import ContactListItem, ContactListWidget
 
 # Python standard libraries
 import os
-from sys import stderr
 from shutil import copyfile
 from string import ascii_letters, digits
 from random import sample
 from functools import partial
-from typing import Dict
-import jsonpickle
 
 
-class ListJsonContacts:
-    """
-    Composition of standard python list
-
-    This class is useful for taking a snapshot of itself in time A and then checking if the content has changed in
-    time B with A <= B.
-    """
+class ListJsonContacts(ChangeContainer):
     def __init__(self):
-        self.list = list()
-        self.old_hash = None
-
-    def __getstate__(self) -> Dict:
-        result = self.__dict__.copy()
-        del result["old_hash"]
-        return result
-
-    def __setstate__(self, state: Dict):
-        self.__dict__.update(state)
-
-    def save_state(self):
-        self.old_hash = str(self.list).__hash__()
-
-    def has_changed(self) -> bool:
-        return str(self.list).__hash__() != self.old_hash
+        super().__init__()
+        self.memory = list()
 
 
 class ContactsWindow(QtWidgets.QDialog):
@@ -92,7 +70,7 @@ class ContactsWindow(QtWidgets.QDialog):
 
         # Populate contact_widgets with info from json file.
         if not self.contact_widgets:
-            for contact in self.contacts_from_json_file.list:
+            for contact in self.contacts_from_json_file.memory:
                 self.contact_widgets.append(ContactListWidget(contact))
 
         # Title, window size & position
@@ -194,7 +172,7 @@ class ContactsWindow(QtWidgets.QDialog):
         if new_contact_window.return_value:
             new_widget = new_contact_window.return_value
 
-            self.contacts_from_json_file.list.append(new_widget.contact)
+            self.contacts_from_json_file.memory.append(new_widget.contact)
             self.contact_widgets.append(new_widget)
             self.add_item(new_widget)
 
@@ -207,10 +185,10 @@ class ContactsWindow(QtWidgets.QDialog):
             old_contact, new_contact = item.child_widget.contact, new_widget.contact
 
             self.remove_item(item)
-            self.contacts_from_json_file.list.remove(item.child_widget.contact)
+            self.contacts_from_json_file.memory.remove(item.child_widget.contact)
             if old_contact.pic_name != new_contact.pic_name:
                 old_contact.release()
-            self.contacts_from_json_file.list.append(new_contact)
+            self.contacts_from_json_file.memory.append(new_contact)
             self.add_item(new_widget)
 
     @QtCore.Slot(ContactListItem)
@@ -218,7 +196,7 @@ class ContactsWindow(QtWidgets.QDialog):
         contact = item.child_widget.contact
 
         self.remove_item(item)
-        self.contacts_from_json_file.list.remove(contact)
+        self.contacts_from_json_file.memory.remove(contact)
         contact.release()
 
 
