@@ -80,6 +80,7 @@ class MainWindow(QtWidgets.QMainWindow):
             mkdir(ProjectConstants.fullpath_thumbnails)
 
         ContactsWindow.load_contacts_json_file()
+        SettingsWindow.load_settings_json_file()
 
     def exec_dialog(self, dialog: Type[QtWidgets.QDialog]):
         child_dialog = dialog(self)
@@ -90,6 +91,10 @@ class MainWindow(QtWidgets.QMainWindow):
         #  Usually output space is much larger than input space but haven't checked.
         if ContactsWindow.contacts_from_json_file.has_changed():
             ContactsWindow.dump_contacts_json_file()
+
+        if SettingsWindow.settings_from_json_file.has_changed():
+            SettingsWindow.dump_settings_json_file()
+
         event.accept()
 
 

@@ -23,7 +23,7 @@ from shutil import copyfile
 from string import ascii_letters, digits
 from random import sample
 from functools import partial
-from typing import Union, List
+from typing import Dict
 import jsonpickle
 
 
@@ -38,12 +38,12 @@ class ListJsonContacts:
         self.list = list()
         self.old_hash = None
 
-    def __getstate__(self):
+    def __getstate__(self) -> Dict:
         result = self.__dict__.copy()
         del result["old_hash"]
         return result
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: Dict):
         self.__dict__.update(state)
 
     def save_state(self):
