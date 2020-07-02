@@ -13,14 +13,17 @@ import algosdk
 
 # Local project
 import resources.Constants as ProjectConstants
-from resources.ContactsWindow import ContactsWindow
-from resources.SettingsWindow import SettingsWindow
+from resources.ContactsWindow import ContactsWindow, ListJsonContacts
+from resources.SettingsWindow import SettingsWindow, DictJsonSettings
 from resources.AboutMenu import InfoWindow, CreditsWindow
 
 # Python standard libraries
+from sys import stderr
 from os import path, mkdir
 from functools import partial
 from typing import Type
+import copy
+import jsonpickle
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -79,8 +82,19 @@ class MainWindow(QtWidgets.QMainWindow):
         if not path.exists(ProjectConstants.fullpath_thumbnails):
             mkdir(ProjectConstants.fullpath_thumbnails)
 
-        ContactsWindow.load_contacts_json_file()
-        SettingsWindow.load_settings_json_file()
+        # Create json files
+        if not path.exists(file := ProjectConstants.fullpath_contacts_json):
+            with open(file, 'w') as f:
+                f.write(jsonpickle.encode(ListJsonContacts()))
+        if not path.exists(file := ProjectConstants.fullpath_settings_json):
+            with open(file, 'w') as f:
+                f.write(jsonpickle.encode(DictJsonSettings()))
+
+        # Load json files and save their state
+        ContactsWindow.contacts_from_json_file = MainWindow.load_json_file(ProjectConstants.fullpath_contacts_json)
+        ContactsWindow.contacts_from_json_file.save_state()
+        SettingsWindow.settings_from_json_file = MainWindow.load_json_file(ProjectConstants.fullpath_settings_json)
+        SettingsWindow.settings_from_json_file.save_state()
 
     def exec_dialog(self, dialog: Type[QtWidgets.QDialog]):
         child_dialog = dialog(self)
@@ -90,12 +104,38 @@ class MainWindow(QtWidgets.QMainWindow):
         # I don't know if there is a reasonable chance that two different list give out the same hash.
         #  Usually output space is much larger than input space but haven't checked.
         if ContactsWindow.contacts_from_json_file.has_changed():
-            ContactsWindow.dump_contacts_json_file()
+            MainWindow.dump_json_file(
+                ProjectConstants.fullpath_contacts_json,
+                ContactsWindow.contacts_from_json_file
+            )
 
         if SettingsWindow.settings_from_json_file.has_changed():
-            SettingsWindow.dump_settings_json_file()
+            MainWindow.dump_json_file(
+                ProjectConstants.fullpath_settings_json,
+                SettingsWindow.settings_from_json_file
+            )
 
         event.accept()
+
+    @staticmethod
+    def load_json_file(file: str):
+        try:
+            with open(file) as f:
+                return jsonpickle.decode(f.read())
+        except Exception as e:
+            print("Could not load %s" % file.split('\\')[-1], file=stderr)
+            print(e, file=stderr)
+            print("Now exiting.", file=stderr)
+            quit()
+
+    @staticmethod
+    def dump_json_file(file: str, structure):
+        try:
+            with open(file, 'w') as f:
+                f.write(jsonpickle.encode(structure, indent='\t'))
+        except Exception as e:
+            print("Could not dump %s" % file.split('\\')[-1], file=stderr)
+            print(e, file=stderr)
 
 
 # The idea of using a frame is that the content of the MainWindow will change and it will be really

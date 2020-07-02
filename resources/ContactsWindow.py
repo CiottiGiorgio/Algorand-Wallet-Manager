@@ -221,42 +221,6 @@ class ContactsWindow(QtWidgets.QDialog):
         self.contacts_from_json_file.list.remove(contact)
         contact.release()
 
-    @staticmethod
-    def load_contacts_json_file():
-        """
-        This method loads contacts.json into memory through jsonpickle parser.
-        """
-        try:
-            if not os.path.exists(ProjectConstants.fullpath_contacts_json):
-                with open(ProjectConstants.fullpath_contacts_json, 'w') as f:
-                    # Create a file with an empty list that is an instance of ListJsonContacts)
-                    f.write(jsonpickle.encode(ListJsonContacts(), indent='\t'))
-            with open(ProjectConstants.fullpath_contacts_json) as f:
-                # ContactJSONDecoder is subclassing the default JSONDecoder because it doesn't automatically
-                #  know how to create a Contact instance from a dictionary
-                ContactsWindow.contacts_from_json_file = jsonpickle.decode(f.read())
-        except Exception as e:
-            print("Could not load contacts from json file", file=stderr)
-            print(e, file=stderr)
-            quit()
-        # Saving the hash of the list when is equal to the correspondent json file. If new hash != old hash
-        #  the content gets dumped back in the disk.
-        ContactsWindow.contacts_from_json_file.save_state()
-
-    @staticmethod
-    def dump_contacts_json_file():
-        """
-        This method dumps memory content into disk through jsonpickle parser.
-        """
-        try:
-            with open(ProjectConstants.fullpath_contacts_json, "w") as f:
-                # To encode Contact class into json object we just output the dictionary of the instance instead of
-                #  the whole instance
-                f.write(jsonpickle.encode(ContactsWindow.contacts_from_json_file, indent="\t"))
-        except Exception as e:
-            print("Could not save contacts to json file", file=stderr)
-            print(e, file=stderr)
-
 
 class ContactsEditing(QtWidgets.QDialog):
     """

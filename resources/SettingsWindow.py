@@ -173,28 +173,3 @@ class SettingsWindow(QtWidgets.QDialog):
         settings["kmd"]["token"] = self.remote_kmd_line_token.text()
 
         self.close()
-
-    # TODO This code is also duplicated. In the future it would be wise to have a single load/dump pair of function.
-    @staticmethod
-    def load_settings_json_file():
-        try:
-            if not path.exists(ProjectConstants.fullpath_settings_json):
-                with open(ProjectConstants.fullpath_settings_json, "w") as f:
-                    f.write(jsonpickle.encode(DictJsonSettings(), indent='\t'))
-            with open(ProjectConstants.fullpath_settings_json) as f:
-                SettingsWindow.settings_from_json_file = jsonpickle.decode(f.read())
-        except Exception as e:
-            print("Could not load settings from json file", file=stderr)
-            print(e, file=stderr)
-            quit()
-
-        SettingsWindow.settings_from_json_file.save_state()
-
-    @staticmethod
-    def dump_settings_json_file():
-        try:
-            with open(ProjectConstants.fullpath_settings_json, "w") as f:
-                f.write(jsonpickle.encode(SettingsWindow.settings_from_json_file, indent='\t'))
-        except Exception as e:
-            print("Could not save settings to json file", file=stderr)
-            print(e, file=stderr)
