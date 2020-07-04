@@ -10,7 +10,7 @@ from PySide2 import QtWidgets, QtGui, QtCore
 
 # Local project
 import resources.Constants as ProjectConstants
-from resources.Entities import Contact
+from resources.Entities import Contact, Wallet
 
 # Python standard libraries
 from functools import cached_property
@@ -18,44 +18,52 @@ from os import path
 
 
 class WalletListItem(QtWidgets.QListWidgetItem):
+    """
+    Dummy class for items in list_wallet. It's kept for the event in which we need to implement
+    functionality in the future.
+    """
     pass
 
 
 class WalletListWidget(QtWidgets.QWidget):
     """
-    Wallet widget for the list in WalletFrame
+    Wallet widget for the list in WalletFrame.
     """
-    def __init__(self, wallet_name: str, wallet_info: str):
+    def __init__(self, wallet: Wallet):
         super().__init__()
 
-        main_layout = QtWidgets.QHBoxLayout()
+        # Anti memory leak
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+
+        # Setup interface
+        main_layout = QtWidgets.QHBoxLayout(self)
         main_layout.setContentsMargins(10, 5, 10, 5)
 
-        # Here the inner layout is created inside addLayout but also is assigned to label_layout using walrus operator.
+        #   Here the inner layout is created inside addLayout but also is assigned to label_layout
+        #    using walrus operator.
         main_layout.addLayout(label_layout := QtWidgets.QVBoxLayout())
 
-        # Here the label with the name of the wallet is created, styled and added to the window
-        self.label_name = QtWidgets.QLabel(wallet_name)
+        #   Here the label with the name of the wallet is created, styled and added to the window
+        self.label_name = QtWidgets.QLabel(wallet.name)
         self.label_name.setStyleSheet("font: 13pt;")
         label_layout.addWidget(self.label_name)
 
-        # Same for the info label
-        self.label_info = QtWidgets.QLabel(wallet_info)
+        #   Same for the info label
+        self.label_info = QtWidgets.QLabel(wallet.info)
         self.label_info.setStyleSheet("font: 8pt;")
         label_layout.addWidget(self.label_info)
 
         main_layout.addStretch(1)
-
-        self.setLayout(main_layout)
+        # End setup
 
 
 # Of course once a ContactListWidget has been assigned to a ContactListItem it's wrong to swap with a
-#  second ContactListWidget because then the cached properties will be different
+#  second ContactListWidget because then the cached properties will be incoherent.
 class ContactListItem(QtWidgets.QListWidgetItem):
     """
-    Item used in the contacts list
+    Item used in the contacts list.
 
-    Most of its features are only available when a ContactListWidget is inside it
+    Most of its features are only available when a ContactListWidget is inside it.
     """
     def __lt__(self, other):
         return self.child_widget < other.child_widget
@@ -68,7 +76,7 @@ class ContactListItem(QtWidgets.QListWidgetItem):
 
     # This changes the method into being an attribute that is only computed the first time.
     # This is made under the assumption that the widget inside a given item doesn't change.
-    # This will be useful for dynamic filtering with search bar.
+    # This will be useful for dynamically filtering search bar.
     @cached_property
     def widget_name(self):
         return self.child_widget.name
@@ -88,7 +96,7 @@ class ContactListItem(QtWidgets.QListWidgetItem):
 
 class ContactListWidget(QtWidgets.QWidget):
     """
-    Widget that represents a contact
+    This widget represents a contact inside ContactWindow.
     """
     pixmap_generic_user = QtGui.QPixmap(path.abspath("graphics/generic_user.png"))
     bitmap_user_mask = QtGui.QBitmap.fromImage(QtGui.QImage(path.abspath("graphics/user_pic_mask.png")))
@@ -108,7 +116,8 @@ class ContactListWidget(QtWidgets.QWidget):
             self.pic_name else \
             self.pixmap_generic_user
 
-        main_layout = QtWidgets.QHBoxLayout()
+        # Setup interface
+        main_layout = QtWidgets.QHBoxLayout(self)
 
         self.label_pixmap = QtWidgets.QLabel()
         self.label_pixmap.setPixmap(self.derive_profile_pic(self.pixmap))
@@ -118,25 +127,26 @@ class ContactListWidget(QtWidgets.QWidget):
 
         main_layout.addLayout(label_layout := QtWidgets.QVBoxLayout())
 
+        #   Name label
         self.label_name = QtWidgets.QLabel(self.name)
         self.label_name.setStyleSheet("font: 13pt;")
         label_layout.addWidget(self.label_name)
 
+        #   Info label
         self.label_info = QtWidgets.QLabel(self.info)
         self.label_info.setStyleSheet("font: 8pt;")
         label_layout.addWidget(self.label_info)
 
         main_layout.addStretch(1)
+        # End setup
 
-        self.setLayout(main_layout)
-
-    def __lt__(self, other):
+    def __lt__(self, other) -> bool:
         return self.name < other.name
 
     @staticmethod
     def derive_profile_pic(pixmap: QtGui.QPixmap) -> QtGui.QPixmap:
         """
-        This method returns the icon for the profile picture starting from a full picture
+        This method returns the icon for the profile picture starting from a full picture.
         """
         # Crop a the maximum square possible from the middle of the QPixmap.
         width, height = pixmap.width(), pixmap.height()

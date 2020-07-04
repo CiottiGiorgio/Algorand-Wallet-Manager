@@ -1,7 +1,5 @@
 """
-This file describes the main contact window, its child widgets and some data structure needed.
-
-ContactsWindow class is the main purpose of this file.
+This file describes the contact window, its child widgets and some data structure needed.
 """
 
 
@@ -26,6 +24,9 @@ from functools import partial
 
 
 class ListJsonContacts(ChangeContainer):
+    """
+    This class will be used to hold the information of contacts.json file.
+    """
     def __init__(self):
         super().__init__()
         self.memory = list()
@@ -33,15 +34,13 @@ class ListJsonContacts(ChangeContainer):
 
 class ContactsWindow(QtWidgets.QDialog):
     """
-    Contact list window.
+    This class is the contact window.
 
-    This subclass of QWidget spawn a new window with the functionality to manage a contact list.
-    I have decided that this class will also host static information about contacts. Other classes might need this
-    info such as the transaction window (e.g.: when sending algos or assets you get suggestions when typing in the
-    receiver of such transaction).
+    This class also manage all information about contacts. It will load at the start of the program all permanent
+    information about user contacts so that other classes that need those information will find it here.
     """
     # These icons are static because we want to avoid having to reload them from the disk each time this class is
-    #  instantiated
+    #  instantiated.
     icon_search = QtGui.QIcon(os.path.abspath("graphics/search.png"))
     icon_edit = QtGui.QIcon(os.path.abspath("graphics/edit.png"))
     icon_delete = QtGui.QIcon(os.path.abspath("graphics/delete.png"))
@@ -51,13 +50,15 @@ class ContactsWindow(QtWidgets.QDialog):
     #  However this class will be the only one to load it and change it. Other classes shall only read from it.
     # A crucial point is that this list gets loaded with the static method load_contacts_json_file as soon as this
     #  class is done with the definition because other class might need its data even if this class never
-    #  gets instantiated
+    #  gets instantiated.
     contacts_from_json_file = ListJsonContacts()
 
-    # We make a list of ContactListItem static because each item has a profile pic that could create IO bottleneck
+    # We make a list of ContactListWidget static because each item has a profile pic that could create IO bottleneck
     #  if it has to be loaded each time this class is instantiated.
     # However we create the list of widget for ContactsWindow only the first time that this class is
     #  instantiated because only this class needs its ContactListWidget.
+    # This list remains coherent with contacts_from_json_file and DOES NOT need to be fully updated as long as
+    #  contacts are managed through this class methods.
     contact_widgets = list()
 
     def __init__(self, parent: QtWidgets.QWidget):
@@ -73,26 +74,27 @@ class ContactsWindow(QtWidgets.QDialog):
             for contact in self.contacts_from_json_file.memory:
                 self.contact_widgets.append(ContactListWidget(contact))
 
-        # Title, window size & position
+        # Setup interface
+        #   Title, window size & position
         self.setWindowTitle("Contacts")
         width, height = 350, 550
         parent_size = self.parent().size()
         self.setFixedSize(width, height)
-        # With this next line we spawn the ContactWindow 50 pixels distant from parent in x axis and
-        #  we align the centers of the two window losing half of the difference in height on the longer window.
+        #   With this next line we spawn the ContactWindow 50 pixels distant from parent in x axis and
+        #    we align the centers of the two window losing half of the difference in height on the longer window.
         self.move(self.parent().pos() +
                   QtCore.QPoint(parent_size.width() + 50, -1 * (height - parent_size.height()) // 2))
 
         main_layout = QtWidgets.QVBoxLayout(self)
 
-        # MenuBar
+        #   MenuBar
         self.menu_bar = QtWidgets.QMenuBar()
         self.menu_new_contact = self.menu_bar.addAction("New contact", self.new_contact)
         main_layout.setMenuBar(self.menu_bar)
 
-        # Search input
-        # As usual we thank the gods for sending us the answer
-        #  http://saurabhg.com/programming/search-box-using-qlineedit/
+        #   Search input
+        #    As usual we thank the gods for sending us the answer
+        #    http://saurabhg.com/programming/search-box-using-qlineedit/
         self.line_search = QtWidgets.QLineEdit()
         self.line_search.setFixedHeight(30)
         self.line_search.setClearButtonEnabled(True)
@@ -101,11 +103,14 @@ class ContactsWindow(QtWidgets.QDialog):
         self.line_search.textChanged.connect(self.filter_contacts)
         main_layout.addWidget(self.line_search)
 
-        # List of contacts
+        #   List of contacts
         self.list_contacts = QtWidgets.QListWidget()
         self.list_contacts.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
         self.list_contacts.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.list_contacts.customContextMenuRequested.connect(self.show_context_menu)
+
+        main_layout.addWidget(self.list_contacts, 1)
+        # End setup
 
         # Populate list
         for widget in self.contact_widgets:
@@ -118,8 +123,7 @@ class ContactsWindow(QtWidgets.QDialog):
         #  all my life choices that led to this moment.
         self.list_contacts.sortItems()
 
-        main_layout.addWidget(self.list_contacts, 1)
-
+    # TODO make this menu hide and show instead of creating it from scratch each time. Partials could be problematic.
     @QtCore.Slot(QtCore.QPoint)
     def show_context_menu(self, pos: QtCore.QPoint):
         if item := self.list_contacts.itemAt(pos):
@@ -130,18 +134,20 @@ class ContactsWindow(QtWidgets.QDialog):
             global_pos = self.list_contacts.mapToGlobal(pos)
             menu.exec_(global_pos)
 
+    # TODO calculate new_text.split(' ') only once.
     @QtCore.Slot(str)
     def filter_contacts(self, new_text: str):
         """
         This method show only those ContactListItems that fit the new search bar content. Hides the rest.
         """
-        # I suspect this code runs in O(n^2) but haven't checked. Meh. As long as it is fast in practice there is no
-        #  reason to think of a better solution.
         for i in range(self.list_contacts.count()):
             # We do matching this way because "in" operator search for exact correspondence. Instead we would like to
             #  filter all the item for with every single word matches against some part of label_name. This is because
             #  the user might look for a contact using a string that doesnt exists in any label_name.
             #  Eg.: search_text="py mo" label_name="Monty Python"
+            # This is a slightly convoluted way to split the search text into bits separated by space then math each
+            #  of these bits against the widget name. (Both strings get lowered of course)
+            #  Then if every bit matches the item is shown otherwise is hidden.
             if all([
                 match.lower() in self.list_contacts.item(i).widget_name.lower() for match in new_text.split(" ")
             ]):
@@ -150,7 +156,10 @@ class ContactsWindow(QtWidgets.QDialog):
                 self.list_contacts.item(i).setHidden(True)
 
     # N.B.: The next methods that end in "_item" are only "macros" to manage items in the list
-    #  to really delete a contact from persistent memory use methods that end in "_contact"
+    #  to really delete a contact from persistent memory use methods that end in "_contact".
+
+    # Also add doesn't add_item its input to contact_widgets but remove_item does.
+    #  It's not the best from a rational point of view but the code looks logical this way.
 
     # I know this is confusing but it makes sense to add an item but only pass a widget because the item is
     #  the same every time.
@@ -160,7 +169,6 @@ class ContactsWindow(QtWidgets.QDialog):
         self.list_contacts.addItem(item)
         self.list_contacts.setItemWidget(item, widget)
 
-    # N.B.: Keep in mind that this method removes the widget from self.contact_widgets
     def remove_item(self, item: ContactListItem):
         self.list_contacts.takeItem(self.list_contacts.row(item))
         self.contact_widgets.remove(item.child_widget)
@@ -213,9 +221,11 @@ class ContactsEditing(QtWidgets.QDialog):
         """
         return "".join(sample(ContactsEditing.character_pool, length))
 
+    # Static images to avoid IO bottleneck
     icon_valid = QtGui.QPixmap(os.path.abspath("graphics/valid.png"))
     icon_not_valid = QtGui.QPixmap(os.path.abspath("graphics/not valid.png"))
 
+    # TODO check if all of the above code makes sense
     def __init__(self, parent: QtWidgets.QWidget, pre_filled: ContactListWidget = None):
         super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
 

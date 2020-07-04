@@ -4,10 +4,14 @@ This file contains the setting window class and related static attributes and me
 
 
 # PySide2
-from PySide2 import QtWidgets, QtCore
+from PySide2 import QtWidgets, QtGui, QtCore
 
 # Local project
+import resources.Constants as ProjectConstants
 from resources.DataStructures import ChangeContainer
+
+# Python standard libraries
+from os import path
 
 
 class DictJsonSettings(ChangeContainer):
@@ -27,11 +31,15 @@ class DictJsonSettings(ChangeContainer):
 class SettingsWindow(QtWidgets.QDialog):
     settings_from_json_file = DictJsonSettings()
 
+    rest_endpoints = {}
+
     def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
 
+        # Anti memory leak
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
+        # Setup interface
         self.setWindowTitle("Settings")
         self.setFixedSize(450, 600)
 
@@ -48,10 +56,10 @@ class SettingsWindow(QtWidgets.QDialog):
         local_folder_layout = QtWidgets.QHBoxLayout()
 
         self.local_line = QtWidgets.QLineEdit()
-        self.local_line.setPlaceholderText("Algorand node folder")
         local_folder_layout.addWidget(self.local_line)
 
         self.local_button_select_folder = QtWidgets.QPushButton("Select folder")
+
         local_folder_layout.addWidget(self.local_button_select_folder)
 
         local_layout.addLayout(local_folder_layout)
@@ -74,11 +82,16 @@ class SettingsWindow(QtWidgets.QDialog):
 
         remote_layout_algod.addWidget(QtWidgets.QLabel("Port"), 0, 1)
         self.remote_algod_line_port = QtWidgets.QLineEdit()
+        # Even if i wrote (1, 65535) it would accept as far as 99999 so might as well write it myself.
+        #  This is not a complete functional filter but at least limits the input to integers.
+        self.remote_algod_line_port.setValidator(QtGui.QIntValidator(1, 99999))
         remote_layout_algod.addWidget(self.remote_algod_line_port, 1, 1)
 
         remote_layout_algod.addWidget(QtWidgets.QLabel("Token"), 2, 0)
         self.remote_algod_line_token = QtWidgets.QLineEdit()
         remote_layout_algod.addWidget(self.remote_algod_line_token, 3, 0, 1, 2)
+
+        remote_layout_algod.setColumnStretch(0, 1)
 
         remote_groupbox_algod.setLayout(remote_layout_algod)
 
@@ -94,11 +107,15 @@ class SettingsWindow(QtWidgets.QDialog):
 
         remote_layout_kmd.addWidget(QtWidgets.QLabel("Port"), 0, 1)
         self.remote_kmd_line_port = QtWidgets.QLineEdit()
+        self.remote_kmd_line_port.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
+        self.remote_kmd_line_port.setValidator(QtGui.QIntValidator(1, 99999))
         remote_layout_kmd.addWidget(self.remote_kmd_line_port, 1, 1)
 
         remote_layout_kmd.addWidget(QtWidgets.QLabel("Token"), 2, 0)
         self.remote_kmd_line_token = QtWidgets.QLineEdit()
         remote_layout_kmd.addWidget(self.remote_kmd_line_token, 3, 0, 1, 2)
+
+        remote_layout_kmd.setColumnStretch(0, 10)
 
         remote_groupbox_kmd.setLayout(remote_layout_kmd)
 
@@ -114,9 +131,13 @@ class SettingsWindow(QtWidgets.QDialog):
         self.button_confirm = QtWidgets.QPushButton("Confirm")
         self.button_confirm.clicked.connect(self.button_confirm_clicked)
         main_layout.addWidget(self.button_confirm, alignment=QtCore.Qt.AlignRight)
+        # End setup
+
+        # Slot connect
+        self.local_button_select_folder.clicked.connect(self.button_select_folder_clicked)
 
         # Restoring fields
-        settings = SettingsWindow.settings_from_json_file.memory  # This is just to make code look shorter
+        settings = SettingsWindow.settings_from_json_file.memory  # Shortened
 
         if settings["selected"] == 0:
             self.local_radio.setChecked(True)
@@ -134,7 +155,18 @@ class SettingsWindow(QtWidgets.QDialog):
         self.remote_kmd_line_token.setText(settings["kmd"]["token"])
 
     @QtCore.Slot()
+    def button_select_folder_clicked(self):
+        """
+        This method updates the content of self.local_line after self.button_select_folder is clicked
+        """
+        dir_path = QtWidgets.QFileDialog.getExistingDirectory()
+        if dir_path != "":
+            self.local_line.setText(dir_path)
+
+    # TODO make sure that confirms also restarts the process of connecting to REST endpoint
+    @QtCore.Slot()
     def button_confirm_clicked(self):
+        # TODO do some input validation.
         settings = SettingsWindow.settings_from_json_file.memory
 
         if self.local_radio.isChecked():
@@ -153,3 +185,39 @@ class SettingsWindow(QtWidgets.QDialog):
         settings["kmd"]["token"] = self.remote_kmd_line_token.text()
 
         self.close()
+
+    @staticmethod
+    def calculate_rest_endpoints():
+        settings = SettingsWindow.settings_from_json_file.memory
+
+        temp = dict()
+
+        if settings["selected"] == 0:
+            # Get the rest endpoints through local files.
+            try:
+                with open(path.join(settings["local"], ProjectConstants.filename_algod_net)) as f1, \
+                        open(path.join(settings["local"], ProjectConstants.filename_algod_token)) as f2, \
+                        open(path.join(settings["local"], ProjectConstants.filename_kmd_net)) as f3, \
+                        open(path.join(settings["local"], ProjectConstants.filename_kmd_token)) as f4:
+                    temp["algod"] = {
+                        "address": f1.readline(),
+                        "token": f2.readline()
+                    }
+                    temp["kmd"] = {
+                        "address": f3.readline(),
+                        "token": f4.readline()
+                    }
+            except:
+                temp = dict()
+        elif settings["selected"] == 1:
+            # Use rest endpoints directly.
+            temp["algod"] = {
+                "address": settings["algod"]["url"] + ':' + settings["algod"]["port"],
+                "token": settings["algod"]["token"]
+            }
+            temp["kmd"] = {
+                "address": settings["kmd"]["url"] + ':' + settings["kmd"]["port"],
+                "token": settings["kmd"]["token"]
+            }
+
+        SettingsWindow.rest_endpoints.update(temp)

@@ -7,6 +7,8 @@ This main function will initialize PySide2 & MainWindow and manage the starting 
 from PySide2 import QtWidgets
 
 
+# TODO look into the fact that some widgets only get destroyed when the application is closing making the attribute
+#  QtCore.Qt.WA_DeleteOnClose somewhat useless.
 def main():
     # Manager of all things regarding a widget-based Qt5 app.
     #  Eg.: mainloop, events, initialization, finalization, ...
@@ -22,7 +24,8 @@ def main():
     main_window = MainWindow()
     main_window.show()
 
-    app.exec_()
+    # Enter main loop.
+    return app.exec_()
 
 
 if __name__ == '__main__':

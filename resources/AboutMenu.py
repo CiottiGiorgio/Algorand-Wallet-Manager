@@ -2,6 +2,7 @@
 This file contains info window.
 
 Things like author licences and outsourcing images.
+These windows are made so that they fit the content rather than the content fits the dimention of the window.
 """
 
 
@@ -10,16 +11,19 @@ from PySide2 import QtWidgets, QtCore
 
 
 class InfoWindow(QtWidgets.QDialog):
+    """
+    This class is the info about this application window
+    """
     def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
 
+        # Anti memory leak
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
+        # Setup interface
         self.setWindowTitle("Info")
 
-        main_layout = QtWidgets.QVBoxLayout()
-        # We let the window resize to the fixed dimension of children widgets rather than setting the size and then
-        #  making the children widgets fit.
+        main_layout = QtWidgets.QVBoxLayout(self)
         main_layout.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
 
         next_label = QtWidgets.QLabel("Algorand Wallet Manager\n")
@@ -40,8 +44,7 @@ class InfoWindow(QtWidgets.QDialog):
         next_label.setOpenExternalLinks(True)
         next_label.setAlignment(QtCore.Qt.AlignHCenter)
         main_layout.addWidget(next_label)
-
-        self.setLayout(main_layout)
+        # End setup
 
 
 class CreditsWindow(QtWidgets.QDialog):
@@ -52,9 +55,7 @@ class CreditsWindow(QtWidgets.QDialog):
 
         self.setWindowTitle("Credits")
 
-        main_layout = QtWidgets.QVBoxLayout()
-        # We let the window resize to the fixed dimension of children widgets rather than setting the size and then
-        #  making the children widgets fit.
+        main_layout = QtWidgets.QVBoxLayout(self)
         main_layout.setSizeConstraint(QtWidgets.QLayout.SetFixedSize)
 
         next_label = QtWidgets.QLabel("Credits for the icons used in this application:\n\n"
@@ -62,5 +63,3 @@ class CreditsWindow(QtWidgets.QDialog):
                                       "from www.flaticon.com")
         next_label.setAlignment(QtCore.Qt.AlignHCenter)
         main_layout.addWidget(next_label)
-
-        self.setLayout(main_layout)
