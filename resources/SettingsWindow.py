@@ -8,6 +8,7 @@ from PySide2 import QtWidgets, QtGui, QtCore
 
 # Local project
 import resources.Constants as ProjectConstants
+from resources.MiscFunctions import load_json_file
 from resources.DataStructures import ChangeContainer
 
 # Python standard libraries
@@ -29,7 +30,8 @@ class DictJsonSettings(ChangeContainer):
 
 
 class SettingsWindow(QtWidgets.QDialog):
-    settings_from_json_file = DictJsonSettings()
+    settings_from_json_file = load_json_file(ProjectConstants.fullpath_settings_json)
+    settings_from_json_file.save_state()
 
     rest_endpoints = {}
 
@@ -163,7 +165,6 @@ class SettingsWindow(QtWidgets.QDialog):
         if dir_path != "":
             self.local_line.setText(dir_path)
 
-    # TODO make sure that confirms also restarts the process of connecting to REST endpoint
     @QtCore.Slot()
     def button_confirm_clicked(self):
         # TODO do some input validation.
@@ -185,6 +186,8 @@ class SettingsWindow(QtWidgets.QDialog):
         settings["kmd"]["token"] = self.remote_kmd_line_token.text()
 
         self.close()
+
+        self.parent().restart()
 
     @staticmethod
     def calculate_rest_endpoints():

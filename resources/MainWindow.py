@@ -9,6 +9,7 @@ MainWindow class is the fundamental interface from which the program offers its 
 from PySide2 import QtWidgets, QtGui, QtCore
 
 # Local project
+from resources.MiscFunctions import dump_json_file
 import resources.Constants as ProjectConstants
 from resources.WalletAddressFrames import WalletsFrame
 from resources.ContactsWindow import ContactsWindow, ListJsonContacts
@@ -52,14 +53,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menu_action_info = self.menu_about.addAction("Info")
         self.menu_action_credits = self.menu_about.addAction("Credits")
 
-        self.wallet_frame = WalletsFrame(self)
-
-        self.setCentralWidget(self.wallet_frame)
+        # The first wallet will be initialized by self.restart
+        self.wallet_frame = None
         # End setup
-
-        # This will be enabled in the future when it can be called. (i.e.: there exists at least one wallet)
-        for menu_action in [self.menu_action_new_transaction]:
-            menu_action.setEnabled(False)
 
         # MenuBar signal connection.
         # Using partial could be troubling because of circular dependency between memory in python.
@@ -77,6 +73,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menu_action_credits.triggered.connect(
             partial(self.exec_dialog, CreditsWindow)
         )
+
+        # We hijack this method to do the first start.
+        self.restart()
 
     @staticmethod
     def initialize():
@@ -100,22 +99,32 @@ class MainWindow(QtWidgets.QMainWindow):
             with open(file, 'w') as f:
                 f.write(jsonpickle.encode(DictJsonSettings(), indent='\t'))
 
-        # TODO maybe move all of this calls inside static of each class?
-        # Load json files and save their state
-        ContactsWindow.contacts_from_json_file = MainWindow.load_json_file(ProjectConstants.fullpath_contacts_json)
-        ContactsWindow.contacts_from_json_file.save_state()
-        SettingsWindow.settings_from_json_file = MainWindow.load_json_file(ProjectConstants.fullpath_settings_json)
-        SettingsWindow.settings_from_json_file.save_state()
-
-        # Translate user settings to actual connection point to Algorand node
-        SettingsWindow.calculate_rest_endpoints()
-
     def exec_dialog(self, dialog: Type[QtWidgets.QDialog]):
         """
         This method executes a QDialog window.
         """
         child_dialog = dialog(self)
         child_dialog.exec_()
+
+    def restart(self):
+        """
+        This method restart the application from the point when it tries to connect to a node to display wallets.
+        This method can also be used to do the first start.
+
+        This is done by deleting any existing WalletFrame and creating a new one.
+        This method also makes sure that new settings are refreshed into new rest endpoints.
+        """
+        # This will be enabled in the future when it can be called. (i.e.: there exists at least one wallet)
+        for menu_action in [self.menu_action_new_transaction]:
+            menu_action.setEnabled(False)
+
+        if self.wallet_frame:
+            self.wallet_frame.destroy()
+
+        SettingsWindow.calculate_rest_endpoints()
+
+        self.wallet_frame = WalletsFrame(self)
+        self.setCentralWidget(self.wallet_frame)
 
     def closeEvent(self, event: QtGui.QCloseEvent):
         """
@@ -124,45 +133,15 @@ class MainWindow(QtWidgets.QMainWindow):
         It's used to finalize some resources and then it passes the event up the chain to let PySide2 deal with it.
         """
         if ContactsWindow.contacts_from_json_file.has_changed():
-            MainWindow.dump_json_file(
+            dump_json_file(
                 ProjectConstants.fullpath_contacts_json,
                 ContactsWindow.contacts_from_json_file
             )
         if SettingsWindow.settings_from_json_file.has_changed():
-            MainWindow.dump_json_file(
+            dump_json_file(
                 ProjectConstants.fullpath_settings_json,
                 SettingsWindow.settings_from_json_file
             )
 
         event.accept()
 
-    @staticmethod
-    def load_json_file(file: str):
-        """
-        This method takes a json file and returns the data structure contained in it.
-
-        Any error during this method results in the application quitting.
-        """
-        try:
-            with open(file) as f:
-                return jsonpickle.decode(f.read())
-        except Exception as e:
-            print("Could not load %s" % file.split('\\')[-1], file=stderr)
-            print(e, file=stderr)
-            print("Now exiting.", file=stderr)
-            quit()
-
-    @staticmethod
-    def dump_json_file(file: str, structure):
-        """
-        This method takes a data structure and writes it to the json file.
-
-        Any error during this method WILL NOT result in the application quitting. Although the application might still
-        be in the stage of closing if it's trying to save to disk.
-        """
-        try:
-            with open(file, 'w') as f:
-                f.write(jsonpickle.encode(structure, indent='\t'))
-        except Exception as e:
-            print("Could not dump %s" % file.split('\\')[-1], file=stderr)
-            print(e, file=stderr)

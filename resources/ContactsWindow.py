@@ -11,6 +11,7 @@ from algosdk.encoding import is_valid_address
 
 # Local project
 import resources.Constants as ProjectConstants
+from resources.MiscFunctions import load_json_file
 from resources.DataStructures import ChangeContainer
 from resources.Entities import Contact
 from resources.CustomListWidgetItem import ContactListItem, ContactListWidget
@@ -51,7 +52,8 @@ class ContactsWindow(QtWidgets.QDialog):
     # A crucial point is that this list gets loaded with the static method load_contacts_json_file as soon as this
     #  class is done with the definition because other class might need its data even if this class never
     #  gets instantiated.
-    contacts_from_json_file = ListJsonContacts()
+    contacts_from_json_file = load_json_file(ProjectConstants.fullpath_contacts_json)
+    contacts_from_json_file.save_state()
 
     # We make a list of ContactListWidget static because each item has a profile pic that could create IO bottleneck
     #  if it has to be loaded each time this class is instantiated.
@@ -119,11 +121,8 @@ class ContactsWindow(QtWidgets.QDialog):
         # If we enable sorting we get an error when we add an item without widget because list doesn't know
         #  how to compare ContactsListItem without a ContactsListWidget inside.
         #  You can't insert the widget inside the item and then insert item inside the list.
-        # Qt is dumb. I'm so disappointed in this library to the point i'm questioning
-        #  all my life choices that led to this moment.
         self.list_contacts.sortItems()
 
-    # TODO make this menu hide and show instead of creating it from scratch each time. Partials could be problematic.
     @QtCore.Slot(QtCore.QPoint)
     def show_context_menu(self, pos: QtCore.QPoint):
         if item := self.list_contacts.itemAt(pos):
@@ -134,12 +133,16 @@ class ContactsWindow(QtWidgets.QDialog):
             global_pos = self.list_contacts.mapToGlobal(pos)
             menu.exec_(global_pos)
 
-    # TODO calculate new_text.split(' ') only once.
+            # This should get rid of the whole object along with the partial.
+            menu.deleteLater()
+
     @QtCore.Slot(str)
     def filter_contacts(self, new_text: str):
         """
         This method show only those ContactListItems that fit the new search bar content. Hides the rest.
         """
+        new_text_splitted = new_text.split(' ')
+
         for i in range(self.list_contacts.count()):
             # We do matching this way because "in" operator search for exact correspondence. Instead we would like to
             #  filter all the item for with every single word matches against some part of label_name. This is because
@@ -149,7 +152,7 @@ class ContactsWindow(QtWidgets.QDialog):
             #  of these bits against the widget name. (Both strings get lowered of course)
             #  Then if every bit matches the item is shown otherwise is hidden.
             if all([
-                match.lower() in self.list_contacts.item(i).widget_name.lower() for match in new_text.split(" ")
+                match.lower() in self.list_contacts.item(i).widget_name.lower() for match in new_text_splitted
             ]):
                 self.list_contacts.item(i).setHidden(False)
             else:
@@ -210,7 +213,7 @@ class ContactsWindow(QtWidgets.QDialog):
 
 class ContactsEditing(QtWidgets.QDialog):
     """
-    This class implements the window to edit / create a contact
+    This class implements the window to edit / create a contact.
     """
     character_pool = frozenset(ascii_letters + digits)
 
@@ -235,12 +238,13 @@ class ContactsEditing(QtWidgets.QDialog):
         self.external_pic_full_path = None
         self.return_value = None
 
+        # Setup interface
         self.setWindowTitle(
             "Edit contact" if pre_filled else "New contact"
         )
         self.setFixedSize(350, 320)
 
-        main_layout = QtWidgets.QVBoxLayout()
+        main_layout = QtWidgets.QVBoxLayout(self)
 
         main_layout.addWidget(QtWidgets.QLabel("Name:"))
         self.edit_name = QtWidgets.QLineEdit()
@@ -291,6 +295,7 @@ class ContactsEditing(QtWidgets.QDialog):
         button_layout.addWidget(self.button_confirm)
 
         main_layout.addLayout(button_layout)
+        # End setup
 
         if pre_filled:
             self.edit_name.setText(pre_filled.name)
@@ -314,8 +319,6 @@ class ContactsEditing(QtWidgets.QDialog):
         self.edit_name.textChanged.connect(self.validate_inputs)
         self.edit_address.textChanged.connect(self.validate_inputs)
         self.validate_inputs()
-
-        self.setLayout(main_layout)
 
     @QtCore.Slot()
     def validate_inputs(self):
@@ -392,5 +395,7 @@ class ContactsEditing(QtWidgets.QDialog):
             pic_name = rnd_file_name
         else:
             pic_name = self.pic_name
-        self.return_value = ContactListWidget(Contact(pic_name, self.edit_name.text(), self.edit_address.text()))
+        self.return_value = ContactListWidget(
+            Contact(pic_name, self.edit_name.text(), self.edit_address.text())
+        )
         self.close()

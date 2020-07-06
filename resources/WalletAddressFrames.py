@@ -18,6 +18,7 @@ from resources.CustomListWidgetItem import WalletListItem, WalletListWidget
 from sys import stderr
 
 
+# TODO make it obvious that application is operating. Normal functioning if success and error message if not.
 class WalletsFrame(QtWidgets.QFrame):
     """
     This class is the frame for the list of wallet in an Algorand node and the action on those wallets.
