@@ -4,15 +4,15 @@ This file contains two frames used in MainWindow.
 
 
 # PySide2
-from PySide2 import QtWidgets, QtCore
+from PySide2 import QtWidgets, QtCore, QtGui
 
 # Algorand
 from algosdk import kmd
 
 # Local project
-from resources.Entities import Wallet, AlgorandWorker
+from resources.Entities import Wallet
 from resources.SettingsWindow import SettingsWindow
-from resources.CustomListWidgetItem import WalletListItem, WalletListWidget
+from resources.CustomListWidgetItem import WalletListItem, WalletListWidget, LoadingListWidget
 
 # Python standard libraries
 from sys import stderr
@@ -37,7 +37,7 @@ class WalletsFrame(QtWidgets.QFrame):
 
         # Setup interface
         #   Main Horizontal Layout
-        main_layout = QtWidgets.QHBoxLayout()
+        main_layout = QtWidgets.QHBoxLayout(self)
 
         self.list_wallet = QtWidgets.QListWidget()
         #   List of wallet in the connected Algorand node
@@ -73,9 +73,6 @@ class WalletsFrame(QtWidgets.QFrame):
         wallet_button_layout.addWidget(self.button_import)
         wallet_button_layout.addWidget(self.button_delete)
         wallet_button_layout.addWidget(self.button_export)
-
-        #   Setting the frame main layout
-        self.setLayout(main_layout)
         # End setup
 
         # These widgets will be enabled when wallets are loaded.
@@ -83,14 +80,14 @@ class WalletsFrame(QtWidgets.QFrame):
                        self.button_import, self.button_delete, self.button_export]:
             button.setEnabled(False)
 
-        # Load wallets in a threaded way
-        # TODO make a macro for this code.
-        worker = AlgorandWorker(self.kmd_client.list_wallets)
         # TODO what happens to this worker and this connection after the job is done?
-        worker.signals.result.connect(self.load_wallets)
         # TODO implement if this threaded function returns an error.
-        worker.signals.error.connect(lambda x: print(x, file=stderr))
-        self.parent().thread_pool.start(worker)
+        # Load wallets in a threaded way
+        self.worker = self.parent().start_worker(
+            self.kmd_client.list_wallets,
+            self.load_wallets,
+            lambda x: print(x, file=stderr)
+        )
 
     # TODO sort of code duplication for the list of contacts and in the future list of addresses?
     def add_item(self, widget: WalletListWidget):
@@ -109,6 +106,9 @@ class WalletsFrame(QtWidgets.QFrame):
 
         This slot is connected to the result of the thread that
         """
+        # Remove loading widget
+        self.list_wallet.takeItem(0)
+
         for wallet in wallets:
             self.add_item(
                 WalletListWidget(

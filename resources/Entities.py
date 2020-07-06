@@ -45,11 +45,11 @@ class Wallet:
 
 class AlgorandWorkerSignals(QtCore.QObject):
     """
-    QObject with two custom signals.
+    QObject with custom signals.
 
     This is used in AlgorandWorker to signal a success with return value or an error.
     """
-    result = QtCore.Signal(object)
+    success = QtCore.Signal(object)
     error = QtCore.Signal(str)
 
 
@@ -80,4 +80,4 @@ class AlgorandWorker(QtCore.QRunnable):
         except Exception as e:
             self.signals.error.emit(str(e))
         else:
-            self.signals.result.emit(result)
+            self.signals.success.emit(result)

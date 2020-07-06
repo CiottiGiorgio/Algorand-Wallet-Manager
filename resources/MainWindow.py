@@ -9,8 +9,9 @@ MainWindow class is the fundamental interface from which the program offers its 
 from PySide2 import QtWidgets, QtGui, QtCore
 
 # Local project
-from resources.MiscFunctions import dump_json_file
 import resources.Constants as ProjectConstants
+from resources.MiscFunctions import dump_json_file
+from resources.Entities import AlgorandWorker
 from resources.WalletAddressFrames import WalletsFrame
 from resources.ContactsWindow import ContactsWindow, ListJsonContacts
 from resources.SettingsWindow import SettingsWindow, DictJsonSettings
@@ -53,7 +54,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menu_action_info = self.menu_about.addAction("Info")
         self.menu_action_credits = self.menu_about.addAction("Credits")
 
-        # The first wallet will be initialized by self.restart
+        #   The first wallet will be initialized by self.restart
         self.wallet_frame = None
         # End setup
 
@@ -125,6 +126,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.wallet_frame = WalletsFrame(self)
         self.setCentralWidget(self.wallet_frame)
+
+    def start_worker(self, fn: callable, fn_success: callable, fn_error: callable) -> AlgorandWorker:
+        worker = AlgorandWorker(fn)
+
+        if fn_success:
+            worker.signals.success.connect(fn_success)
+
+        if fn_error:
+            worker.signals.error.connect(fn_error)
+
+        self.thread_pool.start(worker)
+
+        return worker
 
     def closeEvent(self, event: QtGui.QCloseEvent):
         """
