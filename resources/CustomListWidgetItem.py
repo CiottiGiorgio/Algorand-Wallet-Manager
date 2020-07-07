@@ -164,33 +164,3 @@ class ContactListWidget(QtWidgets.QWidget):
         result.setMask(temp_mask)
 
         return result.scaled(40, 40, QtCore.Qt.IgnoreAspectRatio, QtCore.Qt.SmoothTransformation)
-
-
-class LoadingListWidget(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
-
-        # Anti memory leak
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-
-        # Setup interface
-        main_layout = QtWidgets.QHBoxLayout(self)
-
-        movie = QtGui.QMovie("graphics/loading.webp")
-        movie.setScaledSize(QtCore.QSize(30, 30))
-        movie.setCacheMode(QtGui.QMovie.CacheAll)
-
-        main_layout.addStretch(1)
-
-        movie_label = QtWidgets.QLabel()
-        movie_label.setMovie(movie)
-        main_layout.addWidget(movie_label)
-
-        loading_label = QtWidgets.QLabel("Loading")
-        loading_label.adjustSize()
-        main_layout.addWidget(loading_label)
-
-        main_layout.addStretch(1)
-        # End setup
-
-        movie.start()

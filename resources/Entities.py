@@ -3,7 +3,7 @@ This module contains common entities model shared between classes.
 """
 
 # PySide2
-from PySide2 import QtCore
+from PySide2 import QtWidgets, QtGui, QtCore
 
 # Local Project
 import resources.Constants as ProjectConstants
@@ -81,3 +81,72 @@ class AlgorandWorker(QtCore.QRunnable):
             self.signals.error.emit(str(e))
         else:
             self.signals.success.emit(result)
+
+
+class LoadingWidget(QtWidgets.QWidget):
+    """
+    This class implements a simple widget used to show a loading message.
+    """
+
+    # We don't make the loading gif static because it's a movie with a .start() method and i'm not sure
+    #  if sharing it with other widget might cause an issue.
+
+    def __init__(self, label_content: str):
+        super().__init__()
+
+        # Anti memory leak
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+
+        # Setup interface
+        main_layout = QtWidgets.QHBoxLayout(self)
+
+        movie = QtGui.QMovie("graphics/loading.webp")
+        movie.setScaledSize(QtCore.QSize(30, 30))
+        movie.setCacheMode(QtGui.QMovie.CacheAll)
+
+        main_layout.addStretch(1)
+
+        movie_label = QtWidgets.QLabel()
+        movie_label.setMovie(movie)
+        main_layout.addWidget(movie_label)
+
+        loading_label = QtWidgets.QLabel(label_content)
+        loading_label.adjustSize()
+        main_layout.addWidget(loading_label)
+
+        main_layout.addStretch(1)
+        # End setup
+
+        movie.start()
+
+
+class ErrorWidget(QtWidgets.QWidget):
+    """
+    This class implements a simple widget used to show an error message.
+    """
+
+    error_icon = QtGui.QPixmap(path.abspath("graphics/not valid.png")).scaled(
+        20, 20,
+        QtCore.Qt.IgnoreAspectRatio,
+        QtCore.Qt.SmoothTransformation)
+
+    def __init__(self, label_content: str):
+        super().__init__()
+
+        # Anti memory leak
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+
+        # Setup interface
+        main_layout = QtWidgets.QHBoxLayout(self)
+
+        main_layout.addStretch(1)
+
+        label_pixmap = QtWidgets.QLabel()
+        label_pixmap.setPixmap(ErrorWidget.error_icon)
+        main_layout.addWidget(label_pixmap)
+
+        label_message = QtWidgets.QLabel(label_content)
+        main_layout.addWidget(label_message)
+
+        main_layout.addStretch(1)
+        # End setup

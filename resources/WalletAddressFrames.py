@@ -10,12 +10,12 @@ from PySide2 import QtWidgets, QtCore, QtGui
 from algosdk import kmd
 
 # Local project
-from resources.Entities import Wallet
+from resources.Entities import Wallet, LoadingWidget, ErrorWidget
 from resources.SettingsWindow import SettingsWindow
-from resources.CustomListWidgetItem import WalletListItem, WalletListWidget, LoadingListWidget
+from resources.CustomListWidgetItem import WalletListItem, WalletListWidget
 
 # Python standard libraries
-from sys import stderr
+from functools import partial
 
 
 # TODO make it obvious that application is operating. Normal functioning if success and error message if not.
@@ -75,19 +75,30 @@ class WalletsFrame(QtWidgets.QFrame):
         wallet_button_layout.addWidget(self.button_export)
         # End setup
 
-        # These widgets will be enabled when wallets are loaded.
-        for button in [self.button_manage, self.button_rename, self.button_new,
-                       self.button_import, self.button_delete, self.button_export]:
-            button.setEnabled(False)
+        # Connections
+        pass
 
-        # TODO what happens to this worker and this connection after the job is done?
-        # TODO implement if this threaded function returns an error.
-        # Load wallets in a threaded way
+        # These widgets will be enabled when wallets are loaded.
+        for widget in [self.button_manage, self.button_rename, self.button_new,
+                       self.button_import, self.button_delete, self.button_export]:
+            widget.setEnabled(False)
+
+        # TODO what happens to this worker and its slot connection after the job is done?
+        # Load wallets in a threaded way.
         self.worker = self.parent().start_worker(
             self.kmd_client.list_wallets,
             self.load_wallets,
-            lambda x: print(x, file=stderr)
+            lambda: self.list_wallet.setItemWidget(self.list_wallet.item(0), ErrorWidget("Could not load wallets."))
         )
+
+        # We insert a loading widget to signal to the user that a call is in progress but we do so only if a fixed time
+        #  has elapsed without a response.
+        self.timer_loading_widget = QtCore.QTimer(self)
+        self.timer_loading_widget.setSingleShot(True)
+        self.timer_loading_widget.timeout.connect(
+            partial(self.add_item, LoadingWidget("Loading wallets..."))
+        )
+        self.timer_loading_widget.start(300)
 
     # TODO sort of code duplication for the list of contacts and in the future list of addresses?
     def add_item(self, widget: WalletListWidget):
@@ -106,8 +117,14 @@ class WalletsFrame(QtWidgets.QFrame):
 
         This slot is connected to the result of the thread that
         """
-        # Remove loading widget
-        self.list_wallet.takeItem(0)
+        # Prevent timer from adding loading widget.
+        self.timer_loading_widget.stop()
+        self.timer_loading_widget.deleteLater()
+
+        # At this point the only possible item present should be the loading widget. We remove it before adding
+        #  wallet widgets.
+        if self.list_wallet.count() > 0:
+            self.list_wallet.takeItem(0)
 
         for wallet in wallets:
             self.add_item(
@@ -121,7 +138,6 @@ class WalletsFrame(QtWidgets.QFrame):
             widget.setEnabled(True)
 
         # Also enable widgets that only make sense for the existence of at least one wallet.
-        # TODO make the parent enable the menu_action for itself?
         if len(wallets) >= 1:
             for widget in [self.button_manage, self.button_rename, self.button_export, self.button_delete,
                            self.parent().menu_action_new_transaction]:

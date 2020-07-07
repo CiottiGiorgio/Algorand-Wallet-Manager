@@ -11,14 +11,13 @@ from PySide2 import QtWidgets, QtGui, QtCore
 # Local project
 import resources.Constants as ProjectConstants
 from resources.MiscFunctions import dump_json_file
-from resources.Entities import AlgorandWorker
+from resources.Entities import AlgorandWorker, LoadingWidget
 from resources.WalletAddressFrames import WalletsFrame
 from resources.ContactsWindow import ContactsWindow, ListJsonContacts
 from resources.SettingsWindow import SettingsWindow, DictJsonSettings
 from resources.AboutMenu import InfoWindow, CreditsWindow
 
 # Python standard libraries
-from sys import stderr
 from os import path, mkdir
 from functools import partial
 from typing import Type
@@ -107,6 +106,11 @@ class MainWindow(QtWidgets.QMainWindow):
         child_dialog = dialog(self)
         child_dialog.exec_()
 
+    # TODO solve this
+    # Known issue: deleting a WalletFrame does not delete a QRunnable with calls to algosdk. As a matter of fact there
+    #  is no way to dirty kill a QRunnable. As a result of this any call that happened before restart might still be
+    #  running. There are two fixes: 1. Make sure that the user can't restart WalletFrame when there are calls running
+    #  2. Make sure even if there are calls running that their signals are disconnected.
     def restart(self):
         """
         This method restart the application from the point when it tries to connect to a node to display wallets.
@@ -120,6 +124,13 @@ class MainWindow(QtWidgets.QMainWindow):
             menu_action.setEnabled(False)
 
         if self.wallet_frame:
+            # TODO Put this 2 lines in the "finalizer" of WalletFrame
+            # We cannot directly stop the worker but we can forget about it by disconnecting from its signals.
+            self.wallet_frame.worker.signals.success.disconnect()
+            self.wallet_frame.worker.signals.error.disconnect()
+
+            # We don't use .destroyLater() because we need to be sure that the frame is not alive when we create a
+            #  new one.
             self.wallet_frame.destroy()
 
         SettingsWindow.calculate_rest_endpoints()
@@ -157,5 +168,34 @@ class MainWindow(QtWidgets.QMainWindow):
                 SettingsWindow.settings_from_json_file
             )
 
+        # We have no choice but to do it this way because i have no control over how much time a call through algosdk
+        #  could take and it's not possible to dirty kill a QRunnable.
+        if self.thread_pool.activeThreadCount() > 0:
+            self.setVisible(False)
+            self.exec_dialog(ClosingWindow)
+
         event.accept()
 
+
+class ClosingWindow(QtWidgets.QDialog):
+    """
+    This class is a window that signals to the user that some tasks are still running and
+    the application can't be closed right now.
+    """
+    def __init__(self, parent: QtWidgets.QWidget):
+        super().__init__(parent, QtCore.Qt.CustomizeWindowHint)
+
+        self.setWindowTitle("Background tasks")
+        self.setFixedSize(220, 70)
+
+        main_layout = QtWidgets.QHBoxLayout(self)
+
+        main_layout.addWidget(LoadingWidget("Waiting for all tasks to close..."))
+
+        closing_timer = QtCore.QTimer(self)
+        closing_timer.timeout.connect(self.terminate)
+        closing_timer.start(500)
+
+    def terminate(self):
+        if self.parent().thread_pool.activeThreadCount() == 0:
+            self.close()
