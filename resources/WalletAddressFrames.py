@@ -18,7 +18,6 @@ from resources.CustomListWidgetItem import WalletListItem, WalletListWidget
 from functools import partial
 
 
-# TODO make it obvious that application is operating. Normal functioning if success and error message if not.
 class WalletsFrame(QtWidgets.QFrame):
     """
     This class is the frame for the list of wallet in an Algorand node and the action on those wallets.
@@ -55,7 +54,7 @@ class WalletsFrame(QtWidgets.QFrame):
         self.button_rename = QtWidgets.QPushButton("Rename")
         self.button_new = QtWidgets.QPushButton("New")
         self.button_import = QtWidgets.QPushButton("Import")
-        self.button_delete = QtWidgets.QPushButton("Delete")
+        # self.button_delete = QtWidgets.QPushButton("Delete")  # Not present in algosdk API
         self.button_export = QtWidgets.QPushButton("Export")
 
         button_fixed_width = 65
@@ -63,7 +62,7 @@ class WalletsFrame(QtWidgets.QFrame):
         self.button_rename.setFixedWidth(button_fixed_width)
         self.button_new.setFixedWidth(button_fixed_width)
         self.button_import.setFixedWidth(button_fixed_width)
-        self.button_delete.setFixedWidth(button_fixed_width)
+        # self.button_delete.setFixedWidth(button_fixed_width)
         self.button_export.setFixedWidth(button_fixed_width)
 
         wallet_button_layout.addWidget(self.button_manage)
@@ -71,20 +70,24 @@ class WalletsFrame(QtWidgets.QFrame):
         wallet_button_layout.addWidget(self.button_rename)
         wallet_button_layout.addWidget(self.button_new)
         wallet_button_layout.addWidget(self.button_import)
-        wallet_button_layout.addWidget(self.button_delete)
+        # wallet_button_layout.addWidget(self.button_delete)
         wallet_button_layout.addWidget(self.button_export)
         # End setup
 
         # Connections
-        pass
+        #   For some reasons if i make a slot that disconnects these signals it doesn't get called. I think i might
+        #    be dealing with python finalizer and Qt C++ destroyer issues.
+        self.destroyed.connect(lambda: self.worker.signals.success.disconnect())
+        self.destroyed.connect(lambda: self.worker.signals.error.disconnect())
 
         # These widgets will be enabled when wallets are loaded.
         for widget in [self.button_manage, self.button_rename, self.button_new,
-                       self.button_import, self.button_delete, self.button_export]:
+                       self.button_import, self.button_export]:
             widget.setEnabled(False)
 
-        # TODO what happens to this worker and its slot connection after the job is done?
         # Load wallets in a threaded way.
+        # I think there's no need to disconnect slots from this worker because the next call will overwrite self.worker
+        #  thus finalizing that object and disconnect its slots. Haven't tested though.
         self.worker = self.parent().start_worker(
             self.kmd_client.list_wallets,
             self.load_wallets,
@@ -139,6 +142,6 @@ class WalletsFrame(QtWidgets.QFrame):
 
         # Also enable widgets that only make sense for the existence of at least one wallet.
         if len(wallets) >= 1:
-            for widget in [self.button_manage, self.button_rename, self.button_export, self.button_delete,
+            for widget in [self.button_manage, self.button_rename, self.button_export,
                            self.parent().menu_action_new_transaction]:
                 widget.setEnabled(True)
