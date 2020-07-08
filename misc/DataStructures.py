@@ -40,3 +40,28 @@ class ChangeContainer:
     def has_changed(self) -> bool:
         return str(self.memory).__hash__() != self.old_hash
 
+
+class ListJsonContacts(ChangeContainer):
+    """
+    This class will be used to hold the information of contacts.json file.
+    """
+    def __init__(self):
+        super().__init__()
+        self.memory = list()
+
+
+class DictJsonSettings(ChangeContainer):
+    """
+    This class will be used to hold the information of settings.json file.
+    """
+    def __init__(self):
+        super().__init__()
+        self.memory = dict()
+
+        self.memory["selected"] = 0
+
+        self.memory["local"] = ""
+
+        self.memory["algod"] = {"url": "", "port": "", "token": ""}
+        self.memory["kmd"] = {"url": "", "port": "", "token": ""}
+        self.memory["indexer"] = {"url": "", "port": "", "token": ""}

@@ -1,18 +1,18 @@
 """
-This file contains two frames used in MainWindow.
+This file contains two frames used in Main.
 """
 
 
 # PySide2
-from PySide2 import QtWidgets, QtCore, QtGui
+from PySide2 import QtWidgets, QtCore
 
 # Algorand
 from algosdk import kmd
 
 # Local project
-from resources.Entities import Wallet, LoadingWidget, ErrorWidget
-from resources.SettingsWindow import SettingsWindow
-from resources.CustomListWidgetItem import WalletListItem, WalletListWidget
+from misc.Entities import Wallet, LoadingWidget, ErrorWidget
+from Interfaces.Settings.Windows import SettingsWindow
+from Interfaces.Contacts.Widgets import WalletListItem, WalletListWidget
 
 # Python standard libraries
 from functools import partial
@@ -29,10 +29,7 @@ class WalletsFrame(QtWidgets.QFrame):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         # API for Algorand node KMD client
-        self.kmd_client = kmd.KMDClient(
-            SettingsWindow.rest_endpoints["kmd"]["token"],
-            SettingsWindow.rest_endpoints["kmd"]["address"]
-        )
+        self.kmd_client = None
 
         # Setup interface
         #   Main Horizontal Layout
@@ -75,33 +72,41 @@ class WalletsFrame(QtWidgets.QFrame):
         # End setup
 
         # Connections
-        #   For some reasons if i make a slot that disconnects these signals it doesn't get called. I think i might
-        #    be dealing with python finalizer and Qt C++ destroyer issues.
-        self.destroyed.connect(lambda: self.worker.signals.success.disconnect())
-        self.destroyed.connect(lambda: self.worker.signals.error.disconnect())
+        pass
 
         # These widgets will be enabled when wallets are loaded.
         for widget in [self.button_manage, self.button_rename, self.button_new,
                        self.button_import, self.button_export]:
             widget.setEnabled(False)
 
-        # Load wallets in a threaded way.
-        # I think there's no need to disconnect slots from this worker because the next call will overwrite self.worker
-        #  thus finalizing that object and disconnect its slots. Haven't tested though.
-        self.worker = self.parent().start_worker(
-            self.kmd_client.list_wallets,
-            self.load_wallets,
-            lambda: self.list_wallet.setItemWidget(self.list_wallet.item(0), ErrorWidget("Could not load wallets."))
-        )
+        if "kmd" in SettingsWindow.rest_endpoints:
+            self.kmd_client = kmd.KMDClient(
+                SettingsWindow.rest_endpoints["kmd"]["token"],
+                SettingsWindow.rest_endpoints["kmd"]["address"]
+            )
 
-        # We insert a loading widget to signal to the user that a call is in progress but we do so only if a fixed time
-        #  has elapsed without a response.
-        self.timer_loading_widget = QtCore.QTimer(self)
-        self.timer_loading_widget.setSingleShot(True)
-        self.timer_loading_widget.timeout.connect(
-            partial(self.add_item, LoadingWidget("Loading wallets..."))
-        )
-        self.timer_loading_widget.start(300)
+            # Load wallets in a threaded way.
+            # I think there's no need to disconnect slots from this worker because the next call will overwrite
+            #  self.worker thus finalizing that object and disconnect its slots. Haven't tested though.
+            self.worker = self.parent().start_worker(
+                self.kmd_client.list_wallets,
+                self.load_wallets,
+                lambda: self.add_item(ErrorWidget("Could not load wallets."))
+            )
+
+            #   For some reasons if i make a slot that disconnects these signals it doesn't get called. I think i might
+            #    be dealing with python finalizer and Qt C++ destroyer issues.
+            self.destroyed.connect(lambda: self.worker.signals.success.disconnect())
+            self.destroyed.connect(lambda: self.worker.signals.error.disconnect())
+
+            # We insert a loading widget to signal to the user that a call is in progress but we do so only if
+            #  a fixed time has elapsed without a response.
+            self.timer_loading_widget = QtCore.QTimer(self)
+            self.timer_loading_widget.setSingleShot(True)
+            self.timer_loading_widget.timeout.connect(
+                partial(self.add_item, LoadingWidget("Loading wallets..."))
+            )
+            self.timer_loading_widget.start(300)
 
     # TODO sort of code duplication for the list of contacts and in the future list of addresses?
     def add_item(self, widget: WalletListWidget):

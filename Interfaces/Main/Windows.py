@@ -1,7 +1,7 @@
 """
-This file declares the MainWindow class subclassed from QMainWindow.
+This file declares the Main class subclassed from QMainWindow.
 
-MainWindow class is the fundamental interface from which the program offers its functionality
+Main class is the fundamental interface from which the program offers its functionality
 """
 
 
@@ -9,13 +9,13 @@ MainWindow class is the fundamental interface from which the program offers its 
 from PySide2 import QtWidgets, QtGui, QtCore
 
 # Local project
-import resources.Constants as ProjectConstants
-from resources.MiscFunctions import dump_json_file
-from resources.Entities import AlgorandWorker, LoadingWidget
-from resources.WalletAddressFrames import WalletsFrame
-from resources.ContactsWindow import ContactsWindow, ListJsonContacts
-from resources.SettingsWindow import SettingsWindow, DictJsonSettings
-from resources.AboutMenu import InfoWindow, CreditsWindow
+import misc.Constants as ProjectConstants
+from misc.Functions import load_json_file, dump_json_file
+from misc.Entities import AlgorandWorker, LoadingWidget
+from Interfaces.Main.WalletFrame import WalletsFrame
+from Interfaces.Contacts.Windows import ContactsWindow, ListJsonContacts
+from Interfaces.Settings.Windows import SettingsWindow, DictJsonSettings
+from Interfaces.About.Windows import InfoWindow, CreditsWindow
 
 # Python standard libraries
 from os import path, mkdir
@@ -59,7 +59,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # MenuBar signal connection.
         # Using partial could be troubling because of circular dependency between memory in python.
-        #  It's ok for now because there are no multiple instances of MainWindow and those partial get destroyed when
+        #  It's ok for now because there are no multiple instances of Main and those partial get destroyed when
         #  application closes.
         self.menu_action_contacts.triggered.connect(
             partial(self.exec_dialog, ContactsWindow)
@@ -83,7 +83,7 @@ class MainWindow(QtWidgets.QMainWindow):
         This method does some preparation work such as creating folders and files if they are not present in
         the filesystem.
 
-        This method is meant to be called before MainWindow instantiation.
+        This method is meant to be called before Main instantiation.
         """
         # Create user data folders
         if not path.exists(ProjectConstants.path_user_data):
@@ -98,6 +98,11 @@ class MainWindow(QtWidgets.QMainWindow):
         if not path.exists(file := ProjectConstants.fullpath_settings_json):
             with open(file, 'w') as f:
                 f.write(jsonpickle.encode(DictJsonSettings(), indent='\t'))
+
+        ContactsWindow.contacts_from_json_file = load_json_file(ProjectConstants.fullpath_contacts_json)
+        ContactsWindow.contacts_from_json_file.save_state()
+        SettingsWindow.settings_from_json_file = load_json_file(ProjectConstants.fullpath_settings_json)
+        SettingsWindow.settings_from_json_file.save_state()
 
     def exec_dialog(self, dialog: Type[QtWidgets.QDialog]):
         """

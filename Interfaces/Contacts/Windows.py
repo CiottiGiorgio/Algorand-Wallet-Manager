@@ -10,11 +10,10 @@ from PySide2 import QtWidgets, QtGui, QtCore
 from algosdk.encoding import is_valid_address
 
 # Local project
-import resources.Constants as ProjectConstants
-from resources.MiscFunctions import load_json_file
-from resources.DataStructures import ChangeContainer
-from resources.Entities import Contact
-from resources.CustomListWidgetItem import ContactListItem, ContactListWidget
+import misc.Constants as ProjectConstants
+from misc.DataStructures import ListJsonContacts
+from misc.Entities import Contact
+from Interfaces.Contacts.Widgets import ContactListItem, ContactListWidget
 
 # Python standard libraries
 import os
@@ -22,15 +21,6 @@ from shutil import copyfile
 from string import ascii_letters, digits
 from random import sample
 from functools import partial
-
-
-class ListJsonContacts(ChangeContainer):
-    """
-    This class will be used to hold the information of contacts.json file.
-    """
-    def __init__(self):
-        super().__init__()
-        self.memory = list()
 
 
 class ContactsWindow(QtWidgets.QDialog):
@@ -52,12 +42,11 @@ class ContactsWindow(QtWidgets.QDialog):
     # A crucial point is that this list gets loaded with the static method load_contacts_json_file as soon as this
     #  class is done with the definition because other class might need its data even if this class never
     #  gets instantiated.
-    contacts_from_json_file = load_json_file(ProjectConstants.fullpath_contacts_json)
-    contacts_from_json_file.save_state()
+    contacts_from_json_file = ListJsonContacts()
 
     # We make a list of ContactListWidget static because each item has a profile pic that could create IO bottleneck
     #  if it has to be loaded each time this class is instantiated.
-    # However we create the list of widget for ContactsWindow only the first time that this class is
+    # However we create the list of widget for Contacts only the first time that this class is
     #  instantiated because only this class needs its ContactListWidget.
     # This list remains coherent with contacts_from_json_file and DOES NOT need to be fully updated as long as
     #  contacts are managed through this class methods.

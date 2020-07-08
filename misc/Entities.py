@@ -6,7 +6,7 @@ This module contains common entities model shared between classes.
 from PySide2 import QtWidgets, QtGui, QtCore
 
 # Local Project
-import resources.Constants as ProjectConstants
+import misc.Constants as ProjectConstants
 
 # Python standard libraries
 from os import path, remove

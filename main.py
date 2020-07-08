@@ -1,5 +1,5 @@
 """
-This main function will initialize PySide2 & MainWindow and manage the starting of the program
+This main function will initialize PySide2 & Main and manage the starting of the program
 """
 
 
@@ -15,9 +15,9 @@ def main():
     app = QtWidgets.QApplication([])
 
     # This import has to be done here because there are several static resources inside this package which
-    #  will be loaded during the import of the package itself. So because most resources are PySide2 objects
+    #  will be loaded during the import of the package itself. So because most misc are PySide2 objects
     #  QApplication needs to be running to perform all task needed.
-    from resources.MainWindow import MainWindow
+    from Interfaces.Main.Windows import MainWindow
 
     MainWindow.initialize()
 

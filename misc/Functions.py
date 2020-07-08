@@ -3,7 +3,7 @@ This file contains some function that are used in multiple classes but belong to
 """
 
 # Local project
-from resources.DataStructures import ChangeContainer
+from misc.DataStructures import ChangeContainer
 
 # Python standard libraries
 import jsonpickle

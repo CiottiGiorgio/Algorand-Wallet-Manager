@@ -9,8 +9,8 @@ Subclasses for QListWidgetItem are needed because of the way an item can referen
 from PySide2 import QtWidgets, QtGui, QtCore
 
 # Local project
-import resources.Constants as ProjectConstants
-from resources.Entities import Contact, Wallet
+import misc.Constants as ProjectConstants
+from misc.Entities import Contact, Wallet
 
 # Python standard libraries
 from functools import cached_property

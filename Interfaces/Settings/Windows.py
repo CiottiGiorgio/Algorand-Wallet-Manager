@@ -7,31 +7,15 @@ This file contains the setting window class and related static attributes and me
 from PySide2 import QtWidgets, QtGui, QtCore
 
 # Local project
-import resources.Constants as ProjectConstants
-from resources.MiscFunctions import load_json_file
-from resources.DataStructures import ChangeContainer
+import misc.Constants as ProjectConstants
+from misc.DataStructures import DictJsonSettings
 
 # Python standard libraries
 from os import path
 
 
-class DictJsonSettings(ChangeContainer):
-    def __init__(self):
-        super().__init__()
-        self.memory = dict()
-
-        self.memory["selected"] = 0
-
-        self.memory["local"] = ""
-
-        self.memory["algod"] = {"url": "", "port": "", "token": ""}
-        self.memory["kmd"] = {"url": "", "port": "", "token": ""}
-        self.memory["indexer"] = {"url": "", "port": "", "token": ""}
-
-
 class SettingsWindow(QtWidgets.QDialog):
-    settings_from_json_file = load_json_file(ProjectConstants.fullpath_settings_json)
-    settings_from_json_file.save_state()
+    settings_from_json_file = DictJsonSettings()
 
     rest_endpoints = {}
 

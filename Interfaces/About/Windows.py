@@ -53,6 +53,7 @@ class CreditsWindow(QtWidgets.QDialog):
 
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
+        # Setup interface
         self.setWindowTitle("Credits")
 
         main_layout = QtWidgets.QVBoxLayout(self)
@@ -63,3 +64,4 @@ class CreditsWindow(QtWidgets.QDialog):
                                       "from www.flaticon.com")
         next_label.setAlignment(QtCore.Qt.AlignHCenter)
         main_layout.addWidget(next_label)
+        # End setup
