@@ -1,7 +1,9 @@
 """
-Custom classes for QListWidget
+Custom classes for QListWidget in ContactsWindow.
 
-Subclasses for QListWidgetItem are needed because of the way an item can reference the widget inside itself.
+Subclass of QWidget is the actual representation.
+Subclass of QListWidgetItem is the item that goes into the list and holds the space for the widget.
+It also offers functionality for the ordering of the items inside ContactsWindow contact list.
 """
 
 
@@ -10,51 +12,11 @@ from PySide2 import QtWidgets, QtGui, QtCore
 
 # Local project
 import misc.Constants as ProjectConstants
-from misc.Entities import Contact, Wallet
+from misc.Entities import Contact
 
 # Python standard libraries
 from functools import cached_property
 from os import path
-
-
-class WalletListItem(QtWidgets.QListWidgetItem):
-    """
-    Dummy class for items in list_wallet. It's kept for the event in which we need to implement
-    functionality in the future.
-    """
-    pass
-
-
-class WalletListWidget(QtWidgets.QWidget):
-    """
-    Wallet widget for the list in WalletFrame.
-    """
-    def __init__(self, wallet: Wallet):
-        super().__init__()
-
-        # Anti memory leak
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-
-        # Setup interface
-        main_layout = QtWidgets.QHBoxLayout(self)
-        main_layout.setContentsMargins(10, 5, 10, 5)
-
-        #   Here the inner layout is created inside addLayout but also is assigned to label_layout
-        #    using walrus operator.
-        main_layout.addLayout(label_layout := QtWidgets.QVBoxLayout())
-
-        #   Here the label with the name of the wallet is created, styled and added to the window
-        self.label_name = QtWidgets.QLabel(wallet.name)
-        self.label_name.setStyleSheet("font: 13pt;")
-        label_layout.addWidget(self.label_name)
-
-        #   Same for the info label
-        self.label_info = QtWidgets.QLabel(wallet.info)
-        self.label_info.setStyleSheet("font: 8pt;")
-        label_layout.addWidget(self.label_info)
-
-        main_layout.addStretch(1)
-        # End setup
 
 
 # Of course once a ContactListWidget has been assigned to a ContactListItem it's wrong to swap with a

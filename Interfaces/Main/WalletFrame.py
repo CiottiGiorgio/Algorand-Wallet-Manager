@@ -12,7 +12,7 @@ from algosdk import kmd
 # Local project
 from misc.Entities import Wallet, LoadingWidget, ErrorWidget
 from Interfaces.Settings.Windows import SettingsWindow
-from Interfaces.Contacts.Widgets import WalletListItem, WalletListWidget
+from Interfaces.Main.Widgets import WalletListItem, WalletListWidget
 
 # Python standard libraries
 from functools import partial
@@ -91,11 +91,11 @@ class WalletsFrame(QtWidgets.QFrame):
             self.worker = self.parent().start_worker(
                 self.kmd_client.list_wallets,
                 self.load_wallets,
-                lambda x: self.add_item(ErrorWidget(x))
+                self.wallet_loading_failed
             )
 
-            #   For some reasons if i make a slot that disconnects these signals it doesn't get called. I think i might
-            #    be dealing with python finalizer and Qt C++ destroyer issues.
+            # For some reasons if i make a slot that disconnects these signals it doesn't get called. I think i might
+            #  be dealing with python finalizer and Qt C++ destroyer issues.
             self.destroyed.connect(lambda: self.worker.signals.success.disconnect())
             self.destroyed.connect(lambda: self.worker.signals.error.disconnect())
 
@@ -121,13 +121,7 @@ class WalletsFrame(QtWidgets.QFrame):
         self.list_wallet.addItem(item)
         self.list_wallet.setItemWidget(item, widget)
 
-    @QtCore.Slot(list)
-    def load_wallets(self, wallets):
-        """
-        This method loads node wallet into the list and enables controls that can be applied to such wallets.
-
-        This slot is connected to the result of the thread that
-        """
+    def clear_list(self):
         # Prevent timer from adding loading widget.
         self.timer_loading_widget.stop()
         self.timer_loading_widget.deleteLater()
@@ -136,6 +130,15 @@ class WalletsFrame(QtWidgets.QFrame):
         #  wallet widgets.
         if self.list_wallet.count() > 0:
             self.list_wallet.takeItem(0)
+
+    @QtCore.Slot(list)
+    def load_wallets(self, wallets):
+        """
+        This method loads node wallet into the list and enables controls that can be applied to such wallets.
+
+        This slot is connected to the result of the thread that
+        """
+        self.clear_list()
 
         for wallet in wallets:
             self.add_item(
@@ -153,3 +156,11 @@ class WalletsFrame(QtWidgets.QFrame):
             for widget in [self.button_manage, self.button_rename, self.button_export,
                            self.parent().menu_action_new_transaction]:
                 widget.setEnabled(True)
+
+    @QtCore.Slot(str)
+    def wallet_loading_failed(self, error: str):
+        self.clear_list()
+
+        self.add_item(
+            ErrorWidget("Could not load wallets" + '\n' + error)
+        )
