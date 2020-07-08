@@ -174,36 +174,54 @@ class SettingsWindow(QtWidgets.QDialog):
 
     @staticmethod
     def calculate_rest_endpoints():
+        """
+        This static methods turns the user settings into REST connection points. Either by using manual mode or by
+        reading it from algod.net, algod.token, kmd.net and kmd.token files.
+
+        It's crucial that the pair (address, token) remains consistent. Meaning that either both exists or none does.
+        """
         settings = SettingsWindow.settings_from_json_file.memory
 
         temp = dict()
 
         if settings["selected"] == 0:
             # Get the rest endpoints through local files.
+
             try:
                 with open(path.join(settings["local"], ProjectConstants.filename_algod_net)) as f1, \
-                        open(path.join(settings["local"], ProjectConstants.filename_algod_token)) as f2, \
-                        open(path.join(settings["local"], ProjectConstants.filename_kmd_net)) as f3, \
-                        open(path.join(settings["local"], ProjectConstants.filename_kmd_token)) as f4:
+                        open(path.join(settings["local"], ProjectConstants.filename_algod_token)) as f2:
                     temp["algod"] = {
                         "address": f1.readline(),
                         "token": f2.readline()
                     }
+            except:
+                if "algod" in temp:
+                    del temp["algod"]
+
+            try:
+                with open(path.join(settings["local"], ProjectConstants.filename_kmd_net)) as f3, \
+                        open(path.join(settings["local"], ProjectConstants.filename_kmd_token)) as f4:
                     temp["kmd"] = {
                         "address": f3.readline(),
                         "token": f4.readline()
                     }
             except:
-                temp = dict()
+                if "kmd" in temp:
+                    del temp["kmd"]
+
         elif settings["selected"] == 1:
             # Use rest endpoints directly.
-            temp["algod"] = {
-                "address": settings["algod"]["url"] + ':' + settings["algod"]["port"],
-                "token": settings["algod"]["token"]
-            }
-            temp["kmd"] = {
-                "address": settings["kmd"]["url"] + ':' + settings["kmd"]["port"],
-                "token": settings["kmd"]["token"]
-            }
 
-        SettingsWindow.rest_endpoints.update(temp)
+            if settings["algod"]["url"] and settings["algod"]["port"] and settings["algod"]["token"]:
+                temp["algod"] = {
+                    "address": settings["algod"]["url"] + ':' + settings["algod"]["port"],
+                    "token": settings["algod"]["token"]
+                }
+
+            if settings["kmd"]["url"] and settings["kmd"]["port"] and settings["kmd"]["token"]:
+                temp["kmd"] = {
+                    "address": settings["kmd"]["url"] + ':' + settings["kmd"]["port"],
+                    "token": settings["kmd"]["token"]
+                }
+
+        SettingsWindow.rest_endpoints = temp

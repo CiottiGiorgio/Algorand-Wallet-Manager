@@ -91,7 +91,7 @@ class WalletsFrame(QtWidgets.QFrame):
             self.worker = self.parent().start_worker(
                 self.kmd_client.list_wallets,
                 self.load_wallets,
-                lambda: self.add_item(ErrorWidget("Could not load wallets."))
+                lambda x: self.add_item(ErrorWidget(x))
             )
 
             #   For some reasons if i make a slot that disconnects these signals it doesn't get called. I think i might
@@ -107,6 +107,8 @@ class WalletsFrame(QtWidgets.QFrame):
                 partial(self.add_item, LoadingWidget("Loading wallets..."))
             )
             self.timer_loading_widget.start(300)
+        else:
+            self.add_item(ErrorWidget("kmd settings not valid"))
 
     # This method is add_item but asks for a widget. This makes sense because this method always adds a WalletListItem.
     #  I know it's confusing but it works.
