@@ -215,16 +215,21 @@ class ContactsEditing(QtWidgets.QDialog):
 
     # Static images to avoid IO bottleneck
     icon_valid = QtGui.QPixmap(os.path.abspath("graphics/valid.png"))
-    icon_not_valid = QtGui.QPixmap(os.path.abspath("graphics/not valid.png"))
+    icon_not_valid = QtGui.QPixmap(os.path.abspath("graphics/not_valid.png"))
 
-    # TODO check if all of the above code makes sense
     def __init__(self, parent: QtWidgets.QWidget, pre_filled: ContactListWidget = None):
         super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
 
         # Anti memory leak
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
+        # This value is set if the user selects a new picture.
         self.external_pic_full_path = None
+
+        # This value holds the name of the current picture.
+        self.pic_name = None
+
+        # This value holds the new ContactListWidget that will be read from ContactsWindow.
         self.return_value = None
 
         # Setup interface
@@ -254,7 +259,6 @@ class ContactsEditing(QtWidgets.QDialog):
         main_layout.addSpacing(10)
 
         main_layout.addWidget(QtWidgets.QLabel("Photo:"))
-        self.pic_name = None
         photo_layout = QtWidgets.QHBoxLayout()
         self.label_pic = QtWidgets.QLabel()
         photo_layout.addWidget(self.label_pic)
@@ -262,11 +266,9 @@ class ContactsEditing(QtWidgets.QDialog):
         photo_button_layout = QtWidgets.QVBoxLayout()
 
         self.button_pic_modify = QtWidgets.QPushButton("Change")
-        self.button_pic_modify.clicked.connect(self.button_pic_modify_clicked)
         photo_button_layout.addWidget(self.button_pic_modify)
 
         self.button_pic_delete = QtWidgets.QPushButton("Delete")
-        self.button_pic_delete.clicked.connect(self.button_pic_delete_clicked)
         photo_button_layout.addWidget(self.button_pic_delete)
 
         photo_layout.addLayout(photo_button_layout)
@@ -278,7 +280,6 @@ class ContactsEditing(QtWidgets.QDialog):
         main_layout.addStretch(1)
 
         self.button_confirm = QtWidgets.QPushButton("Confirm")
-        self.button_confirm.clicked.connect(self.button_confirm_clicked)
         button_layout = QtWidgets.QHBoxLayout()
         button_layout.addStretch(1)
         button_layout.addWidget(self.button_confirm)
@@ -305,8 +306,13 @@ class ContactsEditing(QtWidgets.QDialog):
         if not self.pic_name:
             self.button_pic_delete.setEnabled(False)
 
+        # Connections
+        self.button_pic_modify.clicked.connect(self.button_pic_modify_clicked)
+        self.button_pic_delete.clicked.connect(self.button_pic_delete_clicked)
+        self.button_confirm.clicked.connect(self.button_confirm_clicked)
         self.edit_name.textChanged.connect(self.validate_inputs)
         self.edit_address.textChanged.connect(self.validate_inputs)
+
         self.validate_inputs()
 
     @QtCore.Slot()

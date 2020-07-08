@@ -108,10 +108,11 @@ class WalletsFrame(QtWidgets.QFrame):
             )
             self.timer_loading_widget.start(300)
 
-    # TODO sort of code duplication for the list of contacts and in the future list of addresses?
+    # This method is add_item but asks for a widget. This makes sense because this method always adds a WalletListItem.
+    #  I know it's confusing but it works.
     def add_item(self, widget: WalletListWidget):
         """
-        This method add a WalletListWidget to self.list_wallet through a WalletListItem
+        This method add a WalletListWidget to self.list_wallet through a WalletListItem.
         """
         item = WalletListItem()
         item.setSizeHint(widget.minimumSizeHint())

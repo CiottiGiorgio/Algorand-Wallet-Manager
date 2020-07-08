@@ -151,7 +151,6 @@ class SettingsWindow(QtWidgets.QDialog):
 
     @QtCore.Slot()
     def button_confirm_clicked(self):
-        # TODO do some input validation.
         settings = SettingsWindow.settings_from_json_file.memory
 
         if self.local_radio.isChecked():

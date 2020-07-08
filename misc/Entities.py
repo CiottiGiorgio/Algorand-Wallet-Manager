@@ -125,7 +125,7 @@ class ErrorWidget(QtWidgets.QWidget):
     This class implements a simple widget used to show an error message.
     """
 
-    error_icon = QtGui.QPixmap(path.abspath("graphics/not valid.png")).scaled(
+    error_icon = QtGui.QPixmap(path.abspath("graphics/not_valid.png")).scaled(
         20, 20,
         QtCore.Qt.IgnoreAspectRatio,
         QtCore.Qt.SmoothTransformation)
