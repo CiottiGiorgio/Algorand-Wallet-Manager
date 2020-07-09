@@ -15,6 +15,7 @@ folder_thumbnails = "thumbnails"
 #   Algorand node
 filename_algod_net = "algod.net"
 filename_algod_token = "algod.token"
+# TODO hard coding the version of kmd doesn't look like a good idea
 filename_kmd_net = "kmd-v0.5/kmd.net"
 filename_kmd_token = "kmd-v0.5/kmd.token"
 

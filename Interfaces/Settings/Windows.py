@@ -1,5 +1,5 @@
 """
-This file contains the setting window class and related static attributes and methods
+This file contains the SettingsWindow class and related static attributes and methods.
 """
 
 

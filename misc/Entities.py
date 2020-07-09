@@ -11,6 +11,7 @@ import misc.Constants as ProjectConstants
 # Python standard libraries
 from os import path, remove
 from sys import stderr
+from typing import Dict
 
 
 class Contact:
@@ -36,11 +37,28 @@ class Contact:
 
 class Wallet:
     """
-    Object that represents a single wallet.
+    This class represents a wallet inside this program memory. Not to be confused with algosdk.wallet.Wallet.
+
+    It just holds 3 properties:
+        1. The dict returned from algosdk call
+        2. algosdk.wallet.Wallet for when the wallet is unlocked with its password
+        3. Its associated AddressFrame for when the wallet is unlocked with its password
     """
-    def __init__(self, name, info):
-        self.name = name
+    def __init__(self, info: Dict):
         self.info = info
+        self.algo_wallet = None
+        self.address_frame = None
+
+    def unlock(self, algo_wallet, address_frame):
+        self.algo_wallet = algo_wallet
+        self.address_frame = address_frame
+
+    def lock(self):
+        if self.algo_wallet:
+            del self.algo_wallet
+
+        if self.address_frame:
+            del self.address_frame
 
 
 class AlgorandWorkerSignals(QtCore.QObject):

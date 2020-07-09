@@ -37,6 +37,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         # This thread pool will be used to issue blocking calls of algosdk.
+        # If we want to setup a timeout timer for a algosdk blocking call, a technique could be to start thread A
+        #  that starts a timer.
+        #  Then thread A starts a thread B with the algosdk blocking call. Then only two things can happen:
+        #   1. thread B responds to thread A within the timer timeout
+        #   2. thread B does not respond to thread A within the timer timeout
+        #  Either way we get an answer from thread A within some fixed time or we discard it.
         self.thread_pool = QtCore.QThreadPool(self)
 
         # Setup interface

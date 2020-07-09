@@ -7,10 +7,11 @@ This file contains two frames used in Main.
 from PySide2 import QtWidgets, QtCore
 
 # Algorand
-from algosdk import kmd
+from algosdk import kmd as kmd
+from algosdk import wallet as algosdk_wallet
 
 # Local project
-from misc.Entities import Wallet, LoadingWidget, ErrorWidget
+from misc.Entities import LoadingWidget, ErrorWidget, Wallet
 from Interfaces.Settings.Windows import SettingsWindow
 from Interfaces.Main.Widgets import WalletListItem, WalletListWidget
 
@@ -30,6 +31,8 @@ class WalletsFrame(QtWidgets.QFrame):
 
         # API for Algorand node KMD client
         self.kmd_client = None
+
+        self.wallets = list()
 
         # Setup interface
         #   Main Horizontal Layout
@@ -72,7 +75,7 @@ class WalletsFrame(QtWidgets.QFrame):
         # End setup
 
         # Connections
-        pass
+        self.button_manage.clicked.connect(self.manage_wallet)
 
         # These widgets will be enabled when wallets are loaded.
         for widget in [self.button_manage, self.button_rename, self.button_new,
@@ -122,6 +125,9 @@ class WalletsFrame(QtWidgets.QFrame):
         self.list_wallet.setItemWidget(item, widget)
 
     def clear_list(self):
+        """
+        This method is used to remove LoadingWidget from self.list_wallets if present.
+        """
         # Prevent timer from adding loading widget.
         self.timer_loading_widget.stop()
         self.timer_loading_widget.deleteLater()
@@ -131,20 +137,70 @@ class WalletsFrame(QtWidgets.QFrame):
         if self.list_wallet.count() > 0:
             self.list_wallet.takeItem(0)
 
+    # TODO do all of this in a custom window that asks for a password and make the user see the loading icon while
+    #  the call to algosdk goes through a thread.
+    def unlock_item(self, item: WalletListItem) -> bool:
+        widget = self.list_wallet.itemWidget(item)
+
+        # TODO in the future change the way a wallet is checked if it is already unlocked
+        if widget.wallet.algo_wallet:
+            return True
+
+        password = QtWidgets.QInputDialog.getText(
+            self,
+            "password",
+            "password",
+            QtWidgets.QLineEdit.Password
+        )
+        if password[1]:
+            try:
+                widget.wallet.unlock(
+                    algosdk_wallet.Wallet(
+                        widget.wallet.info["name"], password[0], self.kmd_client
+                    ),
+                    # TODO add an AddressFrame to .unlock method second parameter.
+                    None
+                )
+            except:
+                widget.wallet.lock()
+                return False
+
+            widget.set_active(True)
+            return True
+        else:
+            return False
+
+    def lock_item(self, item: WalletListItem):
+        widget = self.list_wallet.itemWidget(item)
+
+        widget.wallet.lock()
+        widget.set_active(False)
+
+    @QtCore.Slot()
+    def manage_wallet(self):
+        item = self.list_wallet.currentItem()
+        if self.unlock_item(item):
+            pass
+            # Transition into address frame
+
     @QtCore.Slot(list)
-    def load_wallets(self, wallets):
+    def load_wallets(self, wallets: list):
         """
         This method loads node wallet into the list and enables controls that can be applied to such wallets.
 
         This slot is connected to the result of the thread that
         """
+        for wallet in wallets:
+            self.wallets.append(
+                Wallet(wallet)
+            )
+
+        # In case LoadingWidget is alive in the list.
         self.clear_list()
 
-        for wallet in wallets:
+        for wallet in self.wallets:
             self.add_item(
-                WalletListWidget(
-                    Wallet(wallet["name"], wallet["id"])
-                )
+                WalletListWidget(wallet)
             )
 
         # Enable widgets that allow operation on an active node
@@ -153,6 +209,8 @@ class WalletsFrame(QtWidgets.QFrame):
 
         # Also enable widgets that only make sense for the existence of at least one wallet.
         if len(wallets) >= 1:
+            self.list_wallet.setCurrentRow(0)
+
             for widget in [self.button_manage, self.button_rename, self.button_export,
                            self.parent().menu_action_new_transaction]:
                 widget.setEnabled(True)
