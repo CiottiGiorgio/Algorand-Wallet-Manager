@@ -5,6 +5,9 @@ This module contains common entities model shared between classes.
 # PySide2
 from PySide2 import QtWidgets, QtGui, QtCore
 
+# algosdk
+from algosdk.wallet import Wallet as AlgosdkWallet
+
 # Local Project
 import misc.Constants as ProjectConstants
 
@@ -18,7 +21,7 @@ class Contact:
     """
     Object that represents a single contact in the contact list.
     """
-    def __init__(self, pic_name, name, info):
+    def __init__(self, pic_name: str, name: str, info: str):
         self.pic_name = pic_name
         self.name = name
         self.info = info
@@ -47,18 +50,13 @@ class Wallet:
     def __init__(self, info: Dict):
         self.info = info
         self.algo_wallet = None
-        self.address_frame = None
 
-    def unlock(self, algo_wallet, address_frame):
+    def unlock(self, algo_wallet: AlgosdkWallet):
         self.algo_wallet = algo_wallet
-        self.address_frame = address_frame
 
     def lock(self):
         if self.algo_wallet:
             del self.algo_wallet
-
-        if self.address_frame:
-            del self.address_frame
 
 
 class AlgorandWorkerSignals(QtCore.QObject):
@@ -79,7 +77,7 @@ class AlgorandWorker(QtCore.QRunnable):
     As long as it's a simple blocking call with a return value this is fine. Just connect to result signal with the
     function that process the return value.
     """
-    def __init__(self, fn, *args, **kwargs):
+    def __init__(self, fn: callable, *args, **kwargs):
         super().__init__()
 
         self.fn = fn

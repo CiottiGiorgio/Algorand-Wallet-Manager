@@ -1,10 +1,10 @@
 """
-This file contains two frames used in Main.
+This file contains WalletFrame which is a QFrame that is displayed inside MainWindow.
 """
 
 
 # PySide2
-from PySide2 import QtWidgets, QtCore
+from PySide2 import QtWidgets, QtCore, QtGui
 
 # Algorand
 from algosdk import kmd as kmd
@@ -13,10 +13,12 @@ from algosdk import wallet as algosdk_wallet
 # Local project
 from misc.Entities import LoadingWidget, ErrorWidget, Wallet
 from Interfaces.Settings.Windows import SettingsWindow
-from Interfaces.Main.Widgets import WalletListItem, WalletListWidget
+from Interfaces.Main.WalletWidgets import WalletListItem, WalletListWidget
+from Interfaces.Main.AddressFrame import AddressFrame
 
 # Python standard libraries
 from functools import partial
+from sys import stderr
 
 
 class WalletsFrame(QtWidgets.QFrame):
@@ -39,8 +41,6 @@ class WalletsFrame(QtWidgets.QFrame):
         main_layout = QtWidgets.QHBoxLayout(self)
 
         self.list_wallet = QtWidgets.QListWidget()
-        #   List of wallet in the connected Algorand node
-        #    scrolling is PerPixel because otherwise the list scrolls PerItem and it's not desirable.
         self.list_wallet.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
 
         main_layout.addWidget(self.list_wallet)
@@ -51,6 +51,7 @@ class WalletsFrame(QtWidgets.QFrame):
 
         #   Button creation, styling & add to Layout
         self.button_manage = QtWidgets.QPushButton("Manage\nAddresses")
+        self.button_lock = QtWidgets.QPushButton("Lock")
         self.button_rename = QtWidgets.QPushButton("Rename")
         self.button_new = QtWidgets.QPushButton("New")
         self.button_import = QtWidgets.QPushButton("Import")
@@ -59,23 +60,25 @@ class WalletsFrame(QtWidgets.QFrame):
 
         button_fixed_width = 65
         self.button_manage.setFixedWidth(button_fixed_width)
+        self.button_lock.setFixedWidth(button_fixed_width)
         self.button_rename.setFixedWidth(button_fixed_width)
         self.button_new.setFixedWidth(button_fixed_width)
         self.button_import.setFixedWidth(button_fixed_width)
-        # self.button_delete.setFixedWidth(button_fixed_width)
         self.button_export.setFixedWidth(button_fixed_width)
 
         wallet_button_layout.addWidget(self.button_manage)
+        wallet_button_layout.addWidget(self.button_lock)
         wallet_button_layout.addStretch(1)
         wallet_button_layout.addWidget(self.button_rename)
         wallet_button_layout.addWidget(self.button_new)
         wallet_button_layout.addWidget(self.button_import)
-        # wallet_button_layout.addWidget(self.button_delete)
         wallet_button_layout.addWidget(self.button_export)
         # End setup
 
         # Connections
+        self.list_wallet.currentItemChanged.connect(self.activate_lock_button)
         self.button_manage.clicked.connect(self.manage_wallet)
+        self.button_lock.clicked.connect(self.lock_wallet)
 
         # These widgets will be enabled when wallets are loaded.
         for widget in [self.button_manage, self.button_rename, self.button_new,
@@ -99,6 +102,7 @@ class WalletsFrame(QtWidgets.QFrame):
 
             # For some reasons if i make a slot that disconnects these signals it doesn't get called. I think i might
             #  be dealing with python finalizer and Qt C++ destroyer issues.
+            # We can't get rid of the lambdas because they refer to a specific self and wouldn't work otherwise.
             self.destroyed.connect(lambda: self.worker.signals.success.disconnect())
             self.destroyed.connect(lambda: self.worker.signals.error.disconnect())
 
@@ -124,7 +128,7 @@ class WalletsFrame(QtWidgets.QFrame):
         self.list_wallet.addItem(item)
         self.list_wallet.setItemWidget(item, widget)
 
-    def clear_list(self):
+    def clear_loading_list(self):
         """
         This method is used to remove LoadingWidget from self.list_wallets if present.
         """
@@ -140,9 +144,14 @@ class WalletsFrame(QtWidgets.QFrame):
     # TODO do all of this in a custom window that asks for a password and make the user see the loading icon while
     #  the call to algosdk goes through a thread.
     def unlock_item(self, item: WalletListItem) -> bool:
+        """
+        This method takes an item with a Wallet and creates an algosdk.wallet.Wallet creating a point for
+        managing the kmd wallet.
+
+        This method returns true if the wallet is already unlocked otherwise it unlocks it.
+        """
         widget = self.list_wallet.itemWidget(item)
 
-        # TODO in the future change the way a wallet is checked if it is already unlocked
         if widget.wallet.algo_wallet:
             return True
 
@@ -157,46 +166,73 @@ class WalletsFrame(QtWidgets.QFrame):
                 widget.wallet.unlock(
                     algosdk_wallet.Wallet(
                         widget.wallet.info["name"], password[0], self.kmd_client
-                    ),
-                    # TODO add an AddressFrame to .unlock method second parameter.
-                    None
+                    )
                 )
-            except:
+            except Exception as e:
+                print(e, file=stderr)
                 widget.wallet.lock()
                 return False
 
-            widget.set_active(True)
+            widget.set_locked(False)
+            self.activate_lock_button(item, None)
             return True
         else:
             return False
 
     def lock_item(self, item: WalletListItem):
+        """
+        This methods destroys the algosdk.wallet.Wallet object saved inside Entities.Wallet and marks the corresponding
+        widget as locked.
+        """
         widget = self.list_wallet.itemWidget(item)
 
         widget.wallet.lock()
-        widget.set_active(False)
+        widget.set_locked(True)
+        self.activate_lock_button(item, None)
 
     @QtCore.Slot()
     def manage_wallet(self):
+        """
+        This method opens up the AddressFrame of a given wallet.
+        """
         item = self.list_wallet.currentItem()
         if self.unlock_item(item):
-            pass
-            # Transition into address frame
+            widget = self.list_wallet.itemWidget(item)
+
+            self.parent().parent().switch_frame(
+                AddressFrame(widget.wallet)
+            )
+
+    @QtCore.Slot()
+    def lock_wallet(self):
+        """
+        This method locks the wallet and forgets user input password without needing to restart application.
+        """
+        item = self.list_wallet.currentItem()
+        self.lock_item(item)
+
+    @QtCore.Slot(QtWidgets.QListWidgetItem, QtWidgets.QListWidgetItem)
+    def activate_lock_button(self, previous: QtWidgets.QListWidgetItem, current: QtWidgets.QListWidgetItem):
+        self.button_lock.setEnabled(
+            self.list_wallet.itemWidget(previous).label_state.text() == "(unlocked)"
+        )
 
     @QtCore.Slot(list)
     def load_wallets(self, wallets: list):
         """
         This method loads node wallet into the list and enables controls that can be applied to such wallets.
 
-        This slot is connected to the result of the thread that
+        This slot is connected to the result of the thread that.
         """
+        # This is a mouthful. Basically for each dict in wallets that represents a wallet inside kmd, a Entities.Wallet
+        #  object is created. This object is then appended to the internal list "self.wallets" inside WalletFrame.
         for wallet in wallets:
             self.wallets.append(
                 Wallet(wallet)
             )
 
         # In case LoadingWidget is alive in the list.
-        self.clear_list()
+        self.clear_loading_list()
 
         for wallet in self.wallets:
             self.add_item(
@@ -210,14 +246,15 @@ class WalletsFrame(QtWidgets.QFrame):
         # Also enable widgets that only make sense for the existence of at least one wallet.
         if len(wallets) >= 1:
             self.list_wallet.setCurrentRow(0)
+            main_window = self.parent().parent()
 
             for widget in [self.button_manage, self.button_rename, self.button_export,
-                           self.parent().menu_action_new_transaction]:
+                           main_window.menu_action_new_transaction]:
                 widget.setEnabled(True)
 
     @QtCore.Slot(str)
     def wallet_loading_failed(self, error: str):
-        self.clear_list()
+        self.clear_loading_list()
 
         self.add_item(
             ErrorWidget("Could not load wallets" + '\n' + error)

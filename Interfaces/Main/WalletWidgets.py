@@ -6,7 +6,7 @@ Subclass for QListWidgetItem is not really needed right now because there is not
 However it is still used in the code because one day we might need to implement functionality.
 """
 
-# PySide 2
+# PySide2
 from PySide2 import QtWidgets, QtCore
 
 # Local project
@@ -49,7 +49,7 @@ class WalletListWidget(QtWidgets.QWidget):
         main_layout.addWidget(self.label_state, 1, 1, alignment=QtCore.Qt.AlignRight)
         # End setup
 
-    def set_active(self, value: bool):
+    def set_locked(self, value: bool):
         self.label_state.setText(
-            "(unlocked)" if value else ""
+            "" if value else "(unlocked)"
         )

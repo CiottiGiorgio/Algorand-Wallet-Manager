@@ -7,6 +7,7 @@ This main function will initialize PySide2 & Main and manage the starting of the
 from PySide2 import QtWidgets
 
 
+# TODO if possible create a connection class that auto-disconnects after the first call
 # TODO look into the fact that some widgets only get destroyed when the application is closing making the attribute
 #  QtCore.Qt.WA_DeleteOnClose somewhat useless.
 def main():

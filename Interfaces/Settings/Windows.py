@@ -117,6 +117,8 @@ class SettingsWindow(QtWidgets.QDialog):
         self.button_confirm = QtWidgets.QPushButton("Confirm")
         self.button_confirm.clicked.connect(self.button_confirm_clicked)
         main_layout.addWidget(self.button_confirm, alignment=QtCore.Qt.AlignRight)
+
+        self.button_confirm.setFocus()
         # End setup
 
         # Slot connect

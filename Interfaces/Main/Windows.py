@@ -12,7 +12,7 @@ from PySide2 import QtWidgets, QtGui, QtCore
 import misc.Constants as ProjectConstants
 from misc.Functions import load_json_file, dump_json_file
 from misc.Entities import AlgorandWorker, LoadingWidget
-from Interfaces.Main.WalletFrame import WalletsFrame
+from Interfaces.Main.WalletFrame import WalletsFrame, AddressFrame
 from Interfaces.Contacts.Windows import ContactsWindow, ListJsonContacts
 from Interfaces.Settings.Windows import SettingsWindow, DictJsonSettings
 from Interfaces.About.Windows import InfoWindow, CreditsWindow
@@ -20,7 +20,7 @@ from Interfaces.About.Windows import InfoWindow, CreditsWindow
 # Python standard libraries
 from os import path, mkdir
 from functools import partial
-from typing import Type
+from typing import Type, Optional
 import jsonpickle
 
 
@@ -49,7 +49,7 @@ class MainWindow(QtWidgets.QMainWindow):
         #   Window icon, title & size
         self.setWindowIcon(QtGui.QIcon(path.abspath("graphics/python_icon.ico")))
         self.setWindowTitle("Algorand Wallet Manager")
-        self.setFixedSize(500, 300)
+        self.setFixedSize(550, 300)
 
         #   MenuBar initialization
         self.menu_action_new_transaction = self.menuBar().addAction("New transaction")
@@ -59,8 +59,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menu_action_info = self.menu_about.addAction("Info")
         self.menu_action_credits = self.menu_about.addAction("Credits")
 
-        #   The first wallet will be initialized by self.restart
-        self.wallet_frame = None
+        # This layout will be used to display the single WalletFrame and multiple AddressFrame one at a time.
+        self.main_widget = QtWidgets.QStackedWidget(self)
+        self.main_widget.addWidget(WalletsFrame(self))
+        self.setCentralWidget(self.main_widget)
         # End setup
 
         # MenuBar signal connection.
@@ -129,15 +131,12 @@ class MainWindow(QtWidgets.QMainWindow):
         for menu_action in [self.menu_action_new_transaction]:
             menu_action.setEnabled(False)
 
-        if self.wallet_frame:
-            # We don't use .destroyLater() because we need to be sure that the frame is not alive when we create a
-            #  new one.
-            self.wallet_frame.destroy()
+        if temp := self.main_widget.widget(0):
+            self.main_widget.removeWidget(temp)
 
         SettingsWindow.calculate_rest_endpoints()
 
-        self.wallet_frame = WalletsFrame(self)
-        self.setCentralWidget(self.wallet_frame)
+        self.main_widget.addWidget(WalletsFrame(self))
 
     def start_worker(self, fn: callable, fn_success: callable, fn_error: callable) -> AlgorandWorker:
         worker = AlgorandWorker(fn)
@@ -152,9 +151,22 @@ class MainWindow(QtWidgets.QMainWindow):
 
         return worker
 
+    def switch_frame(self, new_frame: Optional[AddressFrame]):
+        """
+        This function switches the WalletFrame for a AddressFrame or viceversa.
+
+        Set the new frame to an instance of Address Frame if you want to open a wallet.
+        Leave it equal to None if you want to restore the WalletFrame.
+        """
+        if new_frame:
+            self.main_widget.addWidget(new_frame)
+            self.main_widget.setCurrentIndex(1)
+        else:
+            self.main_widget.removeWidget(self.main_widget.widget(1))
+
     def closeEvent(self, event: QtGui.QCloseEvent):
         """
-        This overloaded method gets called before actually destroying self.
+        This overridden method gets called before actually destroying self.
 
         It's used to finalize some resources and then it passes the event up the chain to let PySide2 deal with it.
         """
