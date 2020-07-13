@@ -13,6 +13,7 @@ from algosdk.encoding import is_valid_address
 import misc.Constants as ProjectConstants
 from misc.DataStructures import ListJsonContacts
 from misc.Entities import Contact
+from Interfaces.Widgets import CustomListWidget
 from Interfaces.Contacts.Widgets import ContactListItem, ContactListWidget
 
 # Python standard libraries
@@ -95,7 +96,7 @@ class ContactsWindow(QtWidgets.QDialog):
         main_layout.addWidget(self.line_search)
 
         #   List of contacts
-        self.list_contacts = QtWidgets.QListWidget()
+        self.list_contacts = CustomListWidget(self, ContactListItem)
         self.list_contacts.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
         self.list_contacts.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.list_contacts.customContextMenuRequested.connect(self.show_context_menu)
@@ -105,7 +106,7 @@ class ContactsWindow(QtWidgets.QDialog):
 
         # Populate list
         for widget in self.contact_widgets:
-            self.add_item(widget)
+            self.list_contacts.add_widget(widget)
 
         # If we enable sorting we get an error when we add an item without widget because list doesn't know
         #  how to compare ContactsListItem without a ContactsListWidget inside.
@@ -150,17 +151,6 @@ class ContactsWindow(QtWidgets.QDialog):
     # N.B.: The next methods that end in "_item" are only "macros" to manage items in the list
     #  to really delete a contact from persistent memory use methods that end in "_contact".
 
-    # Also add doesn't add_item its input to contact_widgets but remove_item does.
-    #  It's not the best from a rational point of view but the code looks logical this way.
-
-    # I know this is confusing but it makes sense to add an item but only pass a widget because the item is
-    #  the same every time.
-    def add_item(self, widget: ContactListWidget):
-        item = ContactListItem()
-        item.setSizeHint(widget.minimumSizeHint())
-        self.list_contacts.addItem(item)
-        self.list_contacts.setItemWidget(item, widget)
-
     def remove_item(self, item: ContactListItem):
         self.list_contacts.takeItem(self.list_contacts.row(item))
         self.contact_widgets.remove(item.child_widget)
@@ -174,7 +164,7 @@ class ContactsWindow(QtWidgets.QDialog):
 
             self.contacts_from_json_file.memory.append(new_widget.contact)
             self.contact_widgets.append(new_widget)
-            self.add_item(new_widget)
+            self.list_contacts.add_widget(new_widget)
 
     @QtCore.Slot(ContactListItem)
     def edit_contact(self, item: ContactListItem):
@@ -189,7 +179,7 @@ class ContactsWindow(QtWidgets.QDialog):
             if old_contact.pic_name != new_contact.pic_name:
                 old_contact.release()
             self.contacts_from_json_file.memory.append(new_contact)
-            self.add_item(new_widget)
+            self.list_contacts.add_widget(new_widget)
 
     @QtCore.Slot(ContactListItem)
     def delete_contact(self, item: ContactListItem):

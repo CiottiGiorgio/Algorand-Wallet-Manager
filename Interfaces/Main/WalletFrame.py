@@ -4,7 +4,7 @@ This file contains WalletFrame which is a QFrame that is displayed inside MainWi
 
 
 # PySide2
-from PySide2 import QtWidgets, QtCore, QtGui
+from PySide2 import QtWidgets, QtCore
 
 # Algorand
 from algosdk import kmd as kmd
@@ -12,6 +12,7 @@ from algosdk import wallet as algosdk_wallet
 
 # Local project
 from misc.Entities import LoadingWidget, ErrorWidget, Wallet
+from Interfaces.Widgets import CustomListWidget
 from Interfaces.Settings.Windows import SettingsWindow
 from Interfaces.Main.WalletWidgets import WalletListItem, WalletListWidget
 from Interfaces.Main.AddressFrame import AddressFrame
@@ -40,7 +41,7 @@ class WalletsFrame(QtWidgets.QFrame):
         #   Main Horizontal Layout
         main_layout = QtWidgets.QHBoxLayout(self)
 
-        self.list_wallet = QtWidgets.QListWidget()
+        self.list_wallet = CustomListWidget(self, WalletListItem)
         self.list_wallet.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
 
         main_layout.addWidget(self.list_wallet)
@@ -111,22 +112,11 @@ class WalletsFrame(QtWidgets.QFrame):
             self.timer_loading_widget = QtCore.QTimer(self)
             self.timer_loading_widget.setSingleShot(True)
             self.timer_loading_widget.timeout.connect(
-                partial(self.add_item, LoadingWidget("Loading wallets..."))
+                partial(self.list_wallet.add_widget, LoadingWidget("Loading wallets..."))
             )
             self.timer_loading_widget.start(300)
         else:
-            self.add_item(ErrorWidget("kmd settings not valid"))
-
-    # This method is add_item but asks for a widget. This makes sense because this method always adds a WalletListItem.
-    #  I know it's confusing but it works.
-    def add_item(self, widget: WalletListWidget):
-        """
-        This method add a WalletListWidget to self.list_wallet through a WalletListItem.
-        """
-        item = WalletListItem()
-        item.setSizeHint(widget.minimumSizeHint())
-        self.list_wallet.addItem(item)
-        self.list_wallet.setItemWidget(item, widget)
+            self.list_wallet.add_widget(ErrorWidget("kmd settings not valid"))
 
     def clear_loading_list(self):
         """
@@ -235,7 +225,7 @@ class WalletsFrame(QtWidgets.QFrame):
         self.clear_loading_list()
 
         for wallet in self.wallets:
-            self.add_item(
+            self.list_wallet.add_widget(
                 WalletListWidget(wallet)
             )
 
@@ -256,6 +246,6 @@ class WalletsFrame(QtWidgets.QFrame):
     def wallet_loading_failed(self, error: str):
         self.clear_loading_list()
 
-        self.add_item(
+        self.list_wallet.add_widget(
             ErrorWidget("Could not load wallets" + '\n' + error)
         )
