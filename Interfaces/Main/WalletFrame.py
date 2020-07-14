@@ -244,7 +244,7 @@ class WalletsFrame(QtWidgets.QFrame):
             ErrorWidget("Could not load wallets" + '\n' + error)
         )
 
-# TODO disconnect signals from AlgorandWorker if the user closes the window while the call is active
+
 class UnlockingWallet(QtWidgets.QDialog):
     def __init__(self, parent: QtWidgets.QWidget, wallet: Wallet):
         super().__init__(parent)
@@ -254,6 +254,8 @@ class UnlockingWallet(QtWidgets.QDialog):
 
         self.wallet = wallet
         self.return_value = None
+
+        self.worker = None
 
         # Setup interface
         self.setWindowTitle("Unlock")
@@ -294,7 +296,9 @@ class UnlockingWallet(QtWidgets.QDialog):
 
         # TODO eventually we have to find a better way to reference QMainWindow. This chain of .parent() is dangerous.
         #  if we for instance change even one encapsulation of widget this solution stops working.
-        self.parent().parent().parent().start_worker(
+        self.worker = self.parent().parent().parent().start_worker(
+            # We have to use partial because for some reason the creation of an object is not considered a callable.
+            #  I still have to look into this.
             partial(
                 AlgosdkWallet,
                 self.wallet.info["name"],
@@ -304,6 +308,11 @@ class UnlockingWallet(QtWidgets.QDialog):
             self.unlock_success,
             self.unlock_failure
         )
+
+    def closeEvent(self, arg__1: QtGui.QCloseEvent):
+        arg__1.accept()
+        self.worker.signals.success.disconnect()
+        self.worker.signals.error.disconnect()
 
     @QtCore.Slot(object)
     def unlock_success(self, result: object) -> bool:
