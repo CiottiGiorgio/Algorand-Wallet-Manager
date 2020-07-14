@@ -12,6 +12,7 @@ from PySide2 import QtWidgets, QtGui, QtCore
 import misc.Constants as ProjectConstants
 from misc.Functions import load_json_file, dump_json_file
 from misc.Entities import AlgorandWorker, LoadingWidget
+from Interfaces.Widgets import StackedQueuedWidget
 from Interfaces.Main.WalletFrame import WalletsFrame, AddressFrame
 from Interfaces.Contacts.Windows import ContactsWindow, ListJsonContacts
 from Interfaces.Settings.Windows import SettingsWindow, DictJsonSettings
@@ -60,7 +61,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menu_action_credits = self.menu_about.addAction("Credits")
 
         # This layout will be used to display the single WalletFrame and multiple AddressFrame one at a time.
-        self.main_widget = QtWidgets.QStackedWidget(self)
+        self.main_widget = StackedQueuedWidget(self)
         self.main_widget.addWidget(WalletsFrame(self))
         self.setCentralWidget(self.main_widget)
         # End setup
@@ -160,9 +161,8 @@ class MainWindow(QtWidgets.QMainWindow):
         """
         if new_frame:
             self.main_widget.addWidget(new_frame)
-            self.main_widget.setCurrentIndex(1)
         else:
-            self.main_widget.removeWidget(self.main_widget.widget(1))
+            self.main_widget.removeTopWidget()
 
     def closeEvent(self, event: QtGui.QCloseEvent):
         """
