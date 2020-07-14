@@ -35,9 +35,20 @@ class StackedQueuedWidget(QtWidgets.QStackedWidget):
     This class will also always display the highest widget in the queue.
     """
     def addWidget(self, w: QtWidgets.QWidget) -> int:
+        """
+        This method adds a widget to the top of the queue and makes it visible.
+        """
         return_value = super().addWidget(w)
         self.setCurrentIndex(return_value)
         return return_value
 
+    # We don't touch original .removeWidget() method and we create a new one. It's fine we are all adults and we know
+    #  what we are doing.
+
     def removeTopWidget(self):
+        """
+        This method removes the top widget in the queue.
+
+        If we removes the nth widget then the new widget shown is automatically the (n-1)th.
+        """
         self.removeWidget(self.widget(self.count()))

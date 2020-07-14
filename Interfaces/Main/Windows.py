@@ -43,7 +43,7 @@ class MainWindow(QtWidgets.QMainWindow):
         #  Then thread A starts a thread B with the algosdk blocking call. Then only two things can happen:
         #   1. thread B responds to thread A within the timer timeout
         #   2. thread B does not respond to thread A within the timer timeout
-        #  Either way we get an answer from thread A within some fixed time or we discard it.
+        #  Either way we get an answer from thread A within some fixed time.
         self.thread_pool = QtCore.QThreadPool(self)
 
         # Setup interface
@@ -151,18 +151,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.thread_pool.start(worker)
 
         return worker
-
-    def switch_frame(self, new_frame: Optional[AddressFrame]):
-        """
-        This function switches the WalletFrame for a AddressFrame or viceversa.
-
-        Set the new frame to an instance of Address Frame if you want to open a wallet.
-        Leave it equal to None if you want to restore the WalletFrame.
-        """
-        if new_frame:
-            self.main_widget.addWidget(new_frame)
-        else:
-            self.main_widget.removeTopWidget()
 
     def closeEvent(self, event: QtGui.QCloseEvent):
         """

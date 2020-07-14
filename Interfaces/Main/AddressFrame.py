@@ -35,6 +35,7 @@ class AddressFrame(QtWidgets.QFrame):
         self.button_delete = QtWidgets.QPushButton("Delete")
         self.button_import = QtWidgets.QPushButton("Import")
         self.button_export = QtWidgets.QPushButton("Export")
+        # TODO add view balance button
 
         list_buttons = [self.button_return, self.button_new,
                         self.button_delete, self.button_import, self.button_export]

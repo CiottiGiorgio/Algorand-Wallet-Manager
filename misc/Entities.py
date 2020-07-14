@@ -42,10 +42,9 @@ class Wallet:
     """
     This class represents a wallet inside this program memory. Not to be confused with algosdk.wallet.Wallet.
 
-    It just holds 3 properties:
+    It just holds 2 properties:
         1. The dict returned from algosdk call
         2. algosdk.wallet.Wallet for when the wallet is unlocked with its password
-        3. Its associated AddressFrame for when the wallet is unlocked with its password
     """
     def __init__(self, info: Dict):
         self.info = info
@@ -55,8 +54,7 @@ class Wallet:
         self.algo_wallet = algo_wallet
 
     def lock(self):
-        if self.algo_wallet:
-            del self.algo_wallet
+        self.algo_wallet = None
 
 
 class AlgorandWorkerSignals(QtCore.QObject):
