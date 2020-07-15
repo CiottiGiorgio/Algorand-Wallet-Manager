@@ -119,7 +119,6 @@ class MainWindow(QtWidgets.QMainWindow):
         child_dialog = dialog(self)
         child_dialog.exec_()
 
-    # TODO none of this makes sense.
     def restart(self):
         """
         This method restart the application from the point when it tries to connect to a node to display wallets.

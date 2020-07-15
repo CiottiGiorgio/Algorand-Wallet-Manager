@@ -105,12 +105,6 @@ class WalletsFrame(QtWidgets.QFrame):
                 self.wallet_loading_failed
             )
 
-            # For some reasons if i make a slot that disconnects these signals it doesn't get called. I think i might
-            #  be dealing with python finalizer and Qt C++ destroyer issues.
-            # We can't get rid of the lambdas because they refer to a specific self and wouldn't work otherwise.
-            self.destroyed.connect(lambda: self.worker.signals.success.disconnect())
-            self.destroyed.connect(lambda: self.worker.signals.error.disconnect())
-
             # We insert a loading widget to signal to the user that a call is in progress but we do so only if
             #  a fixed time has elapsed without a response.
             self.timer_loading_widget = QtCore.QTimer(self)
@@ -127,6 +121,15 @@ class WalletsFrame(QtWidgets.QFrame):
                 SettingsWindow.rest_endpoints["algod"]["token"],
                 SettingsWindow.rest_endpoints["algod"]["address"]
             )
+        else:
+            print("algod settings not valid", file=stderr)
+
+    def closeEvent(self, event: QtGui.QCloseEvent):
+        event.accept()
+
+        if self.worker:
+            self.worker.signals.success.disconnect()
+            self.worker.signals.error.disconnect()
 
     def showEvent(self, event: QtGui.QShowEvent):
         event.accept()
@@ -302,8 +305,6 @@ class UnlockingWallet(QtWidgets.QDialog):
         self.button_unlock.setEnabled(False)
         self.widget_loading.setVisible(True)
 
-        # TODO eventually we have to find a better way to reference QMainWindow. This chain of .parent() is dangerous.
-        #  if we for instance change even one encapsulation of widget this solution stops working.
         self.worker = ProjectConstants.main_window.start_worker(
             # We have to use partial because for some reason the creation of an object is not considered a callable.
             #  I still have to look into this.

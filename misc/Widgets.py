@@ -52,7 +52,7 @@ class StackedQueuedWidget(QtWidgets.QStackedWidget):
 
         If we removes the nth widget then the new widget shown is automatically the (n-1)th.
         """
-        self.removeWidget(self.widget(self.count()))
+        self.removeWidget(self.widget(self.count() - 1))
 
     def clear_queue(self):
         while self.count() >= 1:

@@ -10,7 +10,6 @@ from PySide2 import QtWidgets
 from misc import Constants as ProjectConstants
 
 
-# TODO if possible create a connection class that auto-disconnects after the first call
 # TODO look into the fact that some widgets only get destroyed when the application is closing making the attribute
 #  QtCore.Qt.WA_DeleteOnClose somewhat useless.
 def main():
