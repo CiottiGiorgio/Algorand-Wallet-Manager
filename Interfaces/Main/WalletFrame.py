@@ -7,12 +7,14 @@ This file contains WalletFrame which is a QFrame that is displayed inside MainWi
 from PySide2 import QtWidgets, QtCore, QtGui
 
 # Algorand
-from algosdk import kmd as kmd
+from algosdk import kmd
+from algosdk.v2client import algod
 from algosdk.wallet import Wallet as AlgosdkWallet
 
 # Local project
+from misc import Constants as ProjectConstants
 from misc.Entities import LoadingWidget, ErrorWidget, Wallet
-from Interfaces.Widgets import CustomListWidget
+from misc.Widgets import CustomListWidget
 from Interfaces.Settings.Windows import SettingsWindow
 from Interfaces.Main.WalletWidgets import WalletListItem, WalletListWidget
 from Interfaces.Main.AddressFrame import AddressFrame
@@ -34,6 +36,7 @@ class WalletsFrame(QtWidgets.QFrame):
 
         # API for Algorand node KMD client
         self.kmd_client = None
+        self.algod_client = None
 
         self.wallets = list()
 
@@ -78,7 +81,7 @@ class WalletsFrame(QtWidgets.QFrame):
 
         # Initial state
         # These widgets will be enabled when wallets are loaded.
-        for widget in [self.button_manage, self.button_rename, self.button_new,
+        for widget in [self.button_manage, self.button_lock, self.button_rename, self.button_new,
                        self.button_import, self.button_export]:
             widget.setEnabled(False)
 
@@ -118,6 +121,12 @@ class WalletsFrame(QtWidgets.QFrame):
             self.timer_loading_widget.start(300)
         else:
             self.list_wallet.add_widget(ErrorWidget("kmd settings not valid"))
+
+        if "algod" in SettingsWindow.rest_endpoints:
+            self.algod_client = algod.AlgodClient(
+                SettingsWindow.rest_endpoints["algod"]["token"],
+                SettingsWindow.rest_endpoints["algod"]["address"]
+            )
 
     def showEvent(self, event: QtGui.QShowEvent):
         event.accept()
@@ -178,7 +187,7 @@ class WalletsFrame(QtWidgets.QFrame):
         if self.unlock_item(item):
             widget = self.list_wallet.itemWidget(item)
 
-            self.parent().parent().main_widget.addWidget(
+            ProjectConstants.main_window.main_widget.add_widget(
                 AddressFrame(widget.wallet)
             )
 
@@ -230,10 +239,9 @@ class WalletsFrame(QtWidgets.QFrame):
         # Also enable widgets that only make sense for the existence of at least one wallet.
         if len(wallets) >= 1:
             self.list_wallet.setCurrentRow(0)
-            main_window = self.parent().parent()
 
             for widget in [self.button_manage, self.button_rename, self.button_export,
-                           main_window.menu_action_new_transaction]:
+                           ProjectConstants.main_window.menu_action_new_transaction]:
                 widget.setEnabled(True)
 
     @QtCore.Slot(str)
@@ -247,7 +255,7 @@ class WalletsFrame(QtWidgets.QFrame):
 
 class UnlockingWallet(QtWidgets.QDialog):
     def __init__(self, parent: QtWidgets.QWidget, wallet: Wallet):
-        super().__init__(parent)
+        super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
 
         # Anti memory leak
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -296,7 +304,7 @@ class UnlockingWallet(QtWidgets.QDialog):
 
         # TODO eventually we have to find a better way to reference QMainWindow. This chain of .parent() is dangerous.
         #  if we for instance change even one encapsulation of widget this solution stops working.
-        self.worker = self.parent().parent().parent().start_worker(
+        self.worker = ProjectConstants.main_window.start_worker(
             # We have to use partial because for some reason the creation of an object is not considered a callable.
             #  I still have to look into this.
             partial(
@@ -311,19 +319,19 @@ class UnlockingWallet(QtWidgets.QDialog):
 
     def closeEvent(self, arg__1: QtGui.QCloseEvent):
         arg__1.accept()
-        self.worker.signals.success.disconnect()
-        self.worker.signals.error.disconnect()
+        if self.worker:
+            self.worker.signals.success.disconnect()
+            self.worker.signals.error.disconnect()
 
     @QtCore.Slot(object)
-    def unlock_success(self, result: object) -> bool:
+    def unlock_success(self, result: object):
         self.return_value = result
         self.close()
-        return True
 
+    # TODO make it obvious for the user that an error has occurred.
     @QtCore.Slot(str)
-    def unlock_failure(self, error: str) -> bool:
+    def unlock_failure(self, error: str):
         print("Could not open wallet.", file=stderr)
         print(error, file=stderr)
         self.return_value = None
         self.close()
-        return False

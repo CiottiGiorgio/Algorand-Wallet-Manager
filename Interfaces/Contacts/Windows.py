@@ -13,7 +13,7 @@ from algosdk.encoding import is_valid_address
 import misc.Constants as ProjectConstants
 from misc.DataStructures import ListJsonContacts
 from misc.Entities import Contact
-from Interfaces.Widgets import CustomListWidget
+from misc.Widgets import CustomListWidget
 from Interfaces.Contacts.Widgets import ContactListItem, ContactListWidget
 
 # Python standard libraries

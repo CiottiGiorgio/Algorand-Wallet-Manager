@@ -6,6 +6,9 @@ This main function will initialize PySide2 & Main and manage the starting of the
 # PySide2
 from PySide2 import QtWidgets
 
+# Local project
+from misc import Constants as ProjectConstants
+
 
 # TODO if possible create a connection class that auto-disconnects after the first call
 # TODO look into the fact that some widgets only get destroyed when the application is closing making the attribute
@@ -23,6 +26,8 @@ def main():
     MainWindow.initialize()
 
     main_window = MainWindow()
+    # We write a reference to main_window inside Constants.py file.
+    ProjectConstants.main_window = main_window
     main_window.show()
 
     # Enter main loop.

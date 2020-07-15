@@ -12,8 +12,8 @@ from PySide2 import QtWidgets, QtGui, QtCore
 import misc.Constants as ProjectConstants
 from misc.Functions import load_json_file, dump_json_file
 from misc.Entities import AlgorandWorker, LoadingWidget
-from Interfaces.Widgets import StackedQueuedWidget
-from Interfaces.Main.WalletFrame import WalletsFrame, AddressFrame
+from misc.Widgets import StackedQueuedWidget
+from Interfaces.Main.WalletFrame import WalletsFrame
 from Interfaces.Contacts.Windows import ContactsWindow, ListJsonContacts
 from Interfaces.Settings.Windows import SettingsWindow, DictJsonSettings
 from Interfaces.About.Windows import InfoWindow, CreditsWindow
@@ -21,7 +21,7 @@ from Interfaces.About.Windows import InfoWindow, CreditsWindow
 # Python standard libraries
 from os import path, mkdir
 from functools import partial
-from typing import Type, Optional
+from typing import Type
 import jsonpickle
 
 
@@ -62,7 +62,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # This layout will be used to display the single WalletFrame and multiple AddressFrame one at a time.
         self.main_widget = StackedQueuedWidget(self)
-        self.main_widget.addWidget(WalletsFrame(self))
         self.setCentralWidget(self.main_widget)
         # End setup
 
@@ -120,6 +119,7 @@ class MainWindow(QtWidgets.QMainWindow):
         child_dialog = dialog(self)
         child_dialog.exec_()
 
+    # TODO none of this makes sense.
     def restart(self):
         """
         This method restart the application from the point when it tries to connect to a node to display wallets.
@@ -132,12 +132,13 @@ class MainWindow(QtWidgets.QMainWindow):
         for menu_action in [self.menu_action_new_transaction]:
             menu_action.setEnabled(False)
 
-        if temp := self.main_widget.widget(0):
-            self.main_widget.removeWidget(temp)
+        if self.main_widget.count() >= 1:
+            self.main_widget.clear_queue()
 
         SettingsWindow.calculate_rest_endpoints()
 
-        self.main_widget.addWidget(WalletsFrame(self))
+        self.main_widget.add_widget(wallet_frame := WalletsFrame(self))
+        ProjectConstants.wallet_frame = wallet_frame
 
     def start_worker(self, fn: callable, fn_success: callable, fn_error: callable) -> AlgorandWorker:
         worker = AlgorandWorker(fn)

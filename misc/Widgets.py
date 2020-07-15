@@ -30,11 +30,12 @@ class CustomListWidget(QtWidgets.QListWidget):
 
 class StackedQueuedWidget(QtWidgets.QStackedWidget):
     """
-    This class is used to restrict the behaviour of a QStackedLayout to that of a queue.
+    This class is to add the behaviour of a queue to QStackedWidget.
 
-    This class will also always display the highest widget in the queue.
+    Old methods in this class are unaltered however add_widget is a modified version that always displays the last
+    widget inserted.
     """
-    def addWidget(self, w: QtWidgets.QWidget) -> int:
+    def add_widget(self, w: QtWidgets.QWidget) -> int:
         """
         This method adds a widget to the top of the queue and makes it visible.
         """
@@ -45,10 +46,14 @@ class StackedQueuedWidget(QtWidgets.QStackedWidget):
     # We don't touch original .removeWidget() method and we create a new one. It's fine we are all adults and we know
     #  what we are doing.
 
-    def removeTopWidget(self):
+    def remove_top_widget(self):
         """
         This method removes the top widget in the queue.
 
         If we removes the nth widget then the new widget shown is automatically the (n-1)th.
         """
         self.removeWidget(self.widget(self.count()))
+
+    def clear_queue(self):
+        while self.count() >= 1:
+            self.remove_top_widget()
