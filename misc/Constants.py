@@ -19,8 +19,9 @@ filename_algod_token = "algod.token"
 filename_kmd_net = "kmd-v0.5/kmd.net"
 filename_kmd_token = "kmd-v0.5/kmd.token"
 
-#   Reference to common PySide2 objects
-main_window = None  # Am i supposed to change this file at runtime?
+#   Global variables for reference to common PySide2 objects.
+#   Am i supposed to change these variables at runtime?
+main_window = None
 wallet_frame = None
 
 # Composite constants

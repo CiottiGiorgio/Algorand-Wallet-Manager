@@ -4,28 +4,56 @@ This file contains subclasses of PySide2 widgets that are used throughout this p
 
 
 # PySide2
-from PySide2 import QtWidgets
+from PySide2 import QtWidgets, QtCore, QtGui
 
 # Python standard libraries
+from os import path
 from typing import Type
 
 
 class CustomListWidget(QtWidgets.QListWidget):
     """
     This class is used to implement a QListWidget with some common code used in the project.
-
-    E.g.: How to add a widget directly.
     """
-    def __init__(self, parent: QtWidgets.QWidget, item_type: Type[QtWidgets.QListWidgetItem]):
+    def __init__(
+            self,
+            parent: QtWidgets.QWidget,
+            item_type: Type[QtWidgets.QListWidgetItem],
+            loading_widget: bool = False
+    ):
         super().__init__(parent)
 
         self.item_type = item_type
+        self.timer = None
+
+        # We make a LoadingWidget appear after a fixed amount of time. Making it appear instantly would cause weird
+        #  effects on the GUI.
+        if loading_widget:
+            self.timer = QtCore.QTimer()
+            self.timer.setSingleShot(True)
+            self.timer.timeout.connect(lambda: self.add_widget(LoadingWidget()))
+            self.timer.start(300)
 
     def add_widget(self, widget: QtWidgets.QWidget):
+        """
+        This method adds a widget to the list using the custom QListWidgetItem specified in the constructor.
+
+        This method avoids code duplication.
+        """
         item = self.item_type()
         item.setSizeHint(widget.minimumSizeHint())
         self.addItem(item)
         self.setItemWidget(item, widget)
+
+    def clear_loading(self):
+        """
+        This method cleans the list from a possible LoadingWidget.
+        """
+        if self.timer.isActive():
+            self.timer.stop()
+            self.timer.timeout.disconnect()
+        elif isinstance(self.itemWidget(self.item(0)), LoadingWidget):
+            self.takeItem(0)
 
 
 class StackedQueuedWidget(QtWidgets.QStackedWidget):
@@ -57,3 +85,72 @@ class StackedQueuedWidget(QtWidgets.QStackedWidget):
     def clear_queue(self):
         while self.count() >= 1:
             self.remove_top_widget()
+
+
+class LoadingWidget(QtWidgets.QWidget):
+    """
+    This class implements a simple widget used to show a loading message.
+    """
+
+    # We don't make the loading gif static because it's a movie with a .start() method and i'm not sure
+    #  if sharing it with other widget might cause an issue.
+
+    def __init__(self, label_content: str = "Loading..."):
+        super().__init__()
+
+        # Anti memory leak
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+
+        # Setup interface
+        main_layout = QtWidgets.QHBoxLayout(self)
+
+        movie = QtGui.QMovie("graphics/loading.webp")
+        movie.setScaledSize(QtCore.QSize(30, 30))
+        movie.setCacheMode(QtGui.QMovie.CacheAll)
+
+        main_layout.addStretch(1)
+
+        movie_label = QtWidgets.QLabel()
+        movie_label.setMovie(movie)
+        main_layout.addWidget(movie_label)
+
+        loading_label = QtWidgets.QLabel(label_content)
+        loading_label.adjustSize()
+        main_layout.addWidget(loading_label)
+
+        main_layout.addStretch(1)
+        # End setup
+
+        movie.start()
+
+
+class ErrorWidget(QtWidgets.QWidget):
+    """
+    This class implements a simple widget used to show an error message.
+    """
+
+    error_icon = QtGui.QPixmap(path.abspath("graphics/not_valid.png")).scaled(
+        20, 20,
+        QtCore.Qt.IgnoreAspectRatio,
+        QtCore.Qt.SmoothTransformation)
+
+    def __init__(self, label_content: str = "Error."):
+        super().__init__()
+
+        # Anti memory leak
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+
+        # Setup interface
+        main_layout = QtWidgets.QHBoxLayout(self)
+
+        main_layout.addStretch(1)
+
+        label_pixmap = QtWidgets.QLabel()
+        label_pixmap.setPixmap(ErrorWidget.error_icon)
+        main_layout.addWidget(label_pixmap)
+
+        label_message = QtWidgets.QLabel(label_content)
+        main_layout.addWidget(label_message)
+
+        main_layout.addStretch(1)
+        # End setup

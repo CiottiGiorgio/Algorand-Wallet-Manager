@@ -38,11 +38,11 @@ class AddressFrame(QtWidgets.QFrame):
         self.button_import = QtWidgets.QPushButton("Import")
         self.button_export = QtWidgets.QPushButton("Export")
 
-        list_buttons = [self.button_return, self.button_balance, self.button_new,
+        buttons_list = [self.button_return, self.button_balance, self.button_new,
                         self.button_delete, self.button_import, self.button_export]
 
         button_fixed_width = 65
-        for widget in list_buttons:
+        for widget in buttons_list:
             widget.setFixedWidth(button_fixed_width)
 
         address_button_layout.addWidget(self.button_return)

@@ -13,7 +13,8 @@ from algosdk.wallet import Wallet as AlgosdkWallet
 
 # Local project
 from misc import Constants as ProjectConstants
-from misc.Entities import LoadingWidget, ErrorWidget, Wallet
+from misc.Entities import Wallet
+from misc.Widgets import LoadingWidget, ErrorWidget
 from misc.Widgets import CustomListWidget
 from Interfaces.Settings.Windows import SettingsWindow
 from Interfaces.Main.WalletWidgets import WalletListItem, WalletListWidget
@@ -44,7 +45,7 @@ class WalletsFrame(QtWidgets.QFrame):
         #   Main Horizontal Layout
         main_layout = QtWidgets.QHBoxLayout(self)
 
-        self.list_wallet = CustomListWidget(self, WalletListItem)
+        self.list_wallet = CustomListWidget(self, WalletListItem, True)
         self.list_wallet.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
 
         main_layout.addWidget(self.list_wallet)
@@ -104,15 +105,6 @@ class WalletsFrame(QtWidgets.QFrame):
                 self.load_wallets,
                 self.wallet_loading_failed
             )
-
-            # We insert a loading widget to signal to the user that a call is in progress but we do so only if
-            #  a fixed time has elapsed without a response.
-            self.timer_loading_widget = QtCore.QTimer(self)
-            self.timer_loading_widget.setSingleShot(True)
-            self.timer_loading_widget.timeout.connect(
-                partial(self.list_wallet.add_widget, LoadingWidget("Loading wallets..."))
-            )
-            self.timer_loading_widget.start(300)
         else:
             self.list_wallet.add_widget(ErrorWidget("kmd settings not valid"))
 
@@ -124,9 +116,8 @@ class WalletsFrame(QtWidgets.QFrame):
         else:
             print("algod settings not valid", file=stderr)
 
-    def closeEvent(self, event: QtGui.QCloseEvent):
-        event.accept()
-
+    def closeEvent(self, arg__1: QtGui.QCloseEvent):
+        arg__1.accept()
         if self.worker:
             self.worker.signals.success.disconnect()
             self.worker.signals.error.disconnect()
@@ -135,19 +126,6 @@ class WalletsFrame(QtWidgets.QFrame):
         event.accept()
 
         self.set_lock_button_status()
-
-    def clear_loading_list(self):
-        """
-        This method is used to remove LoadingWidget from self.list_wallets if present.
-        """
-        # Prevent timer from adding loading widget.
-        self.timer_loading_widget.stop()
-        self.timer_loading_widget.deleteLater()
-
-        # At this point the only possible item present should be the loading widget. We remove it before adding
-        #  wallet widgets.
-        if self.list_wallet.count() > 0:
-            self.list_wallet.takeItem(0)
 
     def unlock_item(self, item: WalletListItem) -> bool:
         """
@@ -208,7 +186,9 @@ class WalletsFrame(QtWidgets.QFrame):
         """
         This method sets self.lock_button enabled or not if the current selected item is locked or not.
         """
-        if item := self.list_wallet.currentItem():
+        item = self.list_wallet.currentItem()
+        widget = self.list_wallet.itemWidget(item)
+        if isinstance(widget, WalletListWidget):
             self.button_lock.setEnabled(
                 self.list_wallet.itemWidget(item).label_state.text() == "(unlocked)"
             )
@@ -220,15 +200,14 @@ class WalletsFrame(QtWidgets.QFrame):
 
         This slot is connected to the result of the thread that.
         """
+        self.list_wallet.clear_loading()
+
         # This is a mouthful. Basically for each dict in wallets that represents a wallet inside kmd, a Entities.Wallet
         #  object is created. This object is then appended to the internal list "self.wallets" inside WalletFrame.
         for wallet in wallets:
             self.wallets.append(
                 Wallet(wallet)
             )
-
-        # In case LoadingWidget is alive in the list.
-        self.clear_loading_list()
 
         for wallet in self.wallets:
             self.list_wallet.add_widget(
@@ -249,7 +228,7 @@ class WalletsFrame(QtWidgets.QFrame):
 
     @QtCore.Slot(str)
     def wallet_loading_failed(self, error: str):
-        self.clear_loading_list()
+        self.list_wallet.clear_loading()
 
         self.list_wallet.add_widget(
             ErrorWidget("Could not load wallets" + '\n' + error)
@@ -317,12 +296,6 @@ class UnlockingWallet(QtWidgets.QDialog):
             self.unlock_success,
             self.unlock_failure
         )
-
-    def closeEvent(self, arg__1: QtGui.QCloseEvent):
-        arg__1.accept()
-        if self.worker:
-            self.worker.signals.success.disconnect()
-            self.worker.signals.error.disconnect()
 
     @QtCore.Slot(object)
     def unlock_success(self, result: object):

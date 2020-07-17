@@ -11,7 +11,8 @@ from PySide2 import QtWidgets, QtGui, QtCore
 # Local project
 import misc.Constants as ProjectConstants
 from misc.Functions import load_json_file, dump_json_file
-from misc.Entities import AlgorandWorker, LoadingWidget
+from misc.Entities import AlgorandWorker
+from misc.Widgets import LoadingWidget
 from misc.Widgets import StackedQueuedWidget
 from Interfaces.Main.WalletFrame import WalletsFrame
 from Interfaces.Contacts.Windows import ContactsWindow, ListJsonContacts
