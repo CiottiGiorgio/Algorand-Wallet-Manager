@@ -64,12 +64,11 @@ class WalletsFrame(QtWidgets.QFrame):
         self.button_export = QtWidgets.QPushButton("Export")
 
         button_fixed_width = 65
-        self.button_manage.setFixedWidth(button_fixed_width)
-        self.button_lock.setFixedWidth(button_fixed_width)
-        self.button_rename.setFixedWidth(button_fixed_width)
-        self.button_new.setFixedWidth(button_fixed_width)
-        self.button_import.setFixedWidth(button_fixed_width)
-        self.button_export.setFixedWidth(button_fixed_width)
+        buttons_list = [self.button_manage, self.button_lock, self.button_rename, self.button_new, self.button_import,
+                        self.button_export]
+
+        for widget in buttons_list:
+            widget.setFixedWidth(button_fixed_width)
 
         wallet_button_layout.addWidget(self.button_manage)
         wallet_button_layout.addWidget(self.button_lock)
@@ -82,8 +81,7 @@ class WalletsFrame(QtWidgets.QFrame):
 
         # Initial state
         # These widgets will be enabled when wallets are loaded.
-        for widget in [self.button_manage, self.button_lock, self.button_rename, self.button_new,
-                       self.button_import, self.button_export]:
+        for widget in buttons_list:
             widget.setEnabled(False)
 
         # Connections
@@ -102,7 +100,7 @@ class WalletsFrame(QtWidgets.QFrame):
             #  self.worker thus finalizing that object and disconnect its slots. Haven't tested though.
             self.worker = self.parent().start_worker(
                 self.kmd_client.list_wallets,
-                self.load_wallets,
+                self.wallet_loading_success,
                 self.wallet_loading_failed
             )
         else:
@@ -194,7 +192,7 @@ class WalletsFrame(QtWidgets.QFrame):
             )
 
     @QtCore.Slot(list)
-    def load_wallets(self, wallets: list):
+    def wallet_loading_success(self, wallets: list):
         """
         This method loads node wallet into the list and enables controls that can be applied to such wallets.
 

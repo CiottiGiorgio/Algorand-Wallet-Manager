@@ -59,7 +59,7 @@ class ContactsWindow(QtWidgets.QDialog):
         super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
 
         # Anti memory leak
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        #self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         # Populate contact_widgets with info from json file.
         if not self.contact_widgets:
@@ -112,6 +112,14 @@ class ContactsWindow(QtWidgets.QDialog):
         #  how to compare ContactsListItem without a ContactsListWidget inside.
         #  You can't insert the widget inside the item and then insert item inside the list.
         self.list_contacts.sortItems()
+
+    def closeEvent(self, arg__1: QtGui.QCloseEvent):
+        # If we don't do this the widgets get deleted from their parent when the window closes.
+        #  Typically this would be fine but since we are storing the widgets statically we don't want them deleted.
+        for contact in ContactsWindow.contact_widgets:
+            contact.setParent(None)
+
+        arg__1.accept()
 
     @QtCore.Slot(QtCore.QPoint)
     def show_context_menu(self, pos: QtCore.QPoint):

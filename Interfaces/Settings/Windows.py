@@ -174,6 +174,7 @@ class SettingsWindow(QtWidgets.QDialog):
 
         self.parent().restart()
 
+    # TODO calculate kmd folder here. The name of the folder is dependent on the version of kmd.
     @staticmethod
     def calculate_rest_endpoints():
         """

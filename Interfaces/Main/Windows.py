@@ -66,10 +66,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.main_widget)
         # End setup
 
-        # MenuBar signal connection.
+        # Connections
         # Using partial could be troubling because of circular dependency between memory in python.
-        #  It's ok for now because there are no multiple instances of Main and those partial get destroyed when
-        #  application closes.
         self.menu_action_contacts.triggered.connect(
             partial(self.exec_dialog, ContactsWindow)
         )
