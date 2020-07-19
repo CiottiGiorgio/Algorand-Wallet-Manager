@@ -59,7 +59,7 @@ class ContactsWindow(QtWidgets.QDialog):
         super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
 
         # Anti memory leak
-        #self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         # Populate contact_widgets with info from json file.
         if not self.contact_widgets:

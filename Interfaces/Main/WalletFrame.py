@@ -8,7 +8,7 @@ from PySide2 import QtWidgets, QtCore, QtGui
 
 # Algorand
 from algosdk import kmd
-from algosdk.v2client import algod
+from algosdk.v2client.algod import AlgodClient
 from algosdk.wallet import Wallet as AlgosdkWallet
 
 # Local project
@@ -107,7 +107,7 @@ class WalletsFrame(QtWidgets.QFrame):
             self.list_wallet.add_widget(ErrorWidget("kmd settings not valid"))
 
         if "algod" in SettingsWindow.rest_endpoints:
-            self.algod_client = algod.AlgodClient(
+            self.algod_client = AlgodClient(
                 SettingsWindow.rest_endpoints["algod"]["token"],
                 SettingsWindow.rest_endpoints["algod"]["address"]
             )
@@ -119,11 +119,6 @@ class WalletsFrame(QtWidgets.QFrame):
         if self.worker:
             self.worker.signals.success.disconnect()
             self.worker.signals.error.disconnect()
-
-    def showEvent(self, event: QtGui.QShowEvent):
-        event.accept()
-
-        self.set_lock_button_status()
 
     def unlock_item(self, item: WalletListItem) -> bool:
         """
@@ -143,6 +138,7 @@ class WalletsFrame(QtWidgets.QFrame):
         if unlock_wallet_dialog.return_value:
             widget.wallet.algo_wallet = unlock_wallet_dialog.return_value
             widget.set_locked(False)
+            self.set_lock_button_status()
             return True
 
         return False
@@ -188,7 +184,7 @@ class WalletsFrame(QtWidgets.QFrame):
         widget = self.list_wallet.itemWidget(item)
         if isinstance(widget, WalletListWidget):
             self.button_lock.setEnabled(
-                self.list_wallet.itemWidget(item).label_state.text() == "(unlocked)"
+                widget.label_state.text() == "(unlocked)"
             )
 
     @QtCore.Slot(list)
@@ -223,6 +219,8 @@ class WalletsFrame(QtWidgets.QFrame):
             for widget in [self.button_manage, self.button_rename, self.button_export,
                            ProjectConstants.main_window.menu_action_new_transaction]:
                 widget.setEnabled(True)
+
+        self.set_lock_button_status()
 
     @QtCore.Slot(str)
     def wallet_loading_failed(self, error: str):
@@ -301,6 +299,7 @@ class UnlockingWallet(QtWidgets.QDialog):
         self.close()
 
     # TODO make it obvious for the user that an error has occurred.
+    #  Maybe don't close QDialog automatically and substitute the loading widget for an error one.
     @QtCore.Slot(str)
     def unlock_failure(self, error: str):
         print("Could not open wallet.", file=stderr)

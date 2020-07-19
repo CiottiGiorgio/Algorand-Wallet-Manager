@@ -34,6 +34,7 @@ class SettingsWindow(QtWidgets.QDialog):
         main_layout.addWidget(QtWidgets.QLabel("Select a method of connection with your Algorand node"))
         main_layout.addSpacing(15)
 
+        #   Local node
         self.local_radio = QtWidgets.QRadioButton("Local node")
         main_layout.addWidget(self.local_radio)
 
@@ -53,6 +54,7 @@ class SettingsWindow(QtWidgets.QDialog):
         main_layout.addLayout(local_layout)
         main_layout.addSpacing(15)
 
+        #   Remote node
         self.remote_radio = QtWidgets.QRadioButton("Remote node")
         main_layout.addWidget(self.remote_radio)
 
@@ -109,7 +111,23 @@ class SettingsWindow(QtWidgets.QDialog):
         remote_groupbox_indexer.setAlignment(QtCore.Qt.AlignHCenter)
         main_layout.addWidget(remote_groupbox_indexer)
 
-        remote_layout_indexer = QtWidgets.QVBoxLayout()
+        remote_layout_indexer = QtWidgets.QGridLayout()
+
+        remote_layout_indexer.addWidget(QtWidgets.QLabel("URL"), 0, 0)
+        self.remote_indexer_line_url = QtWidgets.QLineEdit()
+        remote_layout_indexer.addWidget(self.remote_indexer_line_url, 1, 0)
+
+        remote_layout_indexer.addWidget(QtWidgets.QLabel("Port"), 0, 1)
+        self.remote_indexer_line_port = QtWidgets.QLineEdit()
+        self.remote_indexer_line_port.setValidator(QtGui.QIntValidator(1, 99999))
+        remote_layout_indexer.addWidget(self.remote_indexer_line_port, 1, 1)
+
+        remote_layout_indexer.addWidget(QtWidgets.QLabel("Token"), 2, 0)
+        self.remote_indexer_line_token = QtWidgets.QLineEdit()
+        remote_layout_indexer.addWidget(self.remote_indexer_line_token, 3, 0, 1, 2)
+
+        remote_layout_indexer.setColumnStretch(0, 1)
+
         remote_groupbox_indexer.setLayout(remote_layout_indexer)
 
         main_layout.addStretch(1)
@@ -121,10 +139,10 @@ class SettingsWindow(QtWidgets.QDialog):
         self.button_confirm.setDefault(True)
         # End setup
 
-        # Slot connect
+        # Connections
         self.local_button_select_folder.clicked.connect(self.button_select_folder_clicked)
 
-        # Restoring fields
+        # Initial states
         settings = SettingsWindow.settings_from_json_file.memory  # Shortened
 
         if settings["selected"] == 0:
@@ -174,7 +192,6 @@ class SettingsWindow(QtWidgets.QDialog):
 
         self.parent().restart()
 
-    # TODO calculate kmd folder here. The name of the folder is dependent on the version of kmd.
     @staticmethod
     def calculate_rest_endpoints():
         """

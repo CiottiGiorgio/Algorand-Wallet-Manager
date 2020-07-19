@@ -3,11 +3,12 @@ This file contains AddressFrame which is a QFrame displayed as a result of an op
 """
 
 # PySide2
-from PySide2 import QtWidgets, QtCore, QtGui
+from PySide2 import QtWidgets, QtCore
 
 # Local project
 from misc import Constants as ProjectConstants
 from misc.Entities import Wallet
+from Interfaces.Main.AddressWidgets import BalanceScrollWidget
 
 
 class AddressFrame(QtWidgets.QFrame):
@@ -60,17 +61,80 @@ class AddressFrame(QtWidgets.QFrame):
 
         # Connections
         self.button_return.clicked.connect(self.close)
+        self.button_balance.clicked.connect(self.show_balance)
 
-    def showEvent(self, event: QtGui.QShowEvent):
-        event.accept()
-
+        # Worker
         # We load the addresses in a non threaded way for now.
         addresses = self.wallet.algo_wallet.list_keys()
 
+        for address in addresses:
+            self.list_address.addItem(address)
+
         if len(addresses) >= 1:
+            self.list_address.setCurrentRow(0)
+
             for widget in [self.button_balance, self.button_export, self.button_delete]:
                 widget.setEnabled(True)
 
-        for address in addresses:
-            self.list_address.addItem(address)
-            print(ProjectConstants.wallet_frame.algod_client.account_info(address))
+    def show_balance(self):
+        item = self.list_address.currentItem()
+
+        dialog = BalanceWindow(self, item.text())
+        dialog.exec_()
+
+
+class BalanceWindow(QtWidgets.QDialog):
+    def __init__(self, parent: QtWidgets.QWidget, address: str):
+        super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
+
+        self.address = address
+
+        # Anti memory leak
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+
+        # Setup interface
+        self.setWindowTitle("Algos & Assets")
+
+        self.setFixedSize(500, 500)
+
+        main_layout = QtWidgets.QVBoxLayout(self)
+
+        main_layout.addWidget(QtWidgets.QLabel("Algos:"))
+
+        scrollable_algos = QtWidgets.QScrollArea()
+        main_layout.addWidget(scrollable_algos)
+        algos_layout = QtWidgets.QVBoxLayout()
+        scrollable_algos.setLayout(algos_layout)
+
+        main_layout.addWidget(QtWidgets.QLabel("Assets:"))
+
+        scrollable_assets = QtWidgets.QScrollArea()
+        main_layout.addWidget(scrollable_assets)
+        assets_layout = QtWidgets.QVBoxLayout()
+        scrollable_assets.setLayout(assets_layout)
+        # End setup
+
+        account_info = ProjectConstants.wallet_frame.algod_client.account_info(self.address)
+
+        algos_layout.addWidget(
+            BalanceScrollWidget(
+                "Balance:",
+                str(account_info["amount-without-pending-rewards"]) + " microAlgos"
+            )
+        )
+        algos_layout.addWidget(
+            BalanceScrollWidget(
+                "Pending rewards:",
+                str(account_info["pending-rewards"]) + " microAlgos"
+            )
+        )
+        algos_layout.addStretch(1)
+
+        for i, asset in enumerate(account_info["assets"]):
+            assets_layout.addWidget(
+                BalanceScrollWidget(
+                    "id - " + str(asset["asset-id"]),
+                    str(asset["amount"])
+                )
+            )
+        assets_layout.addStretch(1)
