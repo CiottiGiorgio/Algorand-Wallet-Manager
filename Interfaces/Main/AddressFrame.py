@@ -3,12 +3,18 @@ This file contains AddressFrame which is a QFrame displayed as a result of an op
 """
 
 # PySide2
-from PySide2 import QtWidgets, QtCore
+from PySide2 import QtWidgets, QtCore, QtGui
+
+# algosdk
+from algosdk import transaction
 
 # Local project
 from misc import Constants as ProjectConstants
 from misc.Entities import Wallet
 from Interfaces.Main.AddressWidgets import BalanceScrollWidget
+
+# Python standard libraries
+from functools import partial
 
 
 class AddressFrame(QtWidgets.QFrame):
@@ -25,7 +31,7 @@ class AddressFrame(QtWidgets.QFrame):
 
         self.list_address = QtWidgets.QListWidget()
         self.list_address.setVerticalScrollMode(QtWidgets.QAbstractItemView.ScrollPerPixel)
-
+        self.list_address.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         main_layout.addWidget(self.list_address)
 
         address_button_layout = QtWidgets.QVBoxLayout()
@@ -62,6 +68,7 @@ class AddressFrame(QtWidgets.QFrame):
         # Connections
         self.button_return.clicked.connect(self.close)
         self.button_balance.clicked.connect(self.show_balance)
+        self.list_address.customContextMenuRequested.connect(self.show_context_menu)
 
         # Worker
         # We load the addresses in a non threaded way for now.
@@ -76,11 +83,24 @@ class AddressFrame(QtWidgets.QFrame):
             for widget in [self.button_balance, self.button_export, self.button_delete]:
                 widget.setEnabled(True)
 
+    @QtCore.Slot()
     def show_balance(self):
         item = self.list_address.currentItem()
 
         dialog = BalanceWindow(self, item.text())
         dialog.exec_()
+
+    @QtCore.Slot(QtCore.QPoint)
+    def show_context_menu(self, pos: QtCore.QPoint):
+        if item := self.list_address.itemAt(pos):
+            menu = QtWidgets.QMenu(self)
+
+            menu.addAction("Copy", partial(QtGui.QGuiApplication.clipboard().setText, item.text()))
+
+            global_pos = self.list_address.mapToGlobal(pos)
+            menu.exec_(global_pos)
+
+            menu.deleteLater()
 
 
 class BalanceWindow(QtWidgets.QDialog):
@@ -95,7 +115,7 @@ class BalanceWindow(QtWidgets.QDialog):
         # Setup interface
         self.setWindowTitle("Algos & Assets")
 
-        self.setFixedSize(500, 500)
+        self.setFixedSize(350, 400)
 
         main_layout = QtWidgets.QVBoxLayout(self)
 
@@ -117,6 +137,25 @@ class BalanceWindow(QtWidgets.QDialog):
 
         main_layout.setStretch(3, 1)
         # End setup
+
+        # Initial state
+        new_asset_layout = QtWidgets.QHBoxLayout()
+        assets_layout.addLayout(new_asset_layout)
+
+        self.line_asset_id = QtWidgets.QLineEdit()
+        self.line_asset_id.setPlaceholderText("id of the asset you want to opt-in")
+        # TODO absolutely check what is the range of an ASA
+        self.line_asset_id.setValidator(QtGui.QIntValidator())
+        new_asset_layout.addWidget(self.line_asset_id)
+
+        self.button_opt_in = QtWidgets.QPushButton("Add")
+        new_asset_layout.addWidget(self.button_opt_in)
+
+        new_asset_layout.setStretch(0, 1)
+
+        # Connections
+        self.line_asset_id.textChanged.connect(self.validate_id_line)
+        self.button_opt_in.clicked.connect(self.button_op_in_clicked)
 
         account_info = ProjectConstants.wallet_frame.algod_client.account_info(self.address)
 
@@ -141,3 +180,32 @@ class BalanceWindow(QtWidgets.QDialog):
                 )
             )
         assets_layout.addStretch(1)
+
+    def validate_id_line(self, new_text: str):
+        self.button_opt_in.setEnabled(
+            new_text != ""
+        )
+
+    def button_op_in_clicked(self):
+        try:
+            sp = ProjectConstants.wallet_frame.algod_client.suggested_params()
+            txn = transaction.AssetTransferTxn(
+                self.address,
+                sp.min_fee,
+                sp.first,
+                sp.last,
+                sp.gh,
+                self.address,
+                0,
+                int(self.line_asset_id.text())
+            )
+            s_txn = self.parent().wallet.algo_wallet.sign_transaction(txn)
+            ProjectConstants.wallet_frame.algod_client.send_transaction(s_txn)
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Could not opt-in", str(e))
+        else:
+            QtWidgets.QMessageBox.information(
+                self,
+                "Information",
+                "Keep in mind that opting in could take a few seconds\nfor the transaction to be processed"
+            )

@@ -124,7 +124,7 @@ class ContactsWindow(QtWidgets.QDialog):
     @QtCore.Slot(QtCore.QPoint)
     def show_context_menu(self, pos: QtCore.QPoint):
         if item := self.list_contacts.itemAt(pos):
-            menu = QtWidgets.QMenu()
+            menu = QtWidgets.QMenu(self)
             menu.addAction(self.icon_edit, "Edit", partial(self.edit_contact, item))
             menu.addAction(self.icon_delete, "Delete", partial(self.delete_contact, item))
 

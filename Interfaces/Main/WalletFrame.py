@@ -298,11 +298,8 @@ class UnlockingWallet(QtWidgets.QDialog):
         self.return_value = result
         self.close()
 
-    # TODO make it obvious for the user that an error has occurred.
-    #  Maybe don't close QDialog automatically and substitute the loading widget for an error one.
     @QtCore.Slot(str)
     def unlock_failure(self, error: str):
-        print("Could not open wallet.", file=stderr)
-        print(error, file=stderr)
+        QtWidgets.QMessageBox.critical(self, "Could not open wallet", error)
         self.return_value = None
         self.close()
