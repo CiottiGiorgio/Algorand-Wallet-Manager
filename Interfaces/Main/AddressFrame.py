@@ -109,9 +109,13 @@ class BalanceWindow(QtWidgets.QDialog):
         main_layout.addWidget(QtWidgets.QLabel("Assets:"))
 
         scrollable_assets = QtWidgets.QScrollArea()
+        scrollable_assets.setWidget(content_widget := QtWidgets.QWidget())
+        scrollable_assets.setWidgetResizable(True)
         main_layout.addWidget(scrollable_assets)
         assets_layout = QtWidgets.QVBoxLayout()
-        scrollable_assets.setLayout(assets_layout)
+        content_widget.setLayout(assets_layout)
+
+        main_layout.setStretch(3, 1)
         # End setup
 
         account_info = ProjectConstants.wallet_frame.algod_client.account_info(self.address)
@@ -128,7 +132,6 @@ class BalanceWindow(QtWidgets.QDialog):
                 str(account_info["pending-rewards"]) + " microAlgos"
             )
         )
-        algos_layout.addStretch(1)
 
         for i, asset in enumerate(account_info["assets"]):
             assets_layout.addWidget(

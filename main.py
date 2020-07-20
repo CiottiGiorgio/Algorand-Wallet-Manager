@@ -10,6 +10,7 @@ from PySide2 import QtWidgets
 from misc import Constants as ProjectConstants
 
 
+# TODO Migrate all the GUIs to the ui file.
 # TODO look into the fact that some widgets only get destroyed when the application is closing making the attribute
 #  QtCore.Qt.WA_DeleteOnClose somewhat useless.
 def main():
