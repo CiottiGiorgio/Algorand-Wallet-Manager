@@ -23,8 +23,6 @@ def main():
     MainWindow.initialize()
 
     main_window = MainWindow()
-    # We write a reference to main_window inside Constants.py file.
-    ProjectConstants.main_window = main_window
     main_window.show()
 
     # Enter main loop.

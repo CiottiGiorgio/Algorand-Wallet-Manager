@@ -158,6 +158,8 @@ class ContactsWindow(QtWidgets.QDialog, Ui_Contacts):
             self.contact_widgets.append(new_widget)
             self.listWidget.add_widget(new_widget)
 
+        self.listWidget.sortItems()
+
     @QtCore.Slot(ContactListItem)
     def edit_contact(self, item: ContactListItem):
         edit_contact_window = ContactsCreating(self, self.listWidget.itemWidget(item))
@@ -173,6 +175,8 @@ class ContactsWindow(QtWidgets.QDialog, Ui_Contacts):
             self.contacts_from_json_file.memory.append(new_contact)
             ContactsWindow.contact_widgets.append(new_widget)
             self.listWidget.add_widget(new_widget)
+
+        self.listWidget.sortItems()
 
     @QtCore.Slot(ContactListItem)
     def delete_contact(self, item: ContactListItem):
@@ -213,6 +217,8 @@ class ContactsCreating(QtWidgets.QDialog, Ui_ContactsCreating):
 
         # Anti memory leak
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+
+        self.pre_filled = pre_filled
 
         # This value is set if the user selects a new picture.
         self.external_pic_full_path = None
@@ -264,7 +270,7 @@ class ContactsCreating(QtWidgets.QDialog, Ui_ContactsCreating):
             )
             new_pic_name = rnd_file_name
         else:
-            new_pic_name = self.contact.pic_name
+            new_pic_name = self.pre_filled.contact.pic_name
         self.return_value = ContactListWidget(
             Contact(new_pic_name, self.lineEdit_name.text(), self.lineEdit_address.text())
         )
@@ -316,6 +322,11 @@ class ContactsCreating(QtWidgets.QDialog, Ui_ContactsCreating):
         self.pushButton_delete.setEnabled(False)
 
     def set_label_pixmap(self, pixmap: QtGui.QPixmap):
+        """
+        This method sets the label inside the picture frame.
+
+        It only resized the input pixmap if it is bigger than the label that is going to contain it.
+        """
         picture_size = pixmap.size()
         label_max_size = self.label_picture.maximumSize()
 

@@ -15,15 +15,10 @@ folder_thumbnails = "thumbnails"
 #   Algorand node paths & filenames
 filename_algod_net = "algod.net"
 filename_algod_token = "algod.token"
-# Hard coding the version of kmd isn't the greatest of ideas however this program is written with v0.5 in mind so it
-#  shouldn't be guaranteed that it will work for version of kmd past v0.5.
+#   Hard coding the version of kmd isn't the greatest of ideas however this program is written with v0.5 in mind so it
+#    shouldn't be guaranteed that it will work for version of kmd past v0.5.
 filename_kmd_net = "kmd-v0.5/kmd.net"
 filename_kmd_token = "kmd-v0.5/kmd.token"
-
-#   Global variables for reference to common PySide2 objects.
-#   Am i supposed to change these variables at runtime?
-main_window = None
-wallet_frame = None
 
 # Composite constants
 #   Software data paths & filenames

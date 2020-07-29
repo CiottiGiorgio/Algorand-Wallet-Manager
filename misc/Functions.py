@@ -2,6 +2,9 @@
 This file contains some function that are used in multiple classes but belong to none of them.
 """
 
+# PySide2
+from PySide2 import QtWidgets
+
 # Local project
 from misc.DataStructures import ChangeContainer
 
@@ -39,3 +42,24 @@ def dump_json_file(file: str, structure: ChangeContainer):
     except Exception as e:
         print("Could not dump %s" % file.split('\\')[-1], file=stderr)
         print(e, file=stderr)
+
+
+class SingleInstanceError(Exception):
+    pass
+
+
+def find_main_window() -> QtWidgets.QMainWindow:
+    """
+    This function returns a reference to MainWindow
+
+    This function operates under the assumption that there is only one instance of QMainWindow in the whole application.
+    It will raise an error otherwise.
+    """
+    top_widgets = QtWidgets.QApplication.topLevelWidgets()
+    main_window = [x for x in top_widgets if isinstance(x, QtWidgets.QMainWindow)]
+
+    if len(main_window) != 1:
+        # Uh oh...
+        raise SingleInstanceError
+
+    return main_window[0]

@@ -49,18 +49,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="CustomListWidget" name="listWidget">
-       <property name="contextMenuPolicy">
-        <enum>Qt::CustomContextMenu</enum>
-       </property>
-       <property name="verticalScrollMode">
-        <enum>QAbstractItemView::ScrollPerPixel</enum>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="CustomListWidget" name="listWidget"/>
    </item>
   </layout>
  </widget>

@@ -64,7 +64,7 @@ class AlgorandWorkerSignals(QtCore.QObject):
     This is used in AlgorandWorker to signal a success with return value or an error.
     """
     success = QtCore.Signal(object)
-    error = QtCore.Signal(str)
+    error = QtCore.Signal(Exception)
 
 
 class AlgorandWorker(QtCore.QRunnable):
@@ -92,6 +92,6 @@ class AlgorandWorker(QtCore.QRunnable):
         try:
             result = self.fn(*self.args, **self.kwargs)
         except Exception as e:
-            self.signals.error.emit(str(e))
+            self.signals.error.emit(e)
         else:
             self.signals.success.emit(result)

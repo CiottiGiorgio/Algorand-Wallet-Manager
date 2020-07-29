@@ -8,6 +8,7 @@ from PySide2 import QtWidgets, QtCore, QtGui
 # Local project
 from misc import Constants as ProjectConstants
 from misc.Entities import Wallet
+from misc.Functions import find_main_window
 from Interfaces.Main.Address.Ui_Frame import Ui_AddressFrame
 from Interfaces.Main.Address.Ui_BalanceWindow import Ui_BalanceWindow
 from Interfaces.Main.Address.Widgets import AddressListItem
@@ -31,13 +32,22 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
         self.listWidget.set_item_type(AddressListItem)
 
         # Connections
+        #   listWidget
+        self.listWidget.itemDoubleClicked.connect(self.show_balance)
+        self.listWidget.customContextMenuRequested.connect(self.show_context_menu)
+
+        #   pushButtons
         self.pushButton_return.clicked.connect(self.close)
         self.pushButton_open_balance.clicked.connect(self.show_balance)
-        self.listWidget.customContextMenuRequested.connect(self.show_context_menu)
-        self.listWidget.itemDoubleClicked.connect(self.show_balance)
+        self.pushButton_pending_transactions.clicked.connect(self.show_pending_transactions)
+        self.pushButton_new.clicked.connect(self.new_address)
+        self.pushButton_delete.clicked.connect(self.delete_address)
+        self.pushButton_import.clicked.connect(self.import_address)
+        self.pushButton_export.clicked.connect(self.export_address)
 
         # Worker
-        # We load the addresses in a non threaded way for now.
+        # We load the addresses in a non threaded way for now. It's reasonable because if we are at this point we know
+        #  there is a working kmd server online.
         addresses = self.wallet.algo_wallet.list_keys()
 
         for address in addresses:
@@ -60,8 +70,8 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
 
     @QtCore.Slot()
     def show_balance(self, item: AddressListItem = None):
-        if not ProjectConstants.wallet_frame.algod_client:
-            QtWidgets.QMessageBox.critical(self, "algod settings", "algod settings not valid.")
+        if not find_main_window().wallet_frame.algod_client:
+            QtWidgets.QMessageBox.critical(self, "algod settings", "Please check algod settings.")
             return
 
         if not item:
@@ -69,6 +79,34 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
 
         dialog = BalanceWindow(self, item.text())
         dialog.exec_()
+
+    @QtCore.Slot()
+    def show_pending_transactions(self):
+        if not find_main_window().wallet_frame.algod_client:
+            QtWidgets.QMessageBox.critical(self, "algod settings", "Please check algod settings.")
+            return
+
+        item = self.listWidget.currentItem()
+
+        # TODO come on keep going
+
+    @QtCore.Slot()
+    def new_address(self):
+        pass
+
+    @QtCore.Slot()
+    def delete_address(self):
+        # TODO show a popup that says that deleted addresses are only forgotten by kmd but still exists in the
+        #  blockchain.
+        pass
+
+    @QtCore.Slot()
+    def import_address(self):
+        pass
+
+    @QtCore.Slot()
+    def export_address(self):
+        pass
 
     @QtCore.Slot(QtCore.QPoint)
     def show_context_menu(self, pos: QtCore.QPoint):
@@ -94,7 +132,7 @@ class BalanceWindow(QtWidgets.QDialog, Ui_BalanceWindow):
 
         self.setupUi(self)
 
-        account_info = ProjectConstants.wallet_frame.algod_client.account_info(self.address)
+        account_info = find_main_window().wallet_frame.algod_client.account_info(self.address)
 
         self.label_balance.setText(str(account_info["amount-without-pending-rewards"]) + " microAlgos")
         self.label_pending_rewards.setText(str(account_info["pending-rewards"]) + " microAlgos")

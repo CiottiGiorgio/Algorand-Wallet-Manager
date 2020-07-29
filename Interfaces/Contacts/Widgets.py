@@ -73,7 +73,7 @@ class ContactListWidget(QtWidgets.QWidget):
         # End setup
 
     def __lt__(self, other) -> bool:
-        return self.name < other.name
+        return self.contact.name < other.contact.name
 
     @staticmethod
     def derive_profile_pic(pixmap: QtGui.QPixmap) -> QtGui.QPixmap:

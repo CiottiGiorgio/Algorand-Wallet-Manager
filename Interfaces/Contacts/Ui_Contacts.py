@@ -39,17 +39,10 @@ class Ui_Contacts(object):
 
         self.verticalLayout.addWidget(self.lineEdit)
 
-        self.horizontalLayout = QHBoxLayout()
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
         self.listWidget = CustomListWidget(Contacts)
         self.listWidget.setObjectName(u"listWidget")
-        self.listWidget.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.listWidget.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
 
-        self.horizontalLayout.addWidget(self.listWidget)
-
-
-        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.verticalLayout.addWidget(self.listWidget)
 
 
         self.retranslateUi(Contacts)
