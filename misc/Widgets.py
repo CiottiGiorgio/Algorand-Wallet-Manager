@@ -15,24 +15,22 @@ class CustomListWidget(QtWidgets.QListWidget):
     """
     This class is used to implement a QListWidget with some common code used in the project.
     """
-    def __init__(
-            self,
-            parent: QtWidgets.QWidget,
-            item_type: Type[QtWidgets.QListWidgetItem],
-            loading_widget: bool = False
-    ):
+    def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent)
 
-        self.item_type = item_type
+        self.item_type = QtWidgets.QListWidgetItem
         self.timer = None
 
+    def set_item_type(self, item_type: Type[QtWidgets.QListWidgetItem]):
+        self.item_type = item_type
+
+    def activate_timer(self):
         # We make a LoadingWidget appear after a fixed amount of time. Making it appear instantly would cause weird
         #  effects on the GUI.
-        if loading_widget:
-            self.timer = QtCore.QTimer()
-            self.timer.setSingleShot(True)
-            self.timer.timeout.connect(lambda: self.add_widget(LoadingWidget()))
-            self.timer.start(300)
+        self.timer = QtCore.QTimer()
+        self.timer.setSingleShot(True)
+        self.timer.timeout.connect(lambda: self.add_widget(LoadingWidget(self)))
+        self.timer.start(300)
 
     def add_widget(self, widget: QtWidgets.QWidget):
         """
@@ -49,6 +47,7 @@ class CustomListWidget(QtWidgets.QListWidget):
         """
         This method cleans the list from a possible LoadingWidget.
         """
+        # FIXME if self.timer = None
         if self.timer.isActive():
             self.timer.stop()
             self.timer.timeout.disconnect()
@@ -93,10 +92,10 @@ class LoadingWidget(QtWidgets.QWidget):
     """
 
     # We don't make the loading gif static because it's a movie with a .start() method and i'm not sure
-    #  if sharing it with other widget might cause an issue.
+    #  if sharing it with other widget might cause issues.
 
-    def __init__(self, label_content: str = "Loading..."):
-        super().__init__()
+    def __init__(self, parent: QtWidgets.QWidget, label_content: str = "Loading..."):
+        super().__init__(parent)
 
         # Anti memory leak
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -122,35 +121,3 @@ class LoadingWidget(QtWidgets.QWidget):
         # End setup
 
         movie.start()
-
-
-class ErrorWidget(QtWidgets.QWidget):
-    """
-    This class implements a simple widget used to show an error message.
-    """
-
-    error_icon = QtGui.QPixmap(path.abspath("graphics/not_valid.png")).scaled(
-        20, 20,
-        QtCore.Qt.IgnoreAspectRatio,
-        QtCore.Qt.SmoothTransformation)
-
-    def __init__(self, label_content: str = "Error."):
-        super().__init__()
-
-        # Anti memory leak
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-
-        # Setup interface
-        main_layout = QtWidgets.QHBoxLayout(self)
-
-        main_layout.addStretch(1)
-
-        label_pixmap = QtWidgets.QLabel()
-        label_pixmap.setPixmap(ErrorWidget.error_icon)
-        main_layout.addWidget(label_pixmap)
-
-        label_message = QtWidgets.QLabel(label_content)
-        main_layout.addWidget(label_message)
-
-        main_layout.addStretch(1)
-        # End setup

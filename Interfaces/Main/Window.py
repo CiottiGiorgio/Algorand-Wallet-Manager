@@ -13,11 +13,11 @@ import misc.Constants as ProjectConstants
 from misc.Functions import load_json_file, dump_json_file
 from misc.Entities import AlgorandWorker
 from misc.Widgets import LoadingWidget
-from misc.Widgets import StackedQueuedWidget
-from Interfaces.Main.WalletFrame import WalletsFrame
-from Interfaces.Contacts.Windows import ContactsWindow, ListJsonContacts
-from Interfaces.Settings.Windows import SettingsWindow, DictJsonSettings
-from Interfaces.About.Windows import InfoWindow, CreditsWindow
+from Interfaces.Main.Ui_Window import Ui_MainWindow
+from Interfaces.Main.Wallet.Frame import WalletsFrame
+from Interfaces.Contacts.Window import ContactsWindow, ListJsonContacts
+from Interfaces.Settings.Window import SettingsWindow, DictJsonSettings
+from Interfaces.About.Window import InfoWindow, CreditsWindow
 
 # Python standard libraries
 from os import path, mkdir
@@ -26,7 +26,7 @@ from typing import Type
 import jsonpickle
 
 
-class MainWindow(QtWidgets.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     """
     Algorand Wallet Manager main window.
 
@@ -47,69 +47,45 @@ class MainWindow(QtWidgets.QMainWindow):
         #  Either way we get an answer from thread A within some fixed time.
         self.thread_pool = QtCore.QThreadPool(self)
 
-        # Setup interface
-        #   Window icon, title & size
+        self.setupUi(self)
+
         self.setWindowIcon(QtGui.QIcon(path.abspath("graphics/python_icon.ico")))
-        self.setWindowTitle("Algorand Wallet Manager")
-        self.setFixedSize(550, 300)
 
-        #   MenuBar initialization
-        self.menu_action_new_transaction = self.menuBar().addAction("New transaction")
-        self.menu_action_contacts = self.menuBar().addAction("Contacts")
-        self.menu_action_settings = self.menuBar().addAction("Settings")
-        self.menu_about = self.menuBar().addMenu("About")
-        self.menu_action_info = self.menu_about.addAction("Info")
-        self.menu_action_credits = self.menu_about.addAction("Credits")
+        # This has to be done here because Qt Creator doesn't allow action on the menuBar itself.
+        self.menuAction_NewTransaction = self.menuBar().addAction("New transaction")
+        self.menuAction_Contacts = self.menuBar().addAction("Contacts")
+        self.menuAction_Settings = self.menuBar().addAction("Settings")
+        self.menu_About = self.menuBar().addMenu("About")
+        self.menuAction_Info = self.menu_About.addAction("Info")
+        self.menuAction_Credits = self.menu_About.addAction("Credits")
 
-        # This layout will be used to display the single WalletFrame and multiple AddressFrame one at a time.
-        self.main_widget = StackedQueuedWidget(self)
-        self.setCentralWidget(self.main_widget)
-        # End setup
+        # Initial state
+        self.menuAction_NewTransaction.setEnabled(False)
 
         # Connections
-        # Using partial could be troubling because of circular dependency between memory in python.
-        self.menu_action_contacts.triggered.connect(
+        self.menuAction_NewTransaction.triggered.connect(
+            lambda: None
+        )
+        self.menuAction_Settings.triggered.connect(
+            self.exec_settings
+        )
+        self.menuAction_Contacts.triggered.connect(
             partial(self.exec_dialog, ContactsWindow)
         )
-        self.menu_action_settings.triggered.connect(
-            partial(self.exec_dialog, SettingsWindow)
-        )
-        self.menu_action_info.triggered.connect(
+        self.menuAction_Info.triggered.connect(
             partial(self.exec_dialog, InfoWindow)
         )
-        self.menu_action_credits.triggered.connect(
+        self.menuAction_Credits.triggered.connect(
             partial(self.exec_dialog, CreditsWindow)
         )
 
-        # We hijack this method to do the first start.
         self.restart()
 
-    @staticmethod
-    def initialize():
-        """
-        This method does some preparation work such as creating folders and files if they are not present in
-        the filesystem.
-
-        This method is meant to be called before Main instantiation.
-        """
-        # Create user data folders
-        if not path.exists(ProjectConstants.path_user_data):
-            mkdir(ProjectConstants.path_user_data)
-        if not path.exists(ProjectConstants.fullpath_thumbnails):
-            mkdir(ProjectConstants.fullpath_thumbnails)
-
-        # Create json files
-        if not path.exists(file := ProjectConstants.fullpath_contacts_json):
-            with open(file, 'w') as f:
-                f.write(jsonpickle.encode(ListJsonContacts(), indent='\t'))
-        if not path.exists(file := ProjectConstants.fullpath_settings_json):
-            with open(file, 'w') as f:
-                f.write(jsonpickle.encode(DictJsonSettings(), indent='\t'))
-
-        ContactsWindow.contacts_from_json_file = load_json_file(ProjectConstants.fullpath_contacts_json)
-        ContactsWindow.contacts_from_json_file.save_state()
-        SettingsWindow.settings_from_json_file = load_json_file(ProjectConstants.fullpath_settings_json)
-        SettingsWindow.settings_from_json_file.save_state()
+    @QtCore.Slot()
+    def exec_settings(self):
+        settings_window = SettingsWindow(self)
+        if (settings_window.exec_()) == QtWidgets.QDialog.Accepted:
+            self.restart()
 
     def exec_dialog(self, dialog: Type[QtWidgets.QDialog]):
         """
@@ -127,15 +103,14 @@ class MainWindow(QtWidgets.QMainWindow):
         This method also makes sure that new settings are refreshed into new rest endpoints.
         """
         # This will be enabled in the future when it can be called. (i.e.: there exists at least one wallet)
-        for menu_action in [self.menu_action_new_transaction]:
-            menu_action.setEnabled(False)
+        self.menuAction_NewTransaction.setEnabled(False)
 
-        if self.main_widget.count() >= 1:
-            self.main_widget.clear_queue()
+        if self.queuedWidget.count() >= 1:
+            self.queuedWidget.clear_queue()
 
         SettingsWindow.calculate_rest_endpoints()
 
-        self.main_widget.add_widget(wallet_frame := WalletsFrame(self))
+        self.queuedWidget.add_widget(wallet_frame := WalletsFrame(self))
         ProjectConstants.wallet_frame = wallet_frame
 
     def start_worker(self, fn: callable, fn_success: callable, fn_error: callable) -> AlgorandWorker:
@@ -176,6 +151,34 @@ class MainWindow(QtWidgets.QMainWindow):
 
         event.accept()
 
+    @staticmethod
+    def initialize():
+        """
+        This method does some preparation work such as creating folders and files if they are not present in
+        the filesystem.
+
+        This method is meant to be called before Main instantiation however it's convenient that it is a method here
+        because SettingsWindow and ContactsWindow needs to be imported.
+        """
+        # Create user data folders
+        if not path.exists(ProjectConstants.path_user_data):
+            mkdir(ProjectConstants.path_user_data)
+        if not path.exists(ProjectConstants.fullpath_thumbnails):
+            mkdir(ProjectConstants.fullpath_thumbnails)
+
+        # Create json files
+        if not path.exists(file := ProjectConstants.fullpath_contacts_json):
+            with open(file, 'w') as f:
+                f.write(jsonpickle.encode(ListJsonContacts(), indent='\t'))
+        if not path.exists(file := ProjectConstants.fullpath_settings_json):
+            with open(file, 'w') as f:
+                f.write(jsonpickle.encode(DictJsonSettings(), indent='\t'))
+
+        ContactsWindow.contacts_from_json_file = load_json_file(ProjectConstants.fullpath_contacts_json)
+        ContactsWindow.contacts_from_json_file.save_state()
+        SettingsWindow.settings_from_json_file = load_json_file(ProjectConstants.fullpath_settings_json)
+        SettingsWindow.settings_from_json_file.save_state()
+
 
 class ClosingWindow(QtWidgets.QDialog):
     """
@@ -190,7 +193,7 @@ class ClosingWindow(QtWidgets.QDialog):
 
         main_layout = QtWidgets.QHBoxLayout(self)
 
-        main_layout.addWidget(LoadingWidget("Waiting for all tasks to close..."))
+        main_layout.addWidget(LoadingWidget(self, "Waiting for all tasks to close..."))
 
         closing_timer = QtCore.QTimer(self)
         closing_timer.timeout.connect(self.terminate)

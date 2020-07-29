@@ -15,45 +15,17 @@ import misc.Constants as ProjectConstants
 from misc.Entities import Contact
 
 # Python standard libraries
-from functools import cached_property
 from os import path
 
 
-# Of course once a ContactListWidget has been assigned to a ContactListItem it's wrong to swap with a
-#  second ContactListWidget because then the cached properties will be incoherent.
 class ContactListItem(QtWidgets.QListWidgetItem):
     """
     Item used in the contacts list.
 
     Most of its features are only available when a ContactListWidget is inside it.
     """
-    def __lt__(self, other):
-        return self.child_widget < other.child_widget
-
-    @cached_property
-    def child_widget(self):
-        # This is dumb as hell. You can't do something like .child() on QListWidgetItem. You have to go back to the
-        #  entire list and reference yourself as the item and then retrieve the widget contained in self.
-        return self.listWidget().itemWidget(self)
-
-    # This changes the method into being an attribute that is only computed the first time.
-    # This is made under the assumption that the widget inside a given item doesn't change.
-    # This will be useful for dynamically filtering search bar.
-    @cached_property
-    def widget_name(self):
-        return self.child_widget.name
-
-    @cached_property
-    def widget_info(self):
-        return self.child_widget.info
-
-    @cached_property
-    def widget_pic_name(self):
-        return self.child_widget.pic_name
-
-    @cached_property
-    def widget_pixmap(self):
-        return self.child_widget.pixmap
+    def __lt__(self, other) -> bool:
+        return self.listWidget().itemWidget(self) < other.listWidget().itemWidget(other)
 
 
 class ContactListWidget(QtWidgets.QWidget):
@@ -70,19 +42,17 @@ class ContactListWidget(QtWidgets.QWidget):
         #  the widget.
         self.contact = contact
 
-        self.pic_name = contact.pic_name
-        self.name = contact.name
-        self.info = contact.info
-        self.pixmap = QtGui.QPixmap(
-            path.join(ProjectConstants.path_user_data, ProjectConstants.folder_thumbnails, self.contact.pic_name)) if \
-            self.pic_name else \
-            self.pixmap_generic_user
-
         # Setup interface
         main_layout = QtWidgets.QHBoxLayout(self)
 
         self.label_pixmap = QtWidgets.QLabel()
-        self.label_pixmap.setPixmap(self.derive_profile_pic(self.pixmap))
+        self.label_pixmap.setPixmap(
+                ContactListWidget.derive_profile_pic(
+                    QtGui.QPixmap(path.join(ProjectConstants.fullpath_thumbnails, self.contact.pic_name))
+                    if self.contact.pic_name else
+                    self.pixmap_generic_user
+            )
+        )
         main_layout.addWidget(self.label_pixmap)
 
         main_layout.addSpacing(5)
@@ -90,12 +60,12 @@ class ContactListWidget(QtWidgets.QWidget):
         main_layout.addLayout(label_layout := QtWidgets.QVBoxLayout())
 
         #   Name label
-        self.label_name = QtWidgets.QLabel(self.name)
+        self.label_name = QtWidgets.QLabel(self.contact.name)
         self.label_name.setStyleSheet("font: 13pt;")
         label_layout.addWidget(self.label_name)
 
         #   Info label
-        self.label_info = QtWidgets.QLabel(self.info)
+        self.label_info = QtWidgets.QLabel(self.contact.info)
         self.label_info.setStyleSheet("font: 8pt;")
         label_layout.addWidget(self.label_info)
 

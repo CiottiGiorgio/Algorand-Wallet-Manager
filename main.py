@@ -10,9 +10,6 @@ from PySide2 import QtWidgets
 from misc import Constants as ProjectConstants
 
 
-# TODO Migrate all the GUIs to the ui file.
-# TODO look into the fact that some widgets only get destroyed when the application is closing making the attribute
-#  QtCore.Qt.WA_DeleteOnClose somewhat useless.
 def main():
     # Manager of all things regarding a widget-based Qt5 app.
     #  Eg.: mainloop, events, initialization, finalization, ...
@@ -21,7 +18,7 @@ def main():
     # This import has to be done here because there are several static resources inside this package which
     #  will be loaded during the import of the package itself. So because most misc are PySide2 objects
     #  QApplication needs to be running to perform all task needed.
-    from Interfaces.Main.Windows import MainWindow
+    from Interfaces.Main.Window import MainWindow
 
     MainWindow.initialize()
 
