@@ -13,6 +13,7 @@ from Interfaces.Settings.Ui_Settings import Ui_Settings
 
 # Python standard libraries
 from os import path
+from sys import stderr
 
 
 class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
@@ -29,6 +30,8 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
         self.setupUi(self)
 
         # Connections
+        self.radioButton_local.toggled.connect(self.radiobutton_change_enabled)
+        self.radioButton_remote.toggled.connect(self.radiobutton_change_enabled)
         self.pushButton_folder.clicked.connect(self.pushbutton_folder_dialog)
 
         # Initial states
@@ -57,6 +60,8 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
             settings["selected"] = 0
         elif self.radioButton_remote.isChecked():
             settings["selected"] = 1
+        else:
+            print("This line is impossible to execute. If you see this the universe is collapsing.", file=stderr)
 
         settings["local"] = self.lineEdit_local.text()
 
@@ -69,6 +74,27 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
         settings["kmd"]["token"] = self.lineEdit_kmd_token.text()
 
         super().accept()
+
+    @QtCore.Slot()
+    def radiobutton_change_enabled(self):
+        if self.radioButton_local.isChecked():
+            for widget in [self.lineEdit_local, self.pushButton_folder]:
+                widget.setEnabled(True)
+
+            for widget in [self.lineEdit_algod_url, self.lineEdit_algod_port, self.lineEdit_algod_token,
+                           self.lineEdit_kmd_url, self.lineEdit_kmd_port, self.lineEdit_kmd_token,
+                           self.lineEdit_indexer_url, self.lineEdit_indexer_port, self.lineEdit_indexer_token]:
+                widget.setEnabled(False)
+        elif self.radioButton_remote.isChecked():
+            for widget in [self.lineEdit_local, self.pushButton_folder]:
+                widget.setEnabled(False)
+
+            for widget in [self.lineEdit_algod_url, self.lineEdit_algod_port, self.lineEdit_algod_token,
+                           self.lineEdit_kmd_url, self.lineEdit_kmd_port, self.lineEdit_kmd_token,
+                           self.lineEdit_indexer_url, self.lineEdit_indexer_port, self.lineEdit_indexer_token]:
+                widget.setEnabled(True)
+        else:
+            print("This line is impossible to execute. If you see this the universe is collapsing.", file=stderr)
 
     @QtCore.Slot()
     def pushbutton_folder_dialog(self):

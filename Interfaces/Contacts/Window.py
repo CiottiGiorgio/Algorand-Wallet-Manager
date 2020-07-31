@@ -77,6 +77,7 @@ class ContactsWindow(QtWidgets.QDialog, Ui_Contacts):
         self.menuBar = QtWidgets.QMenuBar()
         self.menuBarAction = self.menuBar.addAction("New contact")
         self.verticalLayout.setMenuBar(self.menuBar)
+        self.menuBar.setNativeMenuBar(False)
 
         #   Search bar
         self.lineEdit.addAction(self.icon_search, QtWidgets.QLineEdit.LeadingPosition)
@@ -271,7 +272,7 @@ class ContactsCreating(QtWidgets.QDialog, Ui_ContactsCreating):
             )
             new_pic_name = rnd_file_name
         else:
-            new_pic_name = self.pre_filled.contact.pic_name
+            new_pic_name = self.pre_filled.contact.pic_name if self.pre_filled else None
         self.return_value = ContactListWidget(
             Contact(new_pic_name, self.lineEdit_name.text(), self.lineEdit_address.text())
         )

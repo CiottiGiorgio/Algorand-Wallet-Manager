@@ -41,6 +41,7 @@ class Ui_Contacts(object):
 
         self.listWidget = CustomListWidget(Contacts)
         self.listWidget.setObjectName(u"listWidget")
+        self.listWidget.setContextMenuPolicy(Qt.CustomContextMenu)
 
         self.verticalLayout.addWidget(self.listWidget)
 

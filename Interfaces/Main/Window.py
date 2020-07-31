@@ -49,6 +49,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.setupUi(self)
 
+        self.menuBar().setNativeMenuBar(False)
+
         self.wallet_frame = None
 
         self.setWindowIcon(QtGui.QIcon(path.abspath("graphics/python_icon.ico")))
