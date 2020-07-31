@@ -106,7 +106,8 @@ class ContactsWindow(QtWidgets.QDialog, Ui_Contacts):
 
     @QtCore.Slot(QtCore.QPoint)
     def show_context_menu(self, pos: QtCore.QPoint):
-        if item := self.listWidget.itemAt(pos):
+        item = self.listWidget.itemAt(pos)
+        if item:
             widget = self.listWidget.itemWidget(item)
 
             menu = QtWidgets.QMenu(self)

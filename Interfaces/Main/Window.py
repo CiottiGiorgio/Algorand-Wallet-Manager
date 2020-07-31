@@ -112,8 +112,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         SettingsWindow.calculate_rest_endpoints()
 
-        self.queuedWidget.add_widget(wallet_frame := WalletsFrame(self))
-        self.wallet_frame = wallet_frame
+        self.wallet_frame = WalletsFrame(self)
+        self.queuedWidget.add_widget(self.wallet_frame)
 
     def start_worker(self, fn: callable, fn_success: callable, fn_error: callable) -> AlgorandWorker:
         worker = AlgorandWorker(fn)
@@ -169,10 +169,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             mkdir(ProjectConstants.fullpath_thumbnails)
 
         # Create json files
-        if not path.exists(file := ProjectConstants.fullpath_contacts_json):
+        file = ProjectConstants.fullpath_contacts_json
+        if not path.exists(file):
             with open(file, 'w') as f:
                 f.write(jsonpickle.encode(ListJsonContacts(), indent='\t'))
-        if not path.exists(file := ProjectConstants.fullpath_settings_json):
+        file = ProjectConstants.fullpath_settings_json
+        if not path.exists(file):
             with open(file, 'w') as f:
                 f.write(jsonpickle.encode(DictJsonSettings(), indent='\t'))
 

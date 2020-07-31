@@ -144,7 +144,8 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
 
     @QtCore.Slot(QtCore.QPoint)
     def show_context_menu(self, pos: QtCore.QPoint):
-        if item := self.listWidget.itemAt(pos):
+        item = self.listWidget.itemAt(pos)
+        if item:
             menu = QtWidgets.QMenu(self)
 
             menu.addAction("Copy to clipboard", partial(QtGui.QGuiApplication.clipboard().setText, item.text()))

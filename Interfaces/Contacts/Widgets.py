@@ -57,7 +57,8 @@ class ContactListWidget(QtWidgets.QWidget):
 
         main_layout.addSpacing(5)
 
-        main_layout.addLayout(label_layout := QtWidgets.QVBoxLayout())
+        label_layout = QtWidgets.QVBoxLayout()
+        main_layout.addLayout(label_layout)
 
         #   Name label
         self.label_name = QtWidgets.QLabel(self.contact.name)
