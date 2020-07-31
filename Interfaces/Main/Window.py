@@ -10,7 +10,7 @@ from PySide2 import QtWidgets, QtGui, QtCore
 
 # Local project
 import misc.Constants as ProjectConstants
-from misc.Functions import load_json_file, dump_json_file, find_main_window
+from misc.Functions import load_json_file, dump_json_file
 from misc.Entities import AlgorandWorker
 from misc.Widgets import LoadingWidget
 from Interfaces.Main.Ui_Window import Ui_MainWindow
@@ -49,6 +49,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.setupUi(self)
 
+        self.wallet_frame = None
+
         self.setWindowIcon(QtGui.QIcon(path.abspath("graphics/python_icon.ico")))
 
         # This has to be done here because Qt Creator doesn't allow action on the menuBar itself.
@@ -84,7 +86,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     @QtCore.Slot()
     def exec_settings(self):
         settings_window = SettingsWindow(self)
-        if (settings_window.exec_()) == QtWidgets.QDialog.Accepted:
+        if settings_window.exec_() == QtWidgets.QDialog.Accepted:
             self.restart()
 
     def exec_dialog(self, dialog: Type[QtWidgets.QDialog]):
@@ -111,7 +113,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         SettingsWindow.calculate_rest_endpoints()
 
         self.queuedWidget.add_widget(wallet_frame := WalletsFrame(self))
-        find_main_window().wallet_frame = wallet_frame
+        self.wallet_frame = wallet_frame
 
     def start_worker(self, fn: callable, fn_success: callable, fn_error: callable) -> AlgorandWorker:
         worker = AlgorandWorker(fn)

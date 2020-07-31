@@ -6,12 +6,10 @@ This file contains AddressFrame which is a QFrame displayed as a result of an op
 from PySide2 import QtWidgets, QtCore, QtGui
 
 # Local project
-from misc import Constants as ProjectConstants
 from misc.Entities import Wallet
 from misc.Functions import find_main_window
 from Interfaces.Main.Address.Ui_Frame import Ui_AddressFrame
 from Interfaces.Main.Address.Ui_BalanceWindow import Ui_BalanceWindow
-from Interfaces.Main.Address.Widgets import AddressListItem
 from Interfaces.Main.Address.Widgets import BalanceScrollWidget
 
 # Python standard libraries
@@ -19,8 +17,8 @@ from functools import partial
 
 
 class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
-    def __init__(self, wallet: Wallet):
-        super().__init__()
+    def __init__(self, parent: QtWidgets.QWidget, wallet: Wallet):
+        super().__init__(parent)
 
         # Anti memory leak
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
@@ -28,8 +26,6 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
         self.wallet = wallet
 
         self.setupUi(self)
-
-        self.listWidget.set_item_type(AddressListItem)
 
         # Connections
         #   listWidget
@@ -39,7 +35,6 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
         #   pushButtons
         self.pushButton_return.clicked.connect(self.close)
         self.pushButton_open_balance.clicked.connect(self.show_balance)
-        self.pushButton_pending_transactions.clicked.connect(self.show_pending_transactions)
         self.pushButton_new.clicked.connect(self.new_address)
         self.pushButton_delete.clicked.connect(self.delete_address)
         self.pushButton_import.clicked.connect(self.import_address)
@@ -56,8 +51,7 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
         if len(addresses) >= 1:
             self.listWidget.setCurrentRow(0)
 
-            for widget in [self.pushButton_open_balance, self.pushButton_pending_transactions,
-                           self.pushButton_delete, self.pushButton_export]:
+            for widget in [self.pushButton_open_balance, self.pushButton_delete, self.pushButton_export]:
                 widget.setEnabled(True)
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
@@ -69,44 +63,84 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
             self.close()
 
     @QtCore.Slot()
-    def show_balance(self, item: AddressListItem = None):
-        if not find_main_window().wallet_frame.algod_client:
-            QtWidgets.QMessageBox.critical(self, "algod settings", "Please check algod settings.")
-            return
-
+    def show_balance(self, item: QtWidgets.QListWidgetItem = None):
         if not item:
             item = self.listWidget.currentItem()
 
-        dialog = BalanceWindow(self, item.text())
-        dialog.exec_()
-
-    @QtCore.Slot()
-    def show_pending_transactions(self):
         if not find_main_window().wallet_frame.algod_client:
             QtWidgets.QMessageBox.critical(self, "algod settings", "Please check algod settings.")
             return
 
-        item = self.listWidget.currentItem()
-
-        # TODO come on keep going
+        try:
+            account_info = find_main_window().wallet_frame.algod_client.account_info(item.text())
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Could not load balance", str(e))
+        else:
+            dialog = BalanceWindow(self, account_info)
+            dialog.exec_()
 
     @QtCore.Slot()
     def new_address(self):
-        pass
+        try:
+            self.wallet.algo_wallet.generate_key()
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Could not generate new address", str(e))
+        else:
+            self.restart()
 
     @QtCore.Slot()
     def delete_address(self):
-        # TODO show a popup that says that deleted addresses are only forgotten by kmd but still exists in the
-        #  blockchain.
-        pass
+        item = self.listWidget.currentItem()
+
+        if QtWidgets.QMessageBox.question(
+            self, "Deleting address",
+            "Please keep in mind that deleting an address means that it will disappear from the wallet.\n\n"
+            "However there is no way to delete the presence of this address from the blockchain.\n\n"
+            "Would you like to continue?"
+        ) != QtWidgets.QMessageBox.StandardButton.Yes:
+            return
+
+        try:
+            self.wallet.algo_wallet.delete_key(item.text())
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Could not delete address", str(e))
+        else:
+            self.restart()
 
     @QtCore.Slot()
     def import_address(self):
-        pass
+        if QtWidgets.QMessageBox.question(
+                self, "Importing address",
+                "Please keep in mind that, when recovering a wallet in the future, only the addresses derived from "
+                "the Master Derivation Key are restored.\n\n"
+                "Importing an address inside a wallet is not the same as deriving it from the wallet.\n\n"
+                "Would you like to continue?"
+        ) != QtWidgets.QMessageBox.StandardButton.Yes:
+            return
+
+        new_address = QtWidgets.QInputDialog.getText(
+            self, "Importing address",
+            "Please fill in with the address private key", QtWidgets.QLineEdit.EchoMode.Password
+        )
+        if new_address[1]:
+            try:
+                self.wallet.algo_wallet.import_key(new_address[0])
+            except Exception as e:
+                QtWidgets.QMessageBox.critical(self, "Could not import address", str(e))
+            else:
+                self.restart()
 
     @QtCore.Slot()
     def export_address(self):
-        pass
+        item = self.listWidget.currentItem()
+
+        try:
+            private_key = self.wallet.algo_wallet.export_key(item.text())
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Could not export address", str(e))
+        else:
+            QtGui.QGuiApplication.clipboard().setText(private_key)
+            QtWidgets.QMessageBox.information(self, "Success", "Private key copied into clipboard")
 
     @QtCore.Slot(QtCore.QPoint)
     def show_context_menu(self, pos: QtCore.QPoint):
@@ -120,19 +154,23 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
 
             menu.deleteLater()
 
+    def restart(self):
+        queued_widget = find_main_window().queuedWidget
+
+        queued_widget.remove_top_widget()
+        queued_widget.add_widget(AddressFrame(queued_widget, self.wallet))
+
 
 class BalanceWindow(QtWidgets.QDialog, Ui_BalanceWindow):
-    def __init__(self, parent: QtWidgets.QWidget, address: str):
+    def __init__(self, parent: QtWidgets.QWidget, account_info: dict):
         super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
-
-        self.address = address
 
         # Anti memory leak
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
-        self.setupUi(self)
+        self.account_info = account_info
 
-        account_info = find_main_window().wallet_frame.algod_client.account_info(self.address)
+        self.setupUi(self)
 
         self.label_balance.setText(str(account_info["amount-without-pending-rewards"]) + " microAlgos")
         self.label_pending_rewards.setText(str(account_info["pending-rewards"]) + " microAlgos")

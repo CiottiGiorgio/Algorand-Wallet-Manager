@@ -44,12 +44,6 @@ class Ui_AddressFrame(object):
 
         self.verticalLayout.addWidget(self.pushButton_open_balance)
 
-        self.pushButton_pending_transactions = QPushButton(AddressFrame)
-        self.pushButton_pending_transactions.setObjectName(u"pushButton_pending_transactions")
-        self.pushButton_pending_transactions.setEnabled(False)
-
-        self.verticalLayout.addWidget(self.pushButton_pending_transactions)
-
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.verticalLayout.addItem(self.verticalSpacer)
@@ -90,8 +84,6 @@ class Ui_AddressFrame(object):
         self.pushButton_return.setText(QCoreApplication.translate("AddressFrame", u"Return", None))
         self.pushButton_open_balance.setText(QCoreApplication.translate("AddressFrame", u"Open\n"
 "Balance", None))
-        self.pushButton_pending_transactions.setText(QCoreApplication.translate("AddressFrame", u"Pending\n"
-"Transactions", None))
         self.pushButton_new.setText(QCoreApplication.translate("AddressFrame", u"New", None))
         self.pushButton_delete.setText(QCoreApplication.translate("AddressFrame", u"Delete", None))
         self.pushButton_import.setText(QCoreApplication.translate("AddressFrame", u"Import", None))

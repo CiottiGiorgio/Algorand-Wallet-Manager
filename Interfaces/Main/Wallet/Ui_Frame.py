@@ -54,17 +54,11 @@ class Ui_WalletFrame(object):
 
         self.verticalLayout.addWidget(self.pushButton_Rename)
 
-        self.pushButton_New = QPushButton(WalletFrame)
-        self.pushButton_New.setObjectName(u"pushButton_New")
-        self.pushButton_New.setEnabled(False)
+        self.pushButton_NewImport = QPushButton(WalletFrame)
+        self.pushButton_NewImport.setObjectName(u"pushButton_NewImport")
+        self.pushButton_NewImport.setEnabled(False)
 
-        self.verticalLayout.addWidget(self.pushButton_New)
-
-        self.pushButton_Import = QPushButton(WalletFrame)
-        self.pushButton_Import.setObjectName(u"pushButton_Import")
-        self.pushButton_Import.setEnabled(False)
-
-        self.verticalLayout.addWidget(self.pushButton_Import)
+        self.verticalLayout.addWidget(self.pushButton_NewImport)
 
         self.pushButton_Export = QPushButton(WalletFrame)
         self.pushButton_Export.setObjectName(u"pushButton_Export")
@@ -90,8 +84,7 @@ class Ui_WalletFrame(object):
 "Addresses", None))
         self.pushButton_LockUnlock.setText(QCoreApplication.translate("WalletFrame", u"Lock/Unlock", None))
         self.pushButton_Rename.setText(QCoreApplication.translate("WalletFrame", u"Rename", None))
-        self.pushButton_New.setText(QCoreApplication.translate("WalletFrame", u"New", None))
-        self.pushButton_Import.setText(QCoreApplication.translate("WalletFrame", u"Import", None))
+        self.pushButton_NewImport.setText(QCoreApplication.translate("WalletFrame", u"New/Import", None))
         self.pushButton_Export.setText(QCoreApplication.translate("WalletFrame", u"Export", None))
     # retranslateUi
 

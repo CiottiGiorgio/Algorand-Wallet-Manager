@@ -12,7 +12,7 @@ import os
 
 
 def ui_compile(source: str, destination: str):
-    os.system("pyside2-uic %s -o %s" % (source, destination))
+    os.system(f"pyside2-uic {source} -o {destination}")
 
 
 # This loop recursively walk through all dirs starting from this script dir

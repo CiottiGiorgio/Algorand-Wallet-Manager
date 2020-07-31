@@ -67,22 +67,12 @@ Addresses</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_New">
+      <widget class="QPushButton" name="pushButton_NewImport">
        <property name="enabled">
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>New</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButton_Import">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>Import</string>
+        <string>New/Import</string>
        </property>
       </widget>
      </item>

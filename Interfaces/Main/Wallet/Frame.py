@@ -14,11 +14,11 @@ from algosdk.wallet import Wallet as AlgosdkWallet
 from algosdk.mnemonic import to_master_derivation_key
 
 # Local project
-from misc import Constants as ProjectConstants
 from misc.Entities import Wallet
 from misc.Functions import find_main_window
 from Interfaces.Main.Wallet.Ui_Frame import Ui_WalletFrame
 from Interfaces.Main.Wallet.Ui_WalletUnlock import Ui_WalletUnlock
+from Interfaces.Main.Wallet.Ui_NewImportWallet import Ui_NewImportWallet
 from Interfaces.Main.Wallet.Widgets import WalletListItem, WalletListWidget
 from Interfaces.Main.Address.Frame import AddressFrame
 from Interfaces.Settings.Window import SettingsWindow
@@ -53,8 +53,7 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
         self.pushButton_Manage.clicked.connect(self.manage_wallet)
         self.pushButton_LockUnlock.clicked.connect(self.lock_unlock_wallet)
         self.pushButton_Rename.clicked.connect(self.rename_wallet)
-        self.pushButton_New.clicked.connect(self.new_wallet)
-        self.pushButton_Import.clicked.connect(self.import_wallet)
+        self.pushButton_NewImport.clicked.connect(self.new_import_wallet)
         self.pushButton_Export.clicked.connect(self.export_wallet)
 
         if "kmd" in SettingsWindow.rest_endpoints:
@@ -91,10 +90,10 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
             print("indexer settings not valid.", file=stderr)
 
     def closeEvent(self, arg__1: QtGui.QCloseEvent):
-        arg__1.accept()
         if self.worker:
             self.worker.signals.success.disconnect()
             self.worker.signals.error.disconnect()
+        arg__1.accept()
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         if event.key() == int(QtCore.Qt.Key_Return) and self.listWidget.hasFocus():
@@ -111,8 +110,9 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
         if self.unlock_item(item):
             widget = self.listWidget.itemWidget(item)
 
-            find_main_window().queuedWidget.add_widget(
-                AddressFrame(widget.wallet)
+            queued_widget = find_main_window().queuedWidget
+            queued_widget.add_widget(
+                AddressFrame(queued_widget, widget.wallet)
             )
 
     @QtCore.Slot()
@@ -139,73 +139,27 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
                 else:
                     widget.label_primary.setText(new_name[0])
 
-    # TODO Create a separate form to ask for (name, password, master key) and maybe merge new / import to the same
-    #  button / method. This is some prime code duplication.
     @QtCore.Slot()
-    def new_wallet(self):
-        name = QtWidgets.QInputDialog.getText(
-            self, "New wallet", "Please insert a name:",
-            QtWidgets.QLineEdit.Normal
-        )
-        if not name[1]:
-            return
+    def new_import_wallet(self):
+        # TODO when importing a wallet ask the user how many addresses must be recovered.
+        input_dialog = NewImportWallet(self)
 
-        password = QtWidgets.QInputDialog.getText(
-            self, "New wallet", "Please insert a password:",
-            QtWidgets.QLineEdit.Password
-        )
-        if not password[1]:
-            return
-
-        try:
-            new_wallet = self.kmd_client.create_wallet(name[0], password[0])
-        except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "Could not create wallet", str(e))
-        else:
-            self.listWidget.add_widget(
-                WalletListWidget(
-                    Wallet(new_wallet)
+        if input_dialog.exec_() == QtWidgets.QDialog.Accepted:
+            try:
+                new_wallet = self.kmd_client.create_wallet(
+                    input_dialog.return_value[0], input_dialog.return_value[1],
+                    master_deriv_key=to_master_derivation_key(
+                        input_dialog.return_value[2] if input_dialog.return_value[2] != "" else None
+                    )
                 )
-            )
-
-        # Just to be sure. Maybe in the future memory footprint is to be investigated better.
-        del password
-
-    @QtCore.Slot()
-    def import_wallet(self):
-        name = QtWidgets.QInputDialog.getText(
-            self, "Import wallet", "Please insert a name:",
-            QtWidgets.QLineEdit.Normal
-        )
-        if not name[1]:
-            return
-
-        password = QtWidgets.QInputDialog.getText(
-            self, "Import wallet", "Please insert a password:",
-            QtWidgets.QLineEdit.Password
-        )
-        if not password[1]:
-            return
-
-        mdk = QtWidgets.QInputDialog.getMultiLineText(
-            self, "Import wallet", "Please insert the mnemonic master derivation key:", ""
-        )
-        if not mdk[1]:
-            return
-
-        try:
-            new_wallet = self.kmd_client.create_wallet(name[0], password[0], to_master_derivation_key(mdk[0]))
-        except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "Could not import wallet", str(e))
-        else:
-            self.listWidget.add_widget(
-                WalletListWidget(
-                    Wallet(new_wallet)
+            except Exception as e:
+                QtWidgets.QMessageBox.critical(self, "Could not create wallet", str(e))
+            else:
+                self.listWidget.add_widget(
+                    WalletListWidget(
+                        Wallet(new_wallet)
+                    )
                 )
-            )
-
-        # Just to be sure. Maybe in the future memory footprint is to be investigated better.
-        del password
 
     @QtCore.Slot()
     def export_wallet(self):
@@ -215,11 +169,14 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
             widget = self.listWidget.itemWidget(item)
 
             try:
-                mnemonic = widget.wallet.algo_wallet.get_mnemonic()
+                mnemonic_mdk = widget.wallet.algo_wallet.get_mnemonic()
             except Exception as e:
                 QtWidgets.QMessageBox.critical(self, "Could not export wallet", str(e))
             else:
-                QtWidgets.QMessageBox.information(self, "Mnemonic Master Derivation Key", mnemonic)
+                QtGui.QGuiApplication.clipboard().setText(mnemonic_mdk)
+                QtWidgets.QMessageBox.information(
+                    self, "Success", "Mnemonic master derivation key copied into clipboard"
+                )
 
     @QtCore.Slot()
     def lock_unlock_wallet(self):
@@ -251,7 +208,7 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
             )
 
         # Enable widgets that allow operation on an active node
-        for widget in [self.pushButton_New, self.pushButton_Import]:
+        for widget in [self.pushButton_NewImport]:
             widget.setEnabled(True)
 
         # Also enable widgets that only make sense for the existence of at least one wallet.
@@ -317,10 +274,16 @@ class UnlockingWallet(QtWidgets.QDialog, Ui_WalletUnlock):
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(False)
 
         # Connections
-        self.lineEdit.textChanged.connect(self.lineedit_text_change)
+        self.lineEdit.textChanged.connect(self.validate_inputs)
+
+    def closeEvent(self, arg__1: QtGui.QCloseEvent):
+        if self.worker:
+            self.worker.signals.success.disconnect()
+            self.worker.signals.error.disconnect()
+        arg__1.accept()
 
     @QtCore.Slot(str)
-    def lineedit_text_change(self, new_text: str):
+    def validate_inputs(self, new_text: str):
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(
             new_text != ""
         )
@@ -351,8 +314,41 @@ class UnlockingWallet(QtWidgets.QDialog, Ui_WalletUnlock):
         self.return_value = result
         super().accept()
 
-    @QtCore.Slot(str)
-    def unlock_failure(self, error: str):
-        QtWidgets.QMessageBox.critical(self, "Could not open wallet", error)
+    @QtCore.Slot(Exception)
+    def unlock_failure(self, error: Exception):
+        QtWidgets.QMessageBox.critical(self, "Could not open wallet", str(error))
         self.return_value = None
         super().reject()
+
+
+class NewImportWallet(QtWidgets.QDialog, Ui_NewImportWallet):
+    def __init__(self, parent: QtWidgets.QWidget):
+        super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
+
+        # Anti memory leak
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+
+        self.return_value = None
+
+        self.setupUi(self)
+
+        # Connections
+        self.lineEdit_Name.textChanged.connect(self.validate_inputs)
+        self.lineEdit_Password.textChanged.connect(self.validate_inputs)
+        self.lineEdit_Password2.textChanged.connect(self.validate_inputs)
+        self.plainTextEdit_MDK.textChanged.connect(self.validate_inputs)
+
+        self.validate_inputs()
+
+    def validate_inputs(self):
+        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(
+            self.lineEdit_Name.text != "" and
+            self.lineEdit_Password.text() != "" and
+            self.lineEdit_Password.text() == self.lineEdit_Password2.text()
+        )
+
+    def accept(self):
+        self.return_value = (
+            self.lineEdit_Name.text(), self.lineEdit_Password.text(), self.plainTextEdit_MDK.toPlainText()
+        )
+        super().accept()
