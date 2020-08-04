@@ -35,8 +35,9 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
         self.pushButton_folder.clicked.connect(self.pushbutton_folder_dialog)
 
         # Initial states
-        settings = SettingsWindow.settings_from_json_file.memory  # Shortened
+        self.groupBox_3.setVisible(False)
 
+        settings = SettingsWindow.settings_from_json_file.memory  # Shortened
         if settings["selected"] == 0:
             self.radioButton_local.setChecked(True)
         elif settings["selected"] == 1:
@@ -127,7 +128,7 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
                         "address": f1.readline(),
                         "token": f2.readline()
                     }
-            except:
+            except Exception as e:
                 if "algod" in temp:
                     del temp["algod"]
 
@@ -138,7 +139,7 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
                         "address": f3.readline(),
                         "token": f4.readline()
                     }
-            except:
+            except Exception as e:
                 if "kmd" in temp:
                     del temp["kmd"]
 

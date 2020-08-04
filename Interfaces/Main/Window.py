@@ -13,6 +13,7 @@ import misc.Constants as ProjectConstants
 from misc.Functions import load_json_file, dump_json_file
 from misc.Entities import AlgorandWorker
 from misc.Widgets import LoadingWidget
+from Interfaces.Transaction.Window import TransactionWindow
 from Interfaces.Main.Ui_Window import Ui_MainWindow
 from Interfaces.Main.Wallet.Frame import WalletsFrame
 from Interfaces.Contacts.Window import ContactsWindow, ListJsonContacts
@@ -68,7 +69,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Connections
         self.menuAction_NewTransaction.triggered.connect(
-            lambda: None
+            self.exec_transaction
         )
         self.menuAction_Settings.triggered.connect(
             self.exec_settings
@@ -84,6 +85,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         )
 
         self.restart()
+
+    @QtCore.Slot()
+    def exec_transaction(self):
+        if not self.wallet_frame.algod_client:
+            QtWidgets.QMessageBox.critical(self, "algod settings", "Please check algod settings.")
+            return
+
+        self.exec_dialog(TransactionWindow)
 
     @QtCore.Slot()
     def exec_settings(self):

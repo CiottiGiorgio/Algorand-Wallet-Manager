@@ -286,19 +286,21 @@ class ContactsCreating(QtWidgets.QDialog, Ui_ContactsCreating):
 
         Action icon on each QLineEdit is changed accordingly and Ok button is enabled accordingly.
         """
-        name_state = self.lineEdit_name.text() != ""
-        address_state = is_valid_address(self.lineEdit_address.text())
+        states = {
+            "name": self.lineEdit_name.text() != "",
+            "address": is_valid_address(self.lineEdit_address.text())
+        }
 
         self.lineEditAction_name.setIcon(
-            self.icon_valid if name_state else self.icon_not_valid
+            self.icon_valid if states["name"] else self.icon_not_valid
         )
 
         self.lineEditAction_address.setIcon(
-            self.icon_valid if address_state else self.icon_not_valid
+            self.icon_valid if states["address"] else self.icon_not_valid
         )
 
         self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(
-            name_state and address_state
+            all(states)
         )
 
     @QtCore.Slot()

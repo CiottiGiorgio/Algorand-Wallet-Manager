@@ -71,6 +71,7 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
                 self.wallet_loading_failed
             )
         else:
+            self.listWidget.clear_loading()
             QtWidgets.QMessageBox.critical(self, "kmd settings", "kmd settings not valid.")
 
         if "algod" in SettingsWindow.rest_endpoints:
@@ -87,7 +88,8 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
                 SettingsWindow.rest_endpoints["indexer"]["address"]
             )
         else:
-            print("indexer settings not valid.", file=stderr)
+            pass
+            # print("indexer settings not valid.", file=stderr)
 
     def closeEvent(self, arg__1: QtGui.QCloseEvent):
         if self.worker:

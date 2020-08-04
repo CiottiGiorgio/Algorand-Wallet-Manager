@@ -21,14 +21,14 @@ class Ui_Settings(object):
         if not Settings.objectName():
             Settings.setObjectName(u"Settings")
         Settings.setWindowModality(Qt.ApplicationModal)
-        Settings.resize(480, 700)
+        Settings.resize(550, 700)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Settings.sizePolicy().hasHeightForWidth())
         Settings.setSizePolicy(sizePolicy)
-        Settings.setMinimumSize(QSize(480, 700))
-        Settings.setMaximumSize(QSize(480, 700))
+        Settings.setMinimumSize(QSize(550, 700))
+        Settings.setMaximumSize(QSize(550, 700))
         Settings.setBaseSize(QSize(0, 0))
         Settings.setWindowOpacity(1.000000000000000)
         Settings.setModal(True)
@@ -112,6 +112,10 @@ class Ui_Settings(object):
 
         self.verticalLayout.addWidget(self.groupBox)
 
+        self.verticalSpacer_4 = QSpacerItem(20, 5, QSizePolicy.Minimum, QSizePolicy.Fixed)
+
+        self.verticalLayout.addItem(self.verticalSpacer_4)
+
         self.groupBox_2 = QGroupBox(Settings)
         self.groupBox_2.setObjectName(u"groupBox_2")
         self.groupBox_2.setAlignment(Qt.AlignCenter)
@@ -150,6 +154,10 @@ class Ui_Settings(object):
         self.gridLayout_2.setColumnStretch(0, 1)
 
         self.verticalLayout.addWidget(self.groupBox_2)
+
+        self.verticalSpacer_5 = QSpacerItem(20, 5, QSizePolicy.Minimum, QSizePolicy.Fixed)
+
+        self.verticalLayout.addItem(self.verticalSpacer_5)
 
         self.groupBox_3 = QGroupBox(Settings)
         self.groupBox_3.setObjectName(u"groupBox_3")

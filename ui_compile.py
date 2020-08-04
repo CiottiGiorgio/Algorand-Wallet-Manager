@@ -19,7 +19,7 @@ def ui_compile(source: str, destination: str):
 for x, y, z in os.walk(os.path.join(os.path.dirname(__file__), "Interfaces")):
     # This filter removes from y all .git and __pycache__ subdirs
     y[:] = filter(
-        lambda h: h != ".git" and h != "__pycache__", y
+        lambda h: h != ".git" and h != "__pycache__" and h != ".idea", y
     )
 
     # For each .ui file we should check if it has to be recompiled into a new .py file.
