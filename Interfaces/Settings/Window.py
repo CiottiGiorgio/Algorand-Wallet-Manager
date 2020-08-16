@@ -127,10 +127,11 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
                 with open(path.join(settings["local"], ProjectConstants.filename_algod_net)) as f1, \
                         open(path.join(settings["local"], ProjectConstants.filename_algod_token)) as f2:
                     temp["algod"] = {
-                        "address": f1.readline(),
-                        "token": f2.readline()
+                        "address": "http://" + f1.readline().strip("\n"),
+                        "token": f2.readline().strip("\n")
                     }
             except Exception as e:
+                print(str(e), file=stderr)
                 if "algod" in temp:
                     del temp["algod"]
 
@@ -138,10 +139,11 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
                 with open(path.join(settings["local"], ProjectConstants.filename_kmd_net)) as f3, \
                         open(path.join(settings["local"], ProjectConstants.filename_kmd_token)) as f4:
                     temp["kmd"] = {
-                        "address": f3.readline(),
-                        "token": f4.readline()
+                        "address": "http://" + f3.readline().strip("\n"),
+                        "token": f4.readline().strip("\n")
                     }
             except Exception as e:
+                print(str(e), file=stderr)
                 if "kmd" in temp:
                     del temp["kmd"]
 
