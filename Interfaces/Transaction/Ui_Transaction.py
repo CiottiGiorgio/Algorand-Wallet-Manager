@@ -15,8 +15,6 @@ from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
     QPixmap, QRadialGradient)
 from PySide2.QtWidgets import *
 
-from misc.Widgets import LoadingWidget
-
 
 class Ui_TransactionWindow(object):
     def setupUi(self, TransactionWindow):
@@ -52,10 +50,23 @@ class Ui_TransactionWindow(object):
 
         self.formLayout.setWidget(1, QFormLayout.FieldRole, self.comboBox_receiver)
 
+        self.label_7 = QLabel(TransactionWindow)
+        self.label_7.setObjectName(u"label_7")
+
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_7)
+
+        self.comboBox_close_to = QComboBox(TransactionWindow)
+        self.comboBox_close_to.setObjectName(u"comboBox_close_to")
+        self.comboBox_close_to.setEnabled(False)
+        self.comboBox_close_to.setMinimumSize(QSize(0, 25))
+        self.comboBox_close_to.setEditable(True)
+
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.comboBox_close_to)
+
         self.label_3 = QLabel(TransactionWindow)
         self.label_3.setObjectName(u"label_3")
 
-        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_3)
+        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_3)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setSpacing(5)
@@ -73,23 +84,28 @@ class Ui_TransactionWindow(object):
 
         self.horizontalLayout.addWidget(self.lineEdit_asset_id)
 
-        self.checkBox_opt_in = QCheckBox(TransactionWindow)
-        self.checkBox_opt_in.setObjectName(u"checkBox_opt_in")
-        self.checkBox_opt_in.setEnabled(False)
+        self.comboBox_asset_mode = QComboBox(TransactionWindow)
+        self.comboBox_asset_mode.addItem("")
+        self.comboBox_asset_mode.addItem("")
+        self.comboBox_asset_mode.addItem("")
+        self.comboBox_asset_mode.setObjectName(u"comboBox_asset_mode")
+        self.comboBox_asset_mode.setEnabled(False)
 
-        self.horizontalLayout.addWidget(self.checkBox_opt_in)
+        self.horizontalLayout.addWidget(self.comboBox_asset_mode)
 
         self.horizontalSpacer_3 = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.horizontalLayout.addItem(self.horizontalSpacer_3)
 
+        self.horizontalLayout.setStretch(1, 2)
+        self.horizontalLayout.setStretch(3, 1)
 
-        self.formLayout.setLayout(2, QFormLayout.FieldRole, self.horizontalLayout)
+        self.formLayout.setLayout(3, QFormLayout.FieldRole, self.horizontalLayout)
 
         self.label_5 = QLabel(TransactionWindow)
         self.label_5.setObjectName(u"label_5")
 
-        self.formLayout.setWidget(3, QFormLayout.LabelRole, self.label_5)
+        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.label_5)
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setSpacing(5)
@@ -115,12 +131,12 @@ class Ui_TransactionWindow(object):
         self.horizontalLayout_3.addItem(self.horizontalSpacer)
 
 
-        self.formLayout.setLayout(3, QFormLayout.FieldRole, self.horizontalLayout_3)
+        self.formLayout.setLayout(4, QFormLayout.FieldRole, self.horizontalLayout_3)
 
         self.label_4 = QLabel(TransactionWindow)
         self.label_4.setObjectName(u"label_4")
 
-        self.formLayout.setWidget(4, QFormLayout.LabelRole, self.label_4)
+        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.label_4)
 
         self.horizontalLayout_2 = QHBoxLayout()
         self.horizontalLayout_2.setSpacing(5)
@@ -152,34 +168,29 @@ class Ui_TransactionWindow(object):
         self.horizontalLayout_2.addItem(self.horizontalSpacer_2)
 
 
-        self.formLayout.setLayout(4, QFormLayout.FieldRole, self.horizontalLayout_2)
+        self.formLayout.setLayout(5, QFormLayout.FieldRole, self.horizontalLayout_2)
 
         self.label_6 = QLabel(TransactionWindow)
         self.label_6.setObjectName(u"label_6")
 
-        self.formLayout.setWidget(5, QFormLayout.LabelRole, self.label_6)
+        self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_6)
 
         self.textEdit_note = QTextEdit(TransactionWindow)
         self.textEdit_note.setObjectName(u"textEdit_note")
         self.textEdit_note.setMaximumSize(QSize(16777215, 70))
 
-        self.formLayout.setWidget(5, QFormLayout.FieldRole, self.textEdit_note)
+        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.textEdit_note)
 
         self.buttonBox = QDialogButtonBox(TransactionWindow)
         self.buttonBox.setObjectName(u"buttonBox")
         self.buttonBox.setOrientation(Qt.Horizontal)
         self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
 
-        self.formLayout.setWidget(7, QFormLayout.FieldRole, self.buttonBox)
-
-        self.widget = LoadingWidget(TransactionWindow)
-        self.widget.setObjectName(u"widget")
-
-        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.widget)
+        self.formLayout.setWidget(8, QFormLayout.FieldRole, self.buttonBox)
 
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
-        self.formLayout.setItem(6, QFormLayout.LabelRole, self.verticalSpacer)
+        self.formLayout.setItem(7, QFormLayout.SpanningRole, self.verticalSpacer)
 
 
         self.retranslateUi(TransactionWindow)
@@ -199,12 +210,16 @@ class Ui_TransactionWindow(object):
 #if QT_CONFIG(tooltip)
         self.comboBox_receiver.setToolTip(QCoreApplication.translate("TransactionWindow", u"Addresses from contact list and unlocked wallets will be displayed here.", None))
 #endif // QT_CONFIG(tooltip)
+        self.label_7.setText(QCoreApplication.translate("TransactionWindow", u"Close to:", None))
         self.label_3.setText(QCoreApplication.translate("TransactionWindow", u"Type:", None))
         self.comboBox_type.setItemText(0, QCoreApplication.translate("TransactionWindow", u"Algos", None))
         self.comboBox_type.setItemText(1, QCoreApplication.translate("TransactionWindow", u"Asset", None))
 
         self.lineEdit_asset_id.setPlaceholderText(QCoreApplication.translate("TransactionWindow", u"Asset ID", None))
-        self.checkBox_opt_in.setText(QCoreApplication.translate("TransactionWindow", u"Opt-in", None))
+        self.comboBox_asset_mode.setItemText(0, QCoreApplication.translate("TransactionWindow", u"Transfer", None))
+        self.comboBox_asset_mode.setItemText(1, QCoreApplication.translate("TransactionWindow", u"Opt-in", None))
+        self.comboBox_asset_mode.setItemText(2, QCoreApplication.translate("TransactionWindow", u"Close to", None))
+
         self.label_5.setText(QCoreApplication.translate("TransactionWindow", u"Amount:", None))
         self.comboBox_amount_unit.setItemText(0, QCoreApplication.translate("TransactionWindow", u"microAlgos", None))
         self.comboBox_amount_unit.setItemText(1, QCoreApplication.translate("TransactionWindow", u"milliAlgos", None))

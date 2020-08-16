@@ -29,14 +29,16 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
 
         self.setupUi(self)
 
+        self.groupBox_3.setVisible(False)
+
         # Connections
         self.radioButton_local.toggled.connect(self.radiobutton_change_enabled)
         self.radioButton_remote.toggled.connect(self.radiobutton_change_enabled)
         self.pushButton_folder.clicked.connect(self.pushbutton_folder_dialog)
 
-        # Initial states
-        self.groupBox_3.setVisible(False)
+        QtCore.QTimer.singleShot(0, self.setup_logic)
 
+    def setup_logic(self):
         settings = SettingsWindow.settings_from_json_file.memory  # Shortened
         if settings["selected"] == 0:
             self.radioButton_local.setChecked(True)
@@ -148,13 +150,13 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
 
             if settings["algod"]["url"] and settings["algod"]["port"] and settings["algod"]["token"]:
                 temp["algod"] = {
-                    "address": settings["algod"]["url"] + ':' + settings["algod"]["port"],
+                    "address": "http://" + settings["algod"]["url"] + ':' + settings["algod"]["port"],
                     "token": settings["algod"]["token"]
                 }
 
             if settings["kmd"]["url"] and settings["kmd"]["port"] and settings["kmd"]["token"]:
                 temp["kmd"] = {
-                    "address": settings["kmd"]["url"] + ':' + settings["kmd"]["port"],
+                    "address": "http://" + settings["kmd"]["url"] + ':' + settings["kmd"]["port"],
                     "token": settings["kmd"]["token"]
                 }
 

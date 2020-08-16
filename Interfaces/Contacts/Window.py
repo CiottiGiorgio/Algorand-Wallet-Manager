@@ -63,11 +63,6 @@ class ContactsWindow(QtWidgets.QDialog, Ui_Contacts):
         # Anti memory leak
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
-        # Populate contact_widgets with info from json file.
-        if not self.contact_widgets:
-            for contact in self.contacts_from_json_file.memory:
-                self.contact_widgets.append(ContactListWidget(contact))
-
         self.setupUi(self)
 
         self.listWidget.set_item_type(ContactListItem)
@@ -87,6 +82,14 @@ class ContactsWindow(QtWidgets.QDialog, Ui_Contacts):
         self.lineEdit.textChanged.connect(self.filter_contacts)
         self.listWidget.customContextMenuRequested.connect(self.show_context_menu)
         self.menuBarAction.triggered.connect(self.new_contact)
+
+        QtCore.QTimer.singleShot(0, self.setup_logic)
+
+    def setup_logic(self):
+        # Populate contact_widgets with info from json file.
+        if not ContactsWindow.contact_widgets:
+            for contact in ContactsWindow.contacts_from_json_file.memory:
+                ContactsWindow.contact_widgets.append(ContactListWidget(contact))
 
         # Populate list
         for widget in self.contact_widgets:

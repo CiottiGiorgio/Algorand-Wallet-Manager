@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Frame</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
    <item>
     <widget class="CustomListWidget" name="listWidget">
      <property name="contextMenuPolicy">
@@ -24,14 +24,14 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QPushButton" name="pushButton_return">
+      <widget class="QPushButton" name="pushButton_Return">
        <property name="text">
         <string>Return</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_open_balance">
+      <widget class="QPushButton" name="pushButton_Balance">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -55,31 +55,34 @@ Balance</string>
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_new">
+      <widget class="QPushButton" name="pushButton_New">
        <property name="text">
         <string>New</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_delete">
+      <widget class="QPushButton" name="pushButton_ForgetClose">
        <property name="enabled">
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>Delete</string>
+        <string>Forget/Close</string>
+       </property>
+       <property name="checkable">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_import">
+      <widget class="QPushButton" name="pushButton_Import">
        <property name="text">
         <string>Import</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_export">
+      <widget class="QPushButton" name="pushButton_Export">
        <property name="enabled">
         <bool>false</bool>
        </property>

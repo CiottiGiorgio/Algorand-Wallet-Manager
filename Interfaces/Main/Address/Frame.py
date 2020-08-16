@@ -5,6 +5,10 @@ This file contains AddressFrame which is a QFrame displayed as a result of an op
 # PySide2
 from PySide2 import QtWidgets, QtCore, QtGui
 
+# Algosdk
+from algosdk.mnemonic import from_private_key, to_private_key
+from algosdk.transaction import PaymentTxn
+
 # Local project
 from misc.Entities import Wallet
 from misc.Functions import find_main_window
@@ -33,13 +37,16 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
         self.listWidget.customContextMenuRequested.connect(self.show_context_menu)
 
         #   pushButtons
-        self.pushButton_return.clicked.connect(self.close)
-        self.pushButton_open_balance.clicked.connect(self.show_balance)
-        self.pushButton_new.clicked.connect(self.new_address)
-        self.pushButton_delete.clicked.connect(self.delete_address)
-        self.pushButton_import.clicked.connect(self.import_address)
-        self.pushButton_export.clicked.connect(self.export_address)
+        self.pushButton_Return.clicked.connect(self.close)
+        self.pushButton_Balance.clicked.connect(self.show_balance)
+        self.pushButton_New.clicked.connect(self.new_address)
+        self.pushButton_ForgetClose.clicked.connect(self.forget_close_address)
+        self.pushButton_Import.clicked.connect(self.import_address)
+        self.pushButton_Export.clicked.connect(self.export_address)
 
+        QtCore.QTimer.singleShot(0, self.setup_logic)
+
+    def setup_logic(self):
         # Worker
         # We load the addresses in a non threaded way for now. It's reasonable because if we are at this point we know
         #  there is a working kmd server online.
@@ -51,7 +58,7 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
         if len(addresses) >= 1:
             self.listWidget.setCurrentRow(0)
 
-            for widget in [self.pushButton_open_balance, self.pushButton_delete, self.pushButton_export]:
+            for widget in [self.pushButton_Balance, self.pushButton_ForgetClose, self.pushButton_Export]:
                 widget.setEnabled(True)
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
@@ -89,23 +96,47 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
             self.restart()
 
     @QtCore.Slot()
-    def delete_address(self):
+    def forget_close_address(self):
         item = self.listWidget.currentItem()
 
-        if QtWidgets.QMessageBox.question(
-            self, "Deleting address",
-            "Please keep in mind that deleting an address means that it will disappear from the wallet.\n\n"
-            "However there is no way to delete the presence of this address from the blockchain.\n\n"
-            "Would you like to continue?"
-        ) != QtWidgets.QMessageBox.StandardButton.Yes:
-            return
+        close_address = QtWidgets.QInputDialog.getText(
+            self, "Forget / Close",
+            "Please fill this field in with a valid Algorand address if you wish to close this account "
+            "on the blockchain transferring all your remaining Algos and forget it from the wallet.\n\n"
+            "Leave it empty if you just want to make the wallet forget the address.\n"
+            "Keep in mind you must not hold any asset when closing an address.\n",
+            QtWidgets.QLineEdit.EchoMode.Normal
+        )
 
-        try:
-            self.wallet.algo_wallet.delete_key(item.text())
-        except Exception as e:
-            QtWidgets.QMessageBox.critical(self, "Could not delete address", str(e))
-        else:
-            self.restart()
+        if close_address[1]:
+            if close_address[0] != "":
+                try:
+                    algod_client = find_main_window().wallet_frame.algod_client
+                    sp = algod_client.suggested_params()
+                    data = {
+                        "sender": item.text(),
+                        "fee": sp.min_fee,
+                        "first": sp.first,
+                        "last": sp.last,
+                        "gh": sp.gh,
+                        "receiver": close_address[0],
+                        "amt": 0,
+                        "close_remainder_to": close_address[0],
+                        "flat_fee": True
+                    }
+                    txn = PaymentTxn(**data)
+                    s_txn = self.wallet.algo_wallet.sign_transaction(txn)
+                    algod_client.send_transaction(s_txn)
+                except Exception as e:
+                    QtWidgets.QMessageBox.critical(self, "Could not close address on the blockchain", str(e))
+                    return
+
+            try:
+                self.wallet.algo_wallet.delete_key(item.text())
+            except Exception as e:
+                QtWidgets.QMessageBox.critical(self, "Could not forget address", str(e))
+            else:
+                self.restart()
 
     @QtCore.Slot()
     def import_address(self):
@@ -120,11 +151,11 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
 
         new_address = QtWidgets.QInputDialog.getText(
             self, "Importing address",
-            "Please fill in with the address private key", QtWidgets.QLineEdit.EchoMode.Password
+            "Please fill in with the address mnemonic private key", QtWidgets.QLineEdit.EchoMode.Normal
         )
         if new_address[1]:
             try:
-                self.wallet.algo_wallet.import_key(new_address[0])
+                self.wallet.algo_wallet.import_key(to_private_key(new_address[0]))
             except Exception as e:
                 QtWidgets.QMessageBox.critical(self, "Could not import address", str(e))
             else:
@@ -139,7 +170,7 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Could not export address", str(e))
         else:
-            QtGui.QGuiApplication.clipboard().setText(private_key)
+            QtGui.QGuiApplication.clipboard().setText(from_private_key(private_key))
             QtWidgets.QMessageBox.information(self, "Success", "Private key copied into clipboard")
 
     @QtCore.Slot(QtCore.QPoint)
@@ -163,6 +194,9 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
 
 
 class BalanceWindow(QtWidgets.QDialog, Ui_BalanceWindow):
+    """
+    This class implements the balance window. It displays current balance, pending rewards and assets.
+    """
     def __init__(self, parent: QtWidgets.QWidget, account_info: dict):
         super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
 

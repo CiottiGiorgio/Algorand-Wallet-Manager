@@ -25,7 +25,6 @@ def load_json_file(file: str) -> ChangeContainer:
     except Exception as e:
         print("Could not load %s" % file.split('\\')[-1], file=stderr)
         print(e, file=stderr)
-        print("Now exiting.", file=stderr)
         quit()
 
 
@@ -45,6 +44,9 @@ def dump_json_file(file: str, structure: ChangeContainer):
 
 
 class SingleInstanceError(Exception):
+    """
+    Custom error to signal that more than one main window is found.
+    """
     pass
 
 

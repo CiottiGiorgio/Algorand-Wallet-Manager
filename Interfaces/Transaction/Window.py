@@ -36,7 +36,6 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
         self.lineEdit_asset_id.setValidator(QtGui.QIntValidator(1, 999999))
         self.lineEdit_amount.setValidator(QtGui.QIntValidator(0, 999999))
         self.lineEdit_fee.setValidator(QtGui.QIntValidator(1, 999999))
-        self.widget.setVisible(False)
 
         # Initial state
         wallet_list = find_main_window().wallet_frame.listWidget
@@ -46,17 +45,18 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
 
             if widget.wallet.algo_wallet:
                 for address in widget.wallet.algo_wallet.list_keys():
-                    # This is SUPER bad. Basically we rely on the position of the item to retrieve the wallet
+                    # FIXME This is SUPER bad. Basically we rely on the position of the item to retrieve the wallet
                     self.sender_list.append(widget.wallet.algo_wallet)
-                    self.comboBox_sender.addItem(f"{widget.wallet.info['name']} - {address}")
+                    self.comboBox_sender.addItem(f"Wallet: {widget.wallet.info['name']} - {address}")
                     self.comboBox_receiver.addItem(f"Wallet: {widget.wallet.info['name']} - {address}")
+                    self.comboBox_close_to.addItem(f"Wallet: {widget.wallet.info['name']} - {address}")
 
         for contact in ContactsWindow.contacts_from_json_file.memory:
             self.comboBox_receiver.addItem(f"Contact: {contact.name} - {contact.info}")
 
         # Connections
         self.comboBox_type.currentIndexChanged.connect(self.combobox_type)
-        self.checkBox_opt_in.stateChanged.connect(self.checkbox_opt_in)
+        self.comboBox_asset_mode.currentIndexChanged.connect(self.combobox_asset_mode)
         self.pushButton_sugg_fee.clicked.connect(self.pushbutton_sf)
 
         #   We only allow the OK button and the "suggested fee" to be enabled under certain conditions.
@@ -64,7 +64,7 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
         self.comboBox_receiver.editTextChanged.connect(self.validate_inputs)
         self.comboBox_type.currentIndexChanged.connect(self.validate_inputs)
         self.lineEdit_asset_id.textChanged.connect(self.validate_inputs)
-        self.checkBox_opt_in.toggled.connect(self.validate_inputs)
+        self.comboBox_asset_mode.currentIndexChanged.connect(self.validate_inputs)
         self.lineEdit_amount.textChanged.connect(self.validate_inputs)
         self.lineEdit_fee.textChanged.connect(self.validate_inputs)
 
@@ -79,12 +79,14 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
             return
 
         try:
-            find_main_window().wallet_frame.algod_client.send_transaction(s_txn)
+            addr_txn = find_main_window().wallet_frame.algod_client.send_transaction(s_txn)
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Could not send transaction", str(e))
             return
 
-        QtWidgets.QMessageBox.information(self, "Transaction", "Transaction successful")
+        QtGui.QGuiApplication.clipboard().setText(addr_txn)
+        QtWidgets.QMessageBox.information(self, "Transaction", "Transaction sent to the node.\n"
+                                                               "Transaction address copied into clipboard")
         super().accept()
 
     @QtCore.Slot(int)
@@ -92,31 +94,45 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
         if new_index == 0:
             for widget in [self.comboBox_amount_unit]:
                 widget.setEnabled(True)
-            for widget in [self.lineEdit_asset_id, self.checkBox_opt_in]:
+            for widget in [self.lineEdit_asset_id, self.comboBox_asset_mode]:
                 widget.setEnabled(False)
-            self.checkBox_opt_in.setChecked(False)
+            self.comboBox_asset_mode.setCurrentIndex(0)
 
         elif new_index == 1:
             for widget in [self.comboBox_amount_unit]:
                 widget.setEnabled(False)
-            for widget in [self.lineEdit_asset_id, self.checkBox_opt_in]:
+            for widget in [self.lineEdit_asset_id, self.comboBox_asset_mode]:
                 widget.setEnabled(True)
 
         else:
             print("This line should be impossible to reach", file=stderr)
 
-    @QtCore.Slot(QtCore.Qt.CheckState)
-    def checkbox_opt_in(self, new_state: QtCore.Qt.CheckState):
-        if new_state == QtCore.Qt.CheckState.Checked:
-            for widget in [self.lineEdit_amount, self.comboBox_receiver]:
-                widget.setEnabled(False)
+    @QtCore.Slot(int)
+    def combobox_asset_mode(self, new_index: int):
+        enables, disables = list(), list()
 
-        elif new_state == QtCore.Qt.CheckState.Unchecked:
-            for widget in [self.lineEdit_amount, self.comboBox_receiver]:
-                widget.setEnabled(True)
-
+        if new_index == 0:
+            enables.append(self.comboBox_receiver)
+            enables.append(self.lineEdit_amount)
+            disables.append(self.comboBox_close_to)
+        elif new_index == 1:
+            # Opt-in
+            disables.append(self.comboBox_receiver)
+            disables.append(self.comboBox_close_to)
+            disables.append(self.lineEdit_amount)
+        elif new_index == 2:
+            # Close
+            enables.append(self.comboBox_receiver)
+            enables.append(self.comboBox_close_to)
+            enables.append(self.lineEdit_amount)
         else:
             print("This line should be impossible to reach", file=stderr)
+
+        for widget in enables:
+            widget.setEnabled(True)
+
+        for widget in disables:
+            widget.setEnabled(False)
 
     @QtCore.Slot()
     def pushbutton_sf(self):
@@ -141,15 +157,21 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
         self.comboBox_fee_unit.setCurrentIndex(0)
         self.lineEdit_fee.setText(
             str(
-                max(temp_txn.estimate_size() * sp.fee, 1000)
+                max(sp.min_fee, temp_txn.estimate_size() * sp.fee)
             )
         )
 
     @QtCore.Slot()
     def validate_inputs(self):
+        """
+        This method ensures that the correct subset of user inputs has a valid input.
+
+        The subset changes based on the type of transaction the user is choosing.
+        """
         states = {
             "sender_state": self.comboBox_sender.currentText() != "",
             "receiver_state": False,
+            "close_to_state": False,
             "asset_id_state": False,
             "amount_state": self.lineEdit_amount.text() != "",
             "fee_state": self.lineEdit_fee.text() != ""
@@ -161,26 +183,43 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
                 self.comboBox_receiver.itemText(self.comboBox_receiver.currentIndex()) == receiver_text):
             states["receiver_state"] = True
 
+        close_to_text = self.comboBox_close_to.currentText()
+        # This means: If the user input a valid algorand address or if the selected item has not been messed with.
+        if (is_valid_address(close_to_text) or
+                self.comboBox_close_to.itemText(self.comboBox_close_to.currentIndex()) == close_to_text):
+            states["close_to_state"] = True
+
         asset_id_text = self.lineEdit_asset_id.text()
         if asset_id_text != "":
             # At this point we are guaranteed to have an integer between 0 and 999999 because of QIntValidator.
-            if int(asset_id_text) < 999999:  # TODO Make sure what is the range for an ASA ID.
+            if int(asset_id_text) < 999999999:  # TODO Make sure what is the range for an ASA ID.
                 states["asset_id_state"] = True
 
+        # Here we save only the states that are compulsory for the OK button.
         if self.comboBox_type.currentIndex() == 0:
-            # Payment transaction
+            # Algos transaction
             del states["asset_id_state"]
-            ok_button_enabled = all(states.values())
+            del states["close_to_state"]
         else:
-            if self.checkBox_opt_in.isChecked():
-                # Asset opt-in transaction
+            # Asset transaction
+            if self.comboBox_asset_mode.currentIndex() == 0:
+                # Transfer
+                del states["close_to_state"]
+            elif self.comboBox_asset_mode.currentIndex() == 1:
+                # Opt-in
                 del states["receiver_state"]
+                del states["close_to_state"]
                 del states["amount_state"]
-                ok_button_enabled = all(states.values())
+            elif self.comboBox_asset_mode.currentIndex() == 2:
+                # Close
+                pass
             else:
-                # Asset transaction
-                ok_button_enabled = all(states.values())
+                print(
+                    "This line should be impossible to reach. If you see this something ultra bad has happened",
+                    file=stderr
+                )
 
+        ok_button_enabled = all(states.values())
         del states["fee_state"]
         sugg_fee_button_enabled = all(states.values())
 
@@ -212,21 +251,27 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
             data["receiver"] = self.comboBox_receiver.currentText().split(" - ")[1]
             data["amt"] = self.get_microalgos_amount()
             temp_txn = transaction.PaymentTxn(**data)
-        else:
-            data["index"] = self.lineEdit_asset_id.text()
-            if self.checkBox_opt_in.isChecked():
+        elif self.comboBox_type.currentIndex() == 1:
+            data["index"] = int(self.lineEdit_asset_id.text())
+            if self.comboBox_asset_mode.currentIndex() == 0:
+                data["receiver"] = self.comboBox_receiver.currentText().split(" - ")[1]
+                data["amt"] = int(self.lineEdit_amount.text())
+            elif self.comboBox_asset_mode.currentIndex() == 1:
                 data["receiver"] = data["sender"]
                 data["amt"] = 0
-                temp_txn = transaction.AssetTransferTxn(**data)
-            else:
+            elif self.comboBox_asset_mode.currentIndex() == 2:
                 data["receiver"] = self.comboBox_receiver.currentText().split(" - ")[1]
-                data["amt"] = self.get_microalgos_amount()
-                temp_txn = transaction.AssetTransferTxn(**data)
+                data["amt"] = int(self.lineEdit_amount.text())
+                data["close_assets_to"] = self.comboBox_close_to.currentText().split(" - ")[1]
+            temp_txn = transaction.AssetTransferTxn(**data)
+        else:
+            print("This line should be impossible to reach", file=stderr)
+
         return temp_txn
 
     def get_microalgos_amount(self) -> int:
         """
-        This branchless method return the the amount in microalgos.
+        This branchless method returns the the amount in microalgos.
         """
         return int(self.lineEdit_amount.text()) * (1 if self.comboBox_amount_unit.currentIndex() == 0 else 0
                                                    + 10**3 if self.comboBox_amount_unit.currentIndex() == 1 else 0
@@ -234,7 +279,7 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
 
     def get_microalgos_fee(self) -> int:
         """
-        This branchless method return the fee in microalgos.
+        This branchless method returns the fee in microalgos.
         """
         return int(self.lineEdit_fee.text()) * (1 if self.comboBox_fee_unit.currentIndex() == 0 else 0
                                                 + 10**3 if self.comboBox_fee_unit.currentIndex() == 1 else 0

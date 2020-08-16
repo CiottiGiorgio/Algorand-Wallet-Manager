@@ -126,25 +126,15 @@
       <set>Qt::AlignCenter</set>
      </property>
      <layout class="QGridLayout" name="gridLayout" columnstretch="1,0">
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="lineEdit_algod_port"/>
+      </item>
       <item row="0" column="1">
        <widget class="QLabel" name="label_3">
         <property name="text">
          <string>Port</string>
         </property>
        </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLineEdit" name="lineEdit_algod_url"/>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>URL</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLineEdit" name="lineEdit_algod_port"/>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label_4">
@@ -153,8 +143,29 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>URL</string>
+        </property>
+       </widget>
+      </item>
       <item row="3" column="0" colspan="2">
        <widget class="QLineEdit" name="lineEdit_algod_token"/>
+      </item>
+      <item row="1" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>http://</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_algod_url"/>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -191,9 +202,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLineEdit" name="lineEdit_kmd_url"/>
-      </item>
       <item row="0" column="1">
        <widget class="QLabel" name="label_6">
         <property name="text">
@@ -213,6 +221,20 @@
       </item>
       <item row="3" column="0" colspan="2">
        <widget class="QLineEdit" name="lineEdit_kmd_token"/>
+      </item>
+      <item row="1" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLabel" name="label_9">
+          <property name="text">
+           <string>http://</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_kmd_url"/>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -249,9 +271,6 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLineEdit" name="lineEdit_indexer_url"/>
-      </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label_13">
         <property name="text">
@@ -271,6 +290,20 @@
       </item>
       <item row="3" column="0" colspan="2">
        <widget class="QLineEdit" name="lineEdit_indexer_token"/>
+      </item>
+      <item row="1" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>http://</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit_indexer_url"/>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>

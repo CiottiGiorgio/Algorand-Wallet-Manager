@@ -84,7 +84,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             partial(self.exec_dialog, CreditsWindow)
         )
 
-        self.restart()
+        QtCore.QTimer.singleShot(0, self.restart)
 
     @QtCore.Slot()
     def exec_transaction(self):

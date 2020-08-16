@@ -78,35 +78,45 @@ class Ui_Settings(object):
         self.groupBox.setAlignment(Qt.AlignCenter)
         self.gridLayout = QGridLayout(self.groupBox)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.label_3 = QLabel(self.groupBox)
-        self.label_3.setObjectName(u"label_3")
-
-        self.gridLayout.addWidget(self.label_3, 0, 1, 1, 1)
-
-        self.lineEdit_algod_url = QLineEdit(self.groupBox)
-        self.lineEdit_algod_url.setObjectName(u"lineEdit_algod_url")
-
-        self.gridLayout.addWidget(self.lineEdit_algod_url, 1, 0, 1, 1)
-
-        self.label_2 = QLabel(self.groupBox)
-        self.label_2.setObjectName(u"label_2")
-
-        self.gridLayout.addWidget(self.label_2, 0, 0, 1, 1)
-
         self.lineEdit_algod_port = QLineEdit(self.groupBox)
         self.lineEdit_algod_port.setObjectName(u"lineEdit_algod_port")
 
         self.gridLayout.addWidget(self.lineEdit_algod_port, 1, 1, 1, 1)
+
+        self.label_3 = QLabel(self.groupBox)
+        self.label_3.setObjectName(u"label_3")
+
+        self.gridLayout.addWidget(self.label_3, 0, 1, 1, 1)
 
         self.label_4 = QLabel(self.groupBox)
         self.label_4.setObjectName(u"label_4")
 
         self.gridLayout.addWidget(self.label_4, 2, 0, 1, 1)
 
+        self.label_2 = QLabel(self.groupBox)
+        self.label_2.setObjectName(u"label_2")
+
+        self.gridLayout.addWidget(self.label_2, 0, 0, 1, 1)
+
         self.lineEdit_algod_token = QLineEdit(self.groupBox)
         self.lineEdit_algod_token.setObjectName(u"lineEdit_algod_token")
 
         self.gridLayout.addWidget(self.lineEdit_algod_token, 3, 0, 1, 2)
+
+        self.horizontalLayout_3 = QHBoxLayout()
+        self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
+        self.label_8 = QLabel(self.groupBox)
+        self.label_8.setObjectName(u"label_8")
+
+        self.horizontalLayout_3.addWidget(self.label_8)
+
+        self.lineEdit_algod_url = QLineEdit(self.groupBox)
+        self.lineEdit_algod_url.setObjectName(u"lineEdit_algod_url")
+
+        self.horizontalLayout_3.addWidget(self.lineEdit_algod_url)
+
+
+        self.gridLayout.addLayout(self.horizontalLayout_3, 1, 0, 1, 1)
 
         self.gridLayout.setColumnStretch(0, 1)
 
@@ -125,11 +135,6 @@ class Ui_Settings(object):
         self.label_7.setObjectName(u"label_7")
 
         self.gridLayout_2.addWidget(self.label_7, 2, 0, 1, 1)
-
-        self.lineEdit_kmd_url = QLineEdit(self.groupBox_2)
-        self.lineEdit_kmd_url.setObjectName(u"lineEdit_kmd_url")
-
-        self.gridLayout_2.addWidget(self.lineEdit_kmd_url, 1, 0, 1, 1)
 
         self.label_6 = QLabel(self.groupBox_2)
         self.label_6.setObjectName(u"label_6")
@@ -151,6 +156,21 @@ class Ui_Settings(object):
 
         self.gridLayout_2.addWidget(self.lineEdit_kmd_token, 3, 0, 1, 2)
 
+        self.horizontalLayout_4 = QHBoxLayout()
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.label_9 = QLabel(self.groupBox_2)
+        self.label_9.setObjectName(u"label_9")
+
+        self.horizontalLayout_4.addWidget(self.label_9)
+
+        self.lineEdit_kmd_url = QLineEdit(self.groupBox_2)
+        self.lineEdit_kmd_url.setObjectName(u"lineEdit_kmd_url")
+
+        self.horizontalLayout_4.addWidget(self.lineEdit_kmd_url)
+
+
+        self.gridLayout_2.addLayout(self.horizontalLayout_4, 1, 0, 1, 1)
+
         self.gridLayout_2.setColumnStretch(0, 1)
 
         self.verticalLayout.addWidget(self.groupBox_2)
@@ -168,11 +188,6 @@ class Ui_Settings(object):
         self.label_11.setObjectName(u"label_11")
 
         self.gridLayout_4.addWidget(self.label_11, 0, 0, 1, 1)
-
-        self.lineEdit_indexer_url = QLineEdit(self.groupBox_3)
-        self.lineEdit_indexer_url.setObjectName(u"lineEdit_indexer_url")
-
-        self.gridLayout_4.addWidget(self.lineEdit_indexer_url, 1, 0, 1, 1)
 
         self.label_13 = QLabel(self.groupBox_3)
         self.label_13.setObjectName(u"label_13")
@@ -193,6 +208,21 @@ class Ui_Settings(object):
         self.lineEdit_indexer_token.setObjectName(u"lineEdit_indexer_token")
 
         self.gridLayout_4.addWidget(self.lineEdit_indexer_token, 3, 0, 1, 2)
+
+        self.horizontalLayout_5 = QHBoxLayout()
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.label_10 = QLabel(self.groupBox_3)
+        self.label_10.setObjectName(u"label_10")
+
+        self.horizontalLayout_5.addWidget(self.label_10)
+
+        self.lineEdit_indexer_url = QLineEdit(self.groupBox_3)
+        self.lineEdit_indexer_url.setObjectName(u"lineEdit_indexer_url")
+
+        self.horizontalLayout_5.addWidget(self.lineEdit_indexer_url)
+
+
+        self.gridLayout_4.addLayout(self.horizontalLayout_5, 1, 0, 1, 1)
 
         self.gridLayout_4.setColumnStretch(0, 1)
 
@@ -225,15 +255,18 @@ class Ui_Settings(object):
         self.radioButton_remote.setText(QCoreApplication.translate("Settings", u"Remote node", None))
         self.groupBox.setTitle(QCoreApplication.translate("Settings", u"algod", None))
         self.label_3.setText(QCoreApplication.translate("Settings", u"Port", None))
-        self.label_2.setText(QCoreApplication.translate("Settings", u"URL", None))
         self.label_4.setText(QCoreApplication.translate("Settings", u"Token", None))
+        self.label_2.setText(QCoreApplication.translate("Settings", u"URL", None))
+        self.label_8.setText(QCoreApplication.translate("Settings", u"http://", None))
         self.groupBox_2.setTitle(QCoreApplication.translate("Settings", u"kmd", None))
         self.label_7.setText(QCoreApplication.translate("Settings", u"Token", None))
         self.label_6.setText(QCoreApplication.translate("Settings", u"Port", None))
         self.label_5.setText(QCoreApplication.translate("Settings", u"URL", None))
+        self.label_9.setText(QCoreApplication.translate("Settings", u"http://", None))
         self.groupBox_3.setTitle(QCoreApplication.translate("Settings", u"indexer", None))
         self.label_11.setText(QCoreApplication.translate("Settings", u"URL", None))
         self.label_13.setText(QCoreApplication.translate("Settings", u"Token", None))
         self.label_12.setText(QCoreApplication.translate("Settings", u"Port", None))
+        self.label_10.setText(QCoreApplication.translate("Settings", u"http://", None))
     # retranslateUi
 

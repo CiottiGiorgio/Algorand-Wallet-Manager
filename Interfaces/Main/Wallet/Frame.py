@@ -43,6 +43,8 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
         self.algod_client = None
         self.indexer_client = None
 
+        self.worker = None
+
         self.setupUi(self)
 
         self.listWidget.set_item_type(WalletListItem)
@@ -56,6 +58,9 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
         self.pushButton_NewImport.clicked.connect(self.new_import_wallet)
         self.pushButton_Export.clicked.connect(self.export_wallet)
 
+        QtCore.QTimer.singleShot(0, self.setup_logic)
+
+    def setup_logic(self):
         if "kmd" in SettingsWindow.rest_endpoints:
             self.kmd_client = kmd.KMDClient(
                 SettingsWindow.rest_endpoints["kmd"]["token"],
@@ -65,7 +70,7 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
             # Load wallets in a threaded way.
             # I think there's no need to disconnect slots from this worker because the next call will overwrite
             #  self.worker thus finalizing that object and disconnect its slots. Haven't tested though.
-            self.worker = self.parent().start_worker(
+            self.worker = find_main_window().start_worker(
                 self.kmd_client.list_wallets,
                 self.wallet_loading_success,
                 self.wallet_loading_failed
@@ -273,22 +278,12 @@ class UnlockingWallet(QtWidgets.QDialog, Ui_WalletUnlock):
         self.setupUi(self)
 
         self.widget.setVisible(False)
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(False)
-
-        # Connections
-        self.lineEdit.textChanged.connect(self.validate_inputs)
 
     def closeEvent(self, arg__1: QtGui.QCloseEvent):
         if self.worker:
             self.worker.signals.success.disconnect()
             self.worker.signals.error.disconnect()
         arg__1.accept()
-
-    @QtCore.Slot(str)
-    def validate_inputs(self, new_text: str):
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(
-            new_text != ""
-        )
 
     # We override accept of this class and don't use super().accept() inside.
     #  This is because we just treat this method as a slot connected to the OK button.

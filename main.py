@@ -10,10 +10,6 @@ from PySide2 import QtWidgets
 # TODO Maybe look into Qt model/view because management of contacts, wallets and addresses is getting out of hand
 #  especially in TransactionWindow
 # TODO deploying on linux is a NIGHTMARE. Find a way to freeze the app for Windows/MacOS/Linux.
-# TODO move all logic code (like initializing data or firing threads) out of constructor and into some method
-#  that fires only once after the window is shown.
-#  Overriding .showEvent won't work because that method fires even when restoring from resizing or changing frame.
-#  A good idea might be to override .show().
 def main():
     # Manager of all things regarding a widget-based Qt5 app.
     #  Eg.: mainloop, events, initialization, finalization, ...

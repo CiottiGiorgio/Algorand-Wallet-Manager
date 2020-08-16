@@ -33,42 +33,43 @@ class Ui_AddressFrame(object):
 
         self.verticalLayout = QVBoxLayout()
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.pushButton_return = QPushButton(AddressFrame)
-        self.pushButton_return.setObjectName(u"pushButton_return")
+        self.pushButton_Return = QPushButton(AddressFrame)
+        self.pushButton_Return.setObjectName(u"pushButton_Return")
 
-        self.verticalLayout.addWidget(self.pushButton_return)
+        self.verticalLayout.addWidget(self.pushButton_Return)
 
-        self.pushButton_open_balance = QPushButton(AddressFrame)
-        self.pushButton_open_balance.setObjectName(u"pushButton_open_balance")
-        self.pushButton_open_balance.setEnabled(False)
+        self.pushButton_Balance = QPushButton(AddressFrame)
+        self.pushButton_Balance.setObjectName(u"pushButton_Balance")
+        self.pushButton_Balance.setEnabled(False)
 
-        self.verticalLayout.addWidget(self.pushButton_open_balance)
+        self.verticalLayout.addWidget(self.pushButton_Balance)
 
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
         self.verticalLayout.addItem(self.verticalSpacer)
 
-        self.pushButton_new = QPushButton(AddressFrame)
-        self.pushButton_new.setObjectName(u"pushButton_new")
+        self.pushButton_New = QPushButton(AddressFrame)
+        self.pushButton_New.setObjectName(u"pushButton_New")
 
-        self.verticalLayout.addWidget(self.pushButton_new)
+        self.verticalLayout.addWidget(self.pushButton_New)
 
-        self.pushButton_delete = QPushButton(AddressFrame)
-        self.pushButton_delete.setObjectName(u"pushButton_delete")
-        self.pushButton_delete.setEnabled(False)
+        self.pushButton_ForgetClose = QPushButton(AddressFrame)
+        self.pushButton_ForgetClose.setObjectName(u"pushButton_ForgetClose")
+        self.pushButton_ForgetClose.setEnabled(False)
+        self.pushButton_ForgetClose.setCheckable(False)
 
-        self.verticalLayout.addWidget(self.pushButton_delete)
+        self.verticalLayout.addWidget(self.pushButton_ForgetClose)
 
-        self.pushButton_import = QPushButton(AddressFrame)
-        self.pushButton_import.setObjectName(u"pushButton_import")
+        self.pushButton_Import = QPushButton(AddressFrame)
+        self.pushButton_Import.setObjectName(u"pushButton_Import")
 
-        self.verticalLayout.addWidget(self.pushButton_import)
+        self.verticalLayout.addWidget(self.pushButton_Import)
 
-        self.pushButton_export = QPushButton(AddressFrame)
-        self.pushButton_export.setObjectName(u"pushButton_export")
-        self.pushButton_export.setEnabled(False)
+        self.pushButton_Export = QPushButton(AddressFrame)
+        self.pushButton_Export.setObjectName(u"pushButton_Export")
+        self.pushButton_Export.setEnabled(False)
 
-        self.verticalLayout.addWidget(self.pushButton_export)
+        self.verticalLayout.addWidget(self.pushButton_Export)
 
 
         self.horizontalLayout.addLayout(self.verticalLayout)
@@ -81,12 +82,12 @@ class Ui_AddressFrame(object):
 
     def retranslateUi(self, AddressFrame):
         AddressFrame.setWindowTitle(QCoreApplication.translate("AddressFrame", u"Frame", None))
-        self.pushButton_return.setText(QCoreApplication.translate("AddressFrame", u"Return", None))
-        self.pushButton_open_balance.setText(QCoreApplication.translate("AddressFrame", u"Open\n"
+        self.pushButton_Return.setText(QCoreApplication.translate("AddressFrame", u"Return", None))
+        self.pushButton_Balance.setText(QCoreApplication.translate("AddressFrame", u"Open\n"
 "Balance", None))
-        self.pushButton_new.setText(QCoreApplication.translate("AddressFrame", u"New", None))
-        self.pushButton_delete.setText(QCoreApplication.translate("AddressFrame", u"Delete", None))
-        self.pushButton_import.setText(QCoreApplication.translate("AddressFrame", u"Import", None))
-        self.pushButton_export.setText(QCoreApplication.translate("AddressFrame", u"Export", None))
+        self.pushButton_New.setText(QCoreApplication.translate("AddressFrame", u"New", None))
+        self.pushButton_ForgetClose.setText(QCoreApplication.translate("AddressFrame", u"Forget/Close", None))
+        self.pushButton_Import.setText(QCoreApplication.translate("AddressFrame", u"Import", None))
+        self.pushButton_Export.setText(QCoreApplication.translate("AddressFrame", u"Export", None))
     # retranslateUi
 
