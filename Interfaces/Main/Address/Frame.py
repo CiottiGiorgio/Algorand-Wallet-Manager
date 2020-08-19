@@ -140,6 +140,7 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
 
     @QtCore.Slot()
     def import_address(self):
+        # TODO make the text space way bigger
         if QtWidgets.QMessageBox.question(
                 self, "Importing address",
                 "Please keep in mind that, when recovering a wallet in the future, only the addresses derived from "
@@ -207,8 +208,8 @@ class BalanceWindow(QtWidgets.QDialog, Ui_BalanceWindow):
 
         self.setupUi(self)
 
-        self.label_balance.setText(str(account_info["amount-without-pending-rewards"]) + " microAlgos")
-        self.label_pending_rewards.setText(str(account_info["pending-rewards"]) + " microAlgos")
+        self.label_Balance.setText(str(account_info["amount-without-pending-rewards"]) + " microAlgos")
+        self.label_Pending.setText(str(account_info["pending-rewards"]) + " microAlgos")
 
         for asset in account_info["assets"]:
             self.verticalLayout_assets.addWidget(

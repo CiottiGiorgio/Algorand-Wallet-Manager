@@ -44,22 +44,22 @@ class Ui_Settings(object):
 
         self.verticalLayout.addItem(self.verticalSpacer_2)
 
-        self.radioButton_local = QRadioButton(Settings)
-        self.radioButton_local.setObjectName(u"radioButton_local")
+        self.radioButton_Local = QRadioButton(Settings)
+        self.radioButton_Local.setObjectName(u"radioButton_Local")
 
-        self.verticalLayout.addWidget(self.radioButton_local)
+        self.verticalLayout.addWidget(self.radioButton_Local)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.lineEdit_local = QLineEdit(Settings)
-        self.lineEdit_local.setObjectName(u"lineEdit_local")
+        self.lineEdit_Local = QLineEdit(Settings)
+        self.lineEdit_Local.setObjectName(u"lineEdit_Local")
 
-        self.horizontalLayout.addWidget(self.lineEdit_local)
+        self.horizontalLayout.addWidget(self.lineEdit_Local)
 
-        self.pushButton_folder = QPushButton(Settings)
-        self.pushButton_folder.setObjectName(u"pushButton_folder")
+        self.pushButton_Folder = QPushButton(Settings)
+        self.pushButton_Folder.setObjectName(u"pushButton_Folder")
 
-        self.horizontalLayout.addWidget(self.pushButton_folder)
+        self.horizontalLayout.addWidget(self.pushButton_Folder)
 
 
         self.verticalLayout.addLayout(self.horizontalLayout)
@@ -68,20 +68,20 @@ class Ui_Settings(object):
 
         self.verticalLayout.addItem(self.verticalSpacer_3)
 
-        self.radioButton_remote = QRadioButton(Settings)
-        self.radioButton_remote.setObjectName(u"radioButton_remote")
+        self.radioButton_Remote = QRadioButton(Settings)
+        self.radioButton_Remote.setObjectName(u"radioButton_Remote")
 
-        self.verticalLayout.addWidget(self.radioButton_remote)
+        self.verticalLayout.addWidget(self.radioButton_Remote)
 
         self.groupBox = QGroupBox(Settings)
         self.groupBox.setObjectName(u"groupBox")
         self.groupBox.setAlignment(Qt.AlignCenter)
         self.gridLayout = QGridLayout(self.groupBox)
         self.gridLayout.setObjectName(u"gridLayout")
-        self.lineEdit_algod_port = QLineEdit(self.groupBox)
-        self.lineEdit_algod_port.setObjectName(u"lineEdit_algod_port")
+        self.lineEdit_AlgodPort = QLineEdit(self.groupBox)
+        self.lineEdit_AlgodPort.setObjectName(u"lineEdit_AlgodPort")
 
-        self.gridLayout.addWidget(self.lineEdit_algod_port, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.lineEdit_AlgodPort, 1, 1, 1, 1)
 
         self.label_3 = QLabel(self.groupBox)
         self.label_3.setObjectName(u"label_3")
@@ -98,10 +98,10 @@ class Ui_Settings(object):
 
         self.gridLayout.addWidget(self.label_2, 0, 0, 1, 1)
 
-        self.lineEdit_algod_token = QLineEdit(self.groupBox)
-        self.lineEdit_algod_token.setObjectName(u"lineEdit_algod_token")
+        self.lineEdit_AlgodToken = QLineEdit(self.groupBox)
+        self.lineEdit_AlgodToken.setObjectName(u"lineEdit_AlgodToken")
 
-        self.gridLayout.addWidget(self.lineEdit_algod_token, 3, 0, 1, 2)
+        self.gridLayout.addWidget(self.lineEdit_AlgodToken, 3, 0, 1, 2)
 
         self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
@@ -110,10 +110,10 @@ class Ui_Settings(object):
 
         self.horizontalLayout_3.addWidget(self.label_8)
 
-        self.lineEdit_algod_url = QLineEdit(self.groupBox)
-        self.lineEdit_algod_url.setObjectName(u"lineEdit_algod_url")
+        self.lineEdit_AlgodUrl = QLineEdit(self.groupBox)
+        self.lineEdit_AlgodUrl.setObjectName(u"lineEdit_AlgodUrl")
 
-        self.horizontalLayout_3.addWidget(self.lineEdit_algod_url)
+        self.horizontalLayout_3.addWidget(self.lineEdit_AlgodUrl)
 
 
         self.gridLayout.addLayout(self.horizontalLayout_3, 1, 0, 1, 1)
@@ -141,20 +141,20 @@ class Ui_Settings(object):
 
         self.gridLayout_2.addWidget(self.label_6, 0, 1, 1, 1)
 
-        self.lineEdit_kmd_port = QLineEdit(self.groupBox_2)
-        self.lineEdit_kmd_port.setObjectName(u"lineEdit_kmd_port")
+        self.lineEdit_KmdPort = QLineEdit(self.groupBox_2)
+        self.lineEdit_KmdPort.setObjectName(u"lineEdit_KmdPort")
 
-        self.gridLayout_2.addWidget(self.lineEdit_kmd_port, 1, 1, 1, 1)
+        self.gridLayout_2.addWidget(self.lineEdit_KmdPort, 1, 1, 1, 1)
 
         self.label_5 = QLabel(self.groupBox_2)
         self.label_5.setObjectName(u"label_5")
 
         self.gridLayout_2.addWidget(self.label_5, 0, 0, 1, 1)
 
-        self.lineEdit_kmd_token = QLineEdit(self.groupBox_2)
-        self.lineEdit_kmd_token.setObjectName(u"lineEdit_kmd_token")
+        self.lineEdit_KmdToken = QLineEdit(self.groupBox_2)
+        self.lineEdit_KmdToken.setObjectName(u"lineEdit_KmdToken")
 
-        self.gridLayout_2.addWidget(self.lineEdit_kmd_token, 3, 0, 1, 2)
+        self.gridLayout_2.addWidget(self.lineEdit_KmdToken, 3, 0, 1, 2)
 
         self.horizontalLayout_4 = QHBoxLayout()
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
@@ -163,10 +163,10 @@ class Ui_Settings(object):
 
         self.horizontalLayout_4.addWidget(self.label_9)
 
-        self.lineEdit_kmd_url = QLineEdit(self.groupBox_2)
-        self.lineEdit_kmd_url.setObjectName(u"lineEdit_kmd_url")
+        self.lineEdit_KmdUrl = QLineEdit(self.groupBox_2)
+        self.lineEdit_KmdUrl.setObjectName(u"lineEdit_KmdUrl")
 
-        self.horizontalLayout_4.addWidget(self.lineEdit_kmd_url)
+        self.horizontalLayout_4.addWidget(self.lineEdit_KmdUrl)
 
 
         self.gridLayout_2.addLayout(self.horizontalLayout_4, 1, 0, 1, 1)
@@ -199,15 +199,15 @@ class Ui_Settings(object):
 
         self.gridLayout_4.addWidget(self.label_12, 0, 1, 1, 1)
 
-        self.lineEdit_indexer_port = QLineEdit(self.groupBox_3)
-        self.lineEdit_indexer_port.setObjectName(u"lineEdit_indexer_port")
+        self.lineEdit_IndexerPort = QLineEdit(self.groupBox_3)
+        self.lineEdit_IndexerPort.setObjectName(u"lineEdit_IndexerPort")
 
-        self.gridLayout_4.addWidget(self.lineEdit_indexer_port, 1, 1, 1, 1)
+        self.gridLayout_4.addWidget(self.lineEdit_IndexerPort, 1, 1, 1, 1)
 
-        self.lineEdit_indexer_token = QLineEdit(self.groupBox_3)
-        self.lineEdit_indexer_token.setObjectName(u"lineEdit_indexer_token")
+        self.lineEdit_IndexerToken = QLineEdit(self.groupBox_3)
+        self.lineEdit_IndexerToken.setObjectName(u"lineEdit_IndexerToken")
 
-        self.gridLayout_4.addWidget(self.lineEdit_indexer_token, 3, 0, 1, 2)
+        self.gridLayout_4.addWidget(self.lineEdit_IndexerToken, 3, 0, 1, 2)
 
         self.horizontalLayout_5 = QHBoxLayout()
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
@@ -216,10 +216,10 @@ class Ui_Settings(object):
 
         self.horizontalLayout_5.addWidget(self.label_10)
 
-        self.lineEdit_indexer_url = QLineEdit(self.groupBox_3)
-        self.lineEdit_indexer_url.setObjectName(u"lineEdit_indexer_url")
+        self.lineEdit_IndexerUrl = QLineEdit(self.groupBox_3)
+        self.lineEdit_IndexerUrl.setObjectName(u"lineEdit_IndexerUrl")
 
-        self.horizontalLayout_5.addWidget(self.lineEdit_indexer_url)
+        self.horizontalLayout_5.addWidget(self.lineEdit_IndexerUrl)
 
 
         self.gridLayout_4.addLayout(self.horizontalLayout_5, 1, 0, 1, 1)
@@ -239,6 +239,18 @@ class Ui_Settings(object):
 
         self.verticalLayout.addWidget(self.buttonBox)
 
+        QWidget.setTabOrder(self.lineEdit_Local, self.pushButton_Folder)
+        QWidget.setTabOrder(self.pushButton_Folder, self.lineEdit_AlgodUrl)
+        QWidget.setTabOrder(self.lineEdit_AlgodUrl, self.lineEdit_AlgodPort)
+        QWidget.setTabOrder(self.lineEdit_AlgodPort, self.lineEdit_AlgodToken)
+        QWidget.setTabOrder(self.lineEdit_AlgodToken, self.lineEdit_KmdUrl)
+        QWidget.setTabOrder(self.lineEdit_KmdUrl, self.lineEdit_KmdPort)
+        QWidget.setTabOrder(self.lineEdit_KmdPort, self.lineEdit_KmdToken)
+        QWidget.setTabOrder(self.lineEdit_KmdToken, self.lineEdit_IndexerUrl)
+        QWidget.setTabOrder(self.lineEdit_IndexerUrl, self.lineEdit_IndexerPort)
+        QWidget.setTabOrder(self.lineEdit_IndexerPort, self.lineEdit_IndexerToken)
+        QWidget.setTabOrder(self.lineEdit_IndexerToken, self.radioButton_Local)
+        QWidget.setTabOrder(self.radioButton_Local, self.radioButton_Remote)
 
         self.retranslateUi(Settings)
         self.buttonBox.accepted.connect(Settings.accept)
@@ -250,9 +262,9 @@ class Ui_Settings(object):
     def retranslateUi(self, Settings):
         Settings.setWindowTitle(QCoreApplication.translate("Settings", u"Settings", None))
         self.label.setText(QCoreApplication.translate("Settings", u"Select a method of connection to your Algorand node:", None))
-        self.radioButton_local.setText(QCoreApplication.translate("Settings", u"Local node", None))
-        self.pushButton_folder.setText(QCoreApplication.translate("Settings", u"Select folder", None))
-        self.radioButton_remote.setText(QCoreApplication.translate("Settings", u"Remote node", None))
+        self.radioButton_Local.setText(QCoreApplication.translate("Settings", u"Local node", None))
+        self.pushButton_Folder.setText(QCoreApplication.translate("Settings", u"Select folder", None))
+        self.radioButton_Remote.setText(QCoreApplication.translate("Settings", u"Remote node", None))
         self.groupBox.setTitle(QCoreApplication.translate("Settings", u"algod", None))
         self.label_3.setText(QCoreApplication.translate("Settings", u"Port", None))
         self.label_4.setText(QCoreApplication.translate("Settings", u"Token", None))

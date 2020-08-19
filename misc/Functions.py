@@ -23,7 +23,7 @@ def load_json_file(file: str) -> ChangeContainer:
         with open(file) as f:
             return jsonpickle.decode(f.read())
     except Exception as e:
-        print("Could not load %s" % file.split('\\')[-1], file=stderr)
+        print("Could not load {}".format(file.split('\\')[-1]), file=stderr)
         print(e, file=stderr)
         quit()
 
@@ -39,15 +39,16 @@ def dump_json_file(file: str, structure: ChangeContainer):
         with open(file, 'w') as f:
             f.write(jsonpickle.encode(structure, indent='\t'))
     except Exception as e:
-        print("Could not dump %s" % file.split('\\')[-1], file=stderr)
+        print("Could not dump {}".format(file.split('\\')[-1]), file=stderr)
         print(e, file=stderr)
 
 
-class SingleInstanceError(Exception):
+class ProjectException(Exception):
     """
-    Custom error to signal that more than one main window is found.
+    Custom exception class to raise an internal error.
     """
-    pass
+    def __init__(self, message: str):
+        self.message = message
 
 
 def find_main_window() -> QtWidgets.QMainWindow:
@@ -62,6 +63,6 @@ def find_main_window() -> QtWidgets.QMainWindow:
 
     if len(main_window) != 1:
         # Uh oh...
-        raise SingleInstanceError
+        raise ProjectException(f"Found {len(main_window)} instance(s) of QMainWindow not equal to one.")
 
     return main_window[0]

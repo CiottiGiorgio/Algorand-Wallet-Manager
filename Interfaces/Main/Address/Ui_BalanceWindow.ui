@@ -59,7 +59,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLabel" name="label_balance">
+        <widget class="QLabel" name="label_Balance">
          <property name="text">
           <string/>
          </property>
@@ -76,7 +76,7 @@
         </widget>
        </item>
        <item row="1" column="1">
-        <widget class="QLabel" name="label_pending_rewards">
+        <widget class="QLabel" name="label_Pending">
          <property name="text">
           <string/>
          </property>

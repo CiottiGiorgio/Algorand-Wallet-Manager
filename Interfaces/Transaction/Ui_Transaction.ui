@@ -37,7 +37,7 @@
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="QComboBox" name="comboBox_sender">
+    <widget class="QComboBox" name="comboBox_Sender">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -60,7 +60,7 @@
     </widget>
    </item>
    <item row="1" column="1">
-    <widget class="QComboBox" name="comboBox_receiver">
+    <widget class="QComboBox" name="comboBox_Receiver">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -83,7 +83,7 @@
     </widget>
    </item>
    <item row="2" column="1">
-    <widget class="QComboBox" name="comboBox_close_to">
+    <widget class="QComboBox" name="comboBox_CloseTo">
      <property name="enabled">
       <bool>false</bool>
      </property>
@@ -111,7 +111,7 @@
       <number>5</number>
      </property>
      <item>
-      <widget class="QComboBox" name="comboBox_type">
+      <widget class="QComboBox" name="comboBox_Type">
        <item>
         <property name="text">
          <string>Algos</string>
@@ -125,7 +125,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="lineEdit_asset_id">
+      <widget class="QLineEdit" name="lineEdit_AssetId">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -135,7 +135,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox_asset_mode">
+      <widget class="QComboBox" name="comboBox_AssetMode">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -184,7 +184,7 @@
       <number>5</number>
      </property>
      <item>
-      <widget class="QLineEdit" name="lineEdit_amount">
+      <widget class="QLineEdit" name="lineEdit_Amount">
        <property name="minimumSize">
         <size>
          <width>100</width>
@@ -203,7 +203,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox_amount_unit">
+      <widget class="QComboBox" name="comboBox_AmountUnit">
        <item>
         <property name="text">
          <string>microAlgos</string>
@@ -249,7 +249,7 @@
       <number>5</number>
      </property>
      <item>
-      <widget class="QLineEdit" name="lineEdit_fee">
+      <widget class="QLineEdit" name="lineEdit_Fee">
        <property name="minimumSize">
         <size>
          <width>100</width>
@@ -268,7 +268,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox_fee_unit">
+      <widget class="QComboBox" name="comboBox_FeeUnit">
        <item>
         <property name="text">
          <string>microAlgos</string>
@@ -287,7 +287,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_sugg_fee">
+      <widget class="QPushButton" name="pushButton_SuggestedFee">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -322,7 +322,7 @@
     </widget>
    </item>
    <item row="6" column="1">
-    <widget class="QTextEdit" name="textEdit_note">
+    <widget class="QTextEdit" name="textEdit_Note">
      <property name="maximumSize">
       <size>
        <width>16777215</width>

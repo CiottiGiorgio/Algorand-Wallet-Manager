@@ -43,7 +43,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="lineEdit_name">
+    <widget class="QLineEdit" name="lineEdit_Name">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -79,7 +79,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="lineEdit_address">
+    <widget class="QLineEdit" name="lineEdit_Address">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -150,7 +150,7 @@
          <number>3</number>
         </property>
         <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
-         <widget class="QLabel" name="label_picture">
+         <widget class="QLabel" name="label_Picture">
           <property name="maximumSize">
            <size>
             <width>256</width>
@@ -158,7 +158,7 @@
            </size>
           </property>
           <property name="text">
-           <string>TextLabel</string>
+           <string/>
           </property>
          </widget>
         </item>
@@ -181,7 +181,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_change">
+        <widget class="QPushButton" name="pushButton_Change">
          <property name="text">
           <string>Change</string>
          </property>
@@ -204,7 +204,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_delete">
+        <widget class="QPushButton" name="pushButton_Delete">
          <property name="enabled">
           <bool>false</bool>
          </property>

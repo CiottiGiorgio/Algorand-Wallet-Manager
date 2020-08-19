@@ -234,10 +234,10 @@ class ContactsCreating(QtWidgets.QDialog, Ui_ContactsCreating):
         self.setupUi(self)
 
         # Setup interface
-        self.lineEditAction_name = self.lineEdit_name.addAction(
+        self.lineEditAction_name = self.lineEdit_Name.addAction(
             QtGui.QIcon(), QtWidgets.QLineEdit.TrailingPosition
         )
-        self.lineEditAction_address = self.lineEdit_address.addAction(
+        self.lineEditAction_address = self.lineEdit_Address.addAction(
             QtGui.QIcon(), QtWidgets.QLineEdit.TrailingPosition
         )
         self.set_label_pixmap(ContactListWidget.pixmap_generic_user)
@@ -245,39 +245,43 @@ class ContactsCreating(QtWidgets.QDialog, Ui_ContactsCreating):
         # Initial state
         if pre_filled:
             self.setWindowTitle("Edit contact")
-            self.lineEdit_name.setText(pre_filled.contact.name)
-            self.lineEdit_address.setText(pre_filled.contact.info)
+            self.lineEdit_Name.setText(pre_filled.contact.name)
+            self.lineEdit_Address.setText(pre_filled.contact.info)
             if pre_filled.contact.pic_name:
                 self.set_label_pixmap(
                     QtGui.QPixmap(path.join(ProjectConstants.fullpath_thumbnails, pre_filled.contact.pic_name))
                 )
-                self.pushButton_delete.setEnabled(True)
+                self.external_pic_full_path = ProjectConstants.fullpath_thumbnails + pre_filled.contact.pic_name
+                self.pushButton_Delete.setEnabled(True)
 
         # Connections
-        self.pushButton_change.clicked.connect(self.pushbutton_modify)
-        self.pushButton_delete.clicked.connect(self.pushbutton_delete)
-        self.lineEdit_name.textChanged.connect(self.validate_inputs)
-        self.lineEdit_address.textChanged.connect(self.validate_inputs)
+        self.pushButton_Change.clicked.connect(self.pushbutton_modify)
+        self.pushButton_Delete.clicked.connect(self.pushbutton_delete)
+        self.lineEdit_Name.textChanged.connect(self.validate_inputs)
+        self.lineEdit_Address.textChanged.connect(self.validate_inputs)
 
         self.validate_inputs()
 
     @QtCore.Slot()
     def accept(self):
         if self.external_pic_full_path:
-            old_extension = "." + self.external_pic_full_path.split(".")[-1]
-            while True:
-                rnd_file_name = self.random_file_name() + old_extension
-                if not os.path.exists(os.path.join(ProjectConstants.fullpath_thumbnails, rnd_file_name)):
-                    break
-            copyfile(
-                self.external_pic_full_path,
-                os.path.join(ProjectConstants.fullpath_thumbnails, rnd_file_name)
-            )
-            new_pic_name = rnd_file_name
+            if not self.pre_filled.contact.pic_name or self.external_pic_full_path != ProjectConstants.fullpath_thumbnails + self.pre_filled.contact.pic_name:
+                old_extension = "." + self.external_pic_full_path.split(".")[-1]
+                while True:
+                    rnd_file_name = self.random_file_name() + old_extension
+                    if not os.path.exists(os.path.join(ProjectConstants.fullpath_thumbnails, rnd_file_name)):
+                        break
+                copyfile(
+                    self.external_pic_full_path,
+                    os.path.join(ProjectConstants.fullpath_thumbnails, rnd_file_name)
+                )
+                new_pic_name = rnd_file_name
+            else:
+                new_pic_name = self.pre_filled.contact.pic_name
         else:
-            new_pic_name = self.pre_filled.contact.pic_name if self.pre_filled else None
+            new_pic_name = None
         self.return_value = ContactListWidget(
-            Contact(new_pic_name, self.lineEdit_name.text(), self.lineEdit_address.text())
+            Contact(new_pic_name, self.lineEdit_Name.text(), self.lineEdit_Address.text())
         )
 
         super().accept()
@@ -290,8 +294,8 @@ class ContactsCreating(QtWidgets.QDialog, Ui_ContactsCreating):
         Action icon on each QLineEdit is changed accordingly and Ok button is enabled accordingly.
         """
         states = {
-            "name": self.lineEdit_name.text() != "",
-            "address": is_valid_address(self.lineEdit_address.text())
+            "name": self.lineEdit_Name.text() != "",
+            "address": is_valid_address(self.lineEdit_Address.text())
         }
 
         self.lineEditAction_name.setIcon(
@@ -320,13 +324,13 @@ class ContactsCreating(QtWidgets.QDialog, Ui_ContactsCreating):
             self.external_pic_full_path = file_name[0]
             self.set_label_pixmap(QtGui.QPixmap(file_name[0]))
 
-            self.pushButton_delete.setEnabled(True)
+            self.pushButton_Delete.setEnabled(True)
 
     @QtCore.Slot()
     def pushbutton_delete(self):
         self.external_pic_full_path = None
         self.set_label_pixmap(ContactListWidget.pixmap_generic_user)
-        self.pushButton_delete.setEnabled(False)
+        self.pushButton_Delete.setEnabled(False)
 
     def set_label_pixmap(self, pixmap: QtGui.QPixmap):
         """
@@ -335,9 +339,9 @@ class ContactsCreating(QtWidgets.QDialog, Ui_ContactsCreating):
         It only resized the input pixmap if it is bigger than the label that is going to contain it.
         """
         picture_size = pixmap.size()
-        label_max_size = self.label_picture.maximumSize()
+        label_max_size = self.label_Picture.maximumSize()
 
-        self.label_picture.setPixmap(
+        self.label_Picture.setPixmap(
             pixmap
             if picture_size.width() < label_max_size.width() and picture_size.height() < label_max_size.height() else
             pixmap.scaled(

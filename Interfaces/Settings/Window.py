@@ -7,6 +7,7 @@ This file contains the SettingsWindow class and related static attributes and me
 from PySide2 import QtWidgets, QtCore
 
 # Local project
+from misc.Functions import ProjectException
 import misc.Constants as ProjectConstants
 from misc.DataStructures import DictJsonSettings
 from Interfaces.Settings.Ui_Settings import Ui_Settings
@@ -32,72 +33,76 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
         self.groupBox_3.setVisible(False)
 
         # Connections
-        self.radioButton_local.toggled.connect(self.radiobutton_change_enabled)
-        self.radioButton_remote.toggled.connect(self.radiobutton_change_enabled)
-        self.pushButton_folder.clicked.connect(self.pushbutton_folder_dialog)
+        self.radioButton_Local.toggled.connect(self.radiobutton_change_enabled)
+        self.radioButton_Remote.toggled.connect(self.radiobutton_change_enabled)
+        self.pushButton_Folder.clicked.connect(self.pushbutton_folder_dialog)
 
         QtCore.QTimer.singleShot(0, self.setup_logic)
 
     def setup_logic(self):
         settings = SettingsWindow.settings_from_json_file.memory  # Shortened
         if settings["selected"] == 0:
-            self.radioButton_local.setChecked(True)
+            self.radioButton_Local.setChecked(True)
         elif settings["selected"] == 1:
-            self.radioButton_remote.setChecked(True)
+            self.radioButton_Remote.setChecked(True)
 
-        self.lineEdit_local.setText(settings["local"])
+        self.lineEdit_Local.setText(settings["local"])
 
-        self.lineEdit_algod_url.setText(settings["algod"]["url"])
-        self.lineEdit_algod_port.setText(settings["algod"]["port"])
-        self.lineEdit_algod_token.setText(settings["algod"]["token"])
+        self.lineEdit_AlgodUrl.setText(settings["algod"]["url"])
+        self.lineEdit_AlgodPort.setText(settings["algod"]["port"])
+        self.lineEdit_AlgodToken.setText(settings["algod"]["token"])
 
-        self.lineEdit_kmd_url.setText(settings["kmd"]["url"])
-        self.lineEdit_kmd_port.setText(settings["kmd"]["port"])
-        self.lineEdit_kmd_token.setText(settings["kmd"]["token"])
+        self.lineEdit_KmdUrl.setText(settings["kmd"]["url"])
+        self.lineEdit_KmdPort.setText(settings["kmd"]["port"])
+        self.lineEdit_KmdToken.setText(settings["kmd"]["token"])
 
     @QtCore.Slot()
     def accept(self):
         settings = SettingsWindow.settings_from_json_file.memory
 
-        if self.radioButton_local.isChecked():
+        if self.radioButton_Local.isChecked():
             settings["selected"] = 0
-        elif self.radioButton_remote.isChecked():
+        elif self.radioButton_Remote.isChecked():
             settings["selected"] = 1
         else:
-            print("This line is impossible to execute. If you see this the universe is collapsing.", file=stderr)
+            raise ProjectException(
+                f"self.radioButton_local.isChecked() has unexpected value: {self.radioButton_Local.isChecked()}"
+            )
 
-        settings["local"] = self.lineEdit_local.text()
+        settings["local"] = self.lineEdit_Local.text()
 
-        settings["algod"]["url"] = self.lineEdit_algod_url.text()
-        settings["algod"]["port"] = self.lineEdit_algod_port.text()
-        settings["algod"]["token"] = self.lineEdit_algod_token.text()
+        settings["algod"]["url"] = self.lineEdit_AlgodUrl.text()
+        settings["algod"]["port"] = self.lineEdit_AlgodPort.text()
+        settings["algod"]["token"] = self.lineEdit_AlgodToken.text()
 
-        settings["kmd"]["url"] = self.lineEdit_kmd_url.text()
-        settings["kmd"]["port"] = self.lineEdit_kmd_port.text()
-        settings["kmd"]["token"] = self.lineEdit_kmd_token.text()
+        settings["kmd"]["url"] = self.lineEdit_KmdUrl.text()
+        settings["kmd"]["port"] = self.lineEdit_KmdPort.text()
+        settings["kmd"]["token"] = self.lineEdit_KmdToken.text()
 
         super().accept()
 
     @QtCore.Slot()
     def radiobutton_change_enabled(self):
-        if self.radioButton_local.isChecked():
-            for widget in [self.lineEdit_local, self.pushButton_folder]:
+        if self.radioButton_Local.isChecked():
+            for widget in [self.lineEdit_Local, self.pushButton_Folder]:
                 widget.setEnabled(True)
 
-            for widget in [self.lineEdit_algod_url, self.lineEdit_algod_port, self.lineEdit_algod_token,
-                           self.lineEdit_kmd_url, self.lineEdit_kmd_port, self.lineEdit_kmd_token,
-                           self.lineEdit_indexer_url, self.lineEdit_indexer_port, self.lineEdit_indexer_token]:
+            for widget in [self.lineEdit_AlgodUrl, self.lineEdit_AlgodPort, self.lineEdit_AlgodToken,
+                           self.lineEdit_KmdUrl, self.lineEdit_KmdPort, self.lineEdit_KmdToken,
+                           self.lineEdit_IndexerUrl, self.lineEdit_IndexerPort, self.lineEdit_IndexerToken]:
                 widget.setEnabled(False)
-        elif self.radioButton_remote.isChecked():
-            for widget in [self.lineEdit_local, self.pushButton_folder]:
+        elif self.radioButton_Remote.isChecked():
+            for widget in [self.lineEdit_Local, self.pushButton_Folder]:
                 widget.setEnabled(False)
 
-            for widget in [self.lineEdit_algod_url, self.lineEdit_algod_port, self.lineEdit_algod_token,
-                           self.lineEdit_kmd_url, self.lineEdit_kmd_port, self.lineEdit_kmd_token,
-                           self.lineEdit_indexer_url, self.lineEdit_indexer_port, self.lineEdit_indexer_token]:
+            for widget in [self.lineEdit_AlgodUrl, self.lineEdit_AlgodPort, self.lineEdit_AlgodToken,
+                           self.lineEdit_KmdUrl, self.lineEdit_KmdPort, self.lineEdit_KmdToken,
+                           self.lineEdit_IndexerUrl, self.lineEdit_IndexerPort, self.lineEdit_IndexerToken]:
                 widget.setEnabled(True)
         else:
-            print("This line is impossible to execute. If you see this the universe is collapsing.", file=stderr)
+            raise ProjectException(
+                f"self.RadioButton_local.isChecked() has unexpected value - {self.radioButton_Local.isChecked()}"
+            )
 
     @QtCore.Slot()
     def pushbutton_folder_dialog(self):
@@ -106,7 +111,7 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
         """
         dir_path = QtWidgets.QFileDialog.getExistingDirectory()
         if dir_path != "":
-            self.lineEdit_local.setText(dir_path)
+            self.lineEdit_Local.setText(dir_path)
 
     @staticmethod
     def calculate_rest_endpoints():
@@ -122,7 +127,6 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
 
         if settings["selected"] == 0:
             # Get the rest endpoints through local files.
-
             try:
                 with open(path.join(settings["local"], ProjectConstants.filename_algod_net)) as f1, \
                         open(path.join(settings["local"], ProjectConstants.filename_algod_token)) as f2:
@@ -149,7 +153,6 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
 
         elif settings["selected"] == 1:
             # Use rest endpoints directly.
-
             if settings["algod"]["url"] and settings["algod"]["port"] and settings["algod"]["token"]:
                 temp["algod"] = {
                     "address": "http://" + settings["algod"]["url"] + ':' + settings["algod"]["port"],

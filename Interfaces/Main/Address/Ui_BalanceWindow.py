@@ -44,22 +44,22 @@ class Ui_BalanceWindow(object):
 
         self.gridLayout.addWidget(self.label_3, 0, 0, 1, 1)
 
-        self.label_balance = QLabel(self.scrollAreaWidgetContents)
-        self.label_balance.setObjectName(u"label_balance")
-        self.label_balance.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.label_Balance = QLabel(self.scrollAreaWidgetContents)
+        self.label_Balance.setObjectName(u"label_balance")
+        self.label_Balance.setAlignment(Qt.AlignRight | Qt.AlignTrailing | Qt.AlignVCenter)
 
-        self.gridLayout.addWidget(self.label_balance, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.label_Balance, 0, 1, 1, 1)
 
         self.label_5 = QLabel(self.scrollAreaWidgetContents)
         self.label_5.setObjectName(u"label_5")
 
         self.gridLayout.addWidget(self.label_5, 1, 0, 1, 1)
 
-        self.label_pending_rewards = QLabel(self.scrollAreaWidgetContents)
-        self.label_pending_rewards.setObjectName(u"label_pending_rewards")
-        self.label_pending_rewards.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.label_Pending = QLabel(self.scrollAreaWidgetContents)
+        self.label_Pending.setObjectName(u"label_pending_rewards")
+        self.label_Pending.setAlignment(Qt.AlignRight | Qt.AlignTrailing | Qt.AlignVCenter)
 
-        self.gridLayout.addWidget(self.label_pending_rewards, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.label_Pending, 1, 1, 1, 1)
 
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
@@ -97,9 +97,9 @@ class Ui_BalanceWindow(object):
         BalanceWindow.setWindowTitle(QCoreApplication.translate("BalanceWindow", u"Algos & Assets", None))
         self.label.setText(QCoreApplication.translate("BalanceWindow", u"Algos:", None))
         self.label_3.setText(QCoreApplication.translate("BalanceWindow", u"Balance:", None))
-        self.label_balance.setText("")
+        self.label_Balance.setText("")
         self.label_5.setText(QCoreApplication.translate("BalanceWindow", u"Pending rewards:", None))
-        self.label_pending_rewards.setText("")
+        self.label_Pending.setText("")
         self.label_2.setText(QCoreApplication.translate("BalanceWindow", u"Assets:", None))
     # retranslateUi
 

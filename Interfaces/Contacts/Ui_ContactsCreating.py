@@ -36,11 +36,11 @@ class Ui_ContactsCreating(object):
 
         self.verticalLayout.addWidget(self.label)
 
-        self.lineEdit_name = QLineEdit(ContactsCreating)
-        self.lineEdit_name.setObjectName(u"lineEdit_name")
-        self.lineEdit_name.setMinimumSize(QSize(0, 25))
+        self.lineEdit_Name = QLineEdit(ContactsCreating)
+        self.lineEdit_Name.setObjectName(u"lineEdit_name")
+        self.lineEdit_Name.setMinimumSize(QSize(0, 25))
 
-        self.verticalLayout.addWidget(self.lineEdit_name)
+        self.verticalLayout.addWidget(self.lineEdit_Name)
 
         self.verticalSpacer_2 = QSpacerItem(20, 10, QSizePolicy.Minimum, QSizePolicy.Fixed)
 
@@ -51,11 +51,11 @@ class Ui_ContactsCreating(object):
 
         self.verticalLayout.addWidget(self.label_2)
 
-        self.lineEdit_address = QLineEdit(ContactsCreating)
-        self.lineEdit_address.setObjectName(u"lineEdit_address")
-        self.lineEdit_address.setMinimumSize(QSize(0, 25))
+        self.lineEdit_Address = QLineEdit(ContactsCreating)
+        self.lineEdit_Address.setObjectName(u"lineEdit_address")
+        self.lineEdit_Address.setMinimumSize(QSize(0, 25))
 
-        self.verticalLayout.addWidget(self.lineEdit_address)
+        self.verticalLayout.addWidget(self.lineEdit_Address)
 
         self.verticalSpacer_3 = QSpacerItem(20, 10, QSizePolicy.Minimum, QSizePolicy.Fixed)
 
@@ -77,11 +77,11 @@ class Ui_ContactsCreating(object):
         self.verticalLayout_3 = QVBoxLayout(self.frame)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.verticalLayout_3.setContentsMargins(3, 3, 3, 3)
-        self.label_picture = QLabel(self.frame)
-        self.label_picture.setObjectName(u"label_picture")
-        self.label_picture.setMaximumSize(QSize(256, 256))
+        self.label_Picture = QLabel(self.frame)
+        self.label_Picture.setObjectName(u"label_picture")
+        self.label_Picture.setMaximumSize(QSize(256, 256))
 
-        self.verticalLayout_3.addWidget(self.label_picture, 0, Qt.AlignHCenter|Qt.AlignVCenter)
+        self.verticalLayout_3.addWidget(self.label_Picture, 0, Qt.AlignHCenter | Qt.AlignVCenter)
 
 
         self.horizontalLayout.addWidget(self.frame)
@@ -92,20 +92,20 @@ class Ui_ContactsCreating(object):
 
         self.verticalLayout_2.addItem(self.verticalSpacer_4)
 
-        self.pushButton_change = QPushButton(ContactsCreating)
-        self.pushButton_change.setObjectName(u"pushButton_change")
+        self.pushButton_Change = QPushButton(ContactsCreating)
+        self.pushButton_Change.setObjectName(u"pushButton_change")
 
-        self.verticalLayout_2.addWidget(self.pushButton_change)
+        self.verticalLayout_2.addWidget(self.pushButton_Change)
 
         self.verticalSpacer_5 = QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Fixed)
 
         self.verticalLayout_2.addItem(self.verticalSpacer_5)
 
-        self.pushButton_delete = QPushButton(ContactsCreating)
-        self.pushButton_delete.setObjectName(u"pushButton_delete")
-        self.pushButton_delete.setEnabled(False)
+        self.pushButton_Delete = QPushButton(ContactsCreating)
+        self.pushButton_Delete.setObjectName(u"pushButton_delete")
+        self.pushButton_Delete.setEnabled(False)
 
-        self.verticalLayout_2.addWidget(self.pushButton_delete)
+        self.verticalLayout_2.addWidget(self.pushButton_Delete)
 
         self.verticalSpacer_6 = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
@@ -143,12 +143,12 @@ class Ui_ContactsCreating(object):
     def retranslateUi(self, ContactsCreating):
         ContactsCreating.setWindowTitle(QCoreApplication.translate("ContactsCreating", u"New Contact", None))
         self.label.setText(QCoreApplication.translate("ContactsCreating", u"Name:", None))
-        self.lineEdit_name.setPlaceholderText(QCoreApplication.translate("ContactsCreating", u"Insert a name for your contact", None))
+        self.lineEdit_Name.setPlaceholderText(QCoreApplication.translate("ContactsCreating", u"Insert a name for your contact", None))
         self.label_2.setText(QCoreApplication.translate("ContactsCreating", u"Address:", None))
-        self.lineEdit_address.setPlaceholderText(QCoreApplication.translate("ContactsCreating", u"Insert a valid Algorand address", None))
+        self.lineEdit_Address.setPlaceholderText(QCoreApplication.translate("ContactsCreating", u"Insert a valid Algorand address", None))
         self.label_3.setText(QCoreApplication.translate("ContactsCreating", u"Photo:", None))
-        self.label_picture.setText(QCoreApplication.translate("ContactsCreating", u"TextLabel", None))
-        self.pushButton_change.setText(QCoreApplication.translate("ContactsCreating", u"Change", None))
-        self.pushButton_delete.setText(QCoreApplication.translate("ContactsCreating", u"Delete", None))
+        self.label_Picture.setText(QCoreApplication.translate("ContactsCreating", u"TextLabel", None))
+        self.pushButton_Change.setText(QCoreApplication.translate("ContactsCreating", u"Change", None))
+        self.pushButton_Delete.setText(QCoreApplication.translate("ContactsCreating", u"Delete", None))
     # retranslateUi
 
