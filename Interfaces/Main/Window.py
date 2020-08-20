@@ -150,10 +150,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 ProjectConstants.fullpath_contacts_json,
                 ContactsWindow.contacts_from_json_file
             )
-        if SettingsWindow.settings_from_json_file.has_changed():
+        if SettingsWindow.saved_json_settings.has_changed():
             dump_json_file(
                 ProjectConstants.fullpath_settings_json,
-                SettingsWindow.settings_from_json_file
+                SettingsWindow.saved_json_settings
             )
 
         # We have no choice but to do it this way because i have no control over how much time a call through algosdk
@@ -191,8 +191,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         ContactsWindow.contacts_from_json_file = load_json_file(ProjectConstants.fullpath_contacts_json)
         ContactsWindow.contacts_from_json_file.save_state()
-        SettingsWindow.settings_from_json_file = load_json_file(ProjectConstants.fullpath_settings_json)
-        SettingsWindow.settings_from_json_file.save_state()
+
+        SettingsWindow.saved_json_settings = load_json_file(ProjectConstants.fullpath_settings_json)
+        SettingsWindow.saved_json_settings.save_state()
 
 
 class ClosingWindow(QtWidgets.QDialog):

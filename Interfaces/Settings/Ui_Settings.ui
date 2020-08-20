@@ -111,6 +111,39 @@
     </spacer>
    </item>
    <item>
+    <widget class="QRadioButton" name="radioButton_EnvVar">
+     <property name="text">
+      <string>Environment variable &quot;ALGORAND_DATA&quot;</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="lineEdit_EnvVar">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_6">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>10</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
     <widget class="QRadioButton" name="radioButton_Remote">
      <property name="text">
       <string>Remote node</string>
@@ -336,6 +369,7 @@
  <tabstops>
   <tabstop>lineEdit_Local</tabstop>
   <tabstop>pushButton_Folder</tabstop>
+  <tabstop>lineEdit_EnvVar</tabstop>
   <tabstop>lineEdit_AlgodUrl</tabstop>
   <tabstop>lineEdit_AlgodPort</tabstop>
   <tabstop>lineEdit_AlgodToken</tabstop>
@@ -346,6 +380,7 @@
   <tabstop>lineEdit_IndexerPort</tabstop>
   <tabstop>lineEdit_IndexerToken</tabstop>
   <tabstop>radioButton_Local</tabstop>
+  <tabstop>radioButton_EnvVar</tabstop>
   <tabstop>radioButton_Remote</tabstop>
  </tabstops>
  <resources/>

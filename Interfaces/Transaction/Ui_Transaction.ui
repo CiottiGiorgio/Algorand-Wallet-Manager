@@ -76,9 +76,18 @@
     </widget>
    </item>
    <item row="2" column="0">
-    <widget class="QLabel" name="label_7">
+    <widget class="QCheckBox" name="checkBox_CloseTo">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="text">
-      <string>Close to:</string>
+      <string>Close to</string>
+     </property>
+     <property name="tristate">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
@@ -147,11 +156,6 @@
        <item>
         <property name="text">
          <string>Opt-in</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Close to</string>
         </property>
        </item>
       </widget>

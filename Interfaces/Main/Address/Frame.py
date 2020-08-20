@@ -7,7 +7,6 @@ from PySide2 import QtWidgets, QtCore, QtGui
 
 # Algosdk
 from algosdk.mnemonic import from_private_key, to_private_key
-from algosdk.transaction import PaymentTxn
 
 # Local project
 from misc.Entities import Wallet
@@ -18,6 +17,7 @@ from Interfaces.Main.Address.Widgets import BalanceScrollWidget
 
 # Python standard libraries
 from functools import partial
+import locale
 
 
 class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
@@ -40,7 +40,7 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
         self.pushButton_Return.clicked.connect(self.close)
         self.pushButton_Balance.clicked.connect(self.show_balance)
         self.pushButton_New.clicked.connect(self.new_address)
-        self.pushButton_ForgetClose.clicked.connect(self.forget_close_address)
+        self.pushButton_Forget.clicked.connect(self.forget_address)
         self.pushButton_Import.clicked.connect(self.import_address)
         self.pushButton_Export.clicked.connect(self.export_address)
 
@@ -58,7 +58,7 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
         if len(addresses) >= 1:
             self.listWidget.setCurrentRow(0)
 
-            for widget in [self.pushButton_Balance, self.pushButton_ForgetClose, self.pushButton_Export]:
+            for widget in [self.pushButton_Balance, self.pushButton_Forget, self.pushButton_Export]:
                 widget.setEnabled(True)
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
@@ -96,47 +96,15 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
             self.restart()
 
     @QtCore.Slot()
-    def forget_close_address(self):
+    def forget_address(self):
         item = self.listWidget.currentItem()
 
-        close_address = QtWidgets.QInputDialog.getText(
-            self, "Forget / Close",
-            "Please fill this field in with a valid Algorand address if you wish to close this account "
-            "on the blockchain transferring all your remaining Algos and forget it from the wallet.\n\n"
-            "Leave it empty if you just want to make the wallet forget the address.\n"
-            "Keep in mind you must not hold any asset when closing an address.\n",
-            QtWidgets.QLineEdit.EchoMode.Normal
-        )
-
-        if close_address[1]:
-            if close_address[0] != "":
-                try:
-                    algod_client = find_main_window().wallet_frame.algod_client
-                    sp = algod_client.suggested_params()
-                    data = {
-                        "sender": item.text(),
-                        "fee": sp.min_fee,
-                        "first": sp.first,
-                        "last": sp.last,
-                        "gh": sp.gh,
-                        "receiver": close_address[0],
-                        "amt": 0,
-                        "close_remainder_to": close_address[0],
-                        "flat_fee": True
-                    }
-                    txn = PaymentTxn(**data)
-                    s_txn = self.wallet.algo_wallet.sign_transaction(txn)
-                    algod_client.send_transaction(s_txn)
-                except Exception as e:
-                    QtWidgets.QMessageBox.critical(self, "Could not close address on the blockchain", str(e))
-                    return
-
-            try:
-                self.wallet.algo_wallet.delete_key(item.text())
-            except Exception as e:
-                QtWidgets.QMessageBox.critical(self, "Could not forget address", str(e))
-            else:
-                self.restart()
+        try:
+            self.wallet.algo_wallet.delete_key(item.text())
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Could not forget address", str(e))
+        else:
+            self.restart()
 
     @QtCore.Slot()
     def import_address(self):
@@ -208,8 +176,12 @@ class BalanceWindow(QtWidgets.QDialog, Ui_BalanceWindow):
 
         self.setupUi(self)
 
-        self.label_Balance.setText(str(account_info["amount-without-pending-rewards"]) + " microAlgos")
-        self.label_Pending.setText(str(account_info["pending-rewards"]) + " microAlgos")
+        self.label_Balance.setText(
+            str(locale.currency(account_info["amount-without-pending-rewards"], False, True) + " microAlgos")
+        )
+        self.label_Pending.setText(
+            str(locale.currency(account_info["pending-rewards"], False, True) + " microAlgos")
+        )
 
         for asset in account_info["assets"]:
             self.verticalLayout_assets.addWidget(

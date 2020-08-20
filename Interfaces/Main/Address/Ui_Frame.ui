@@ -62,12 +62,12 @@ Balance</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_ForgetClose">
+      <widget class="QPushButton" name="pushButton_Forget">
        <property name="enabled">
         <bool>false</bool>
        </property>
        <property name="text">
-        <string>Forget/Close</string>
+        <string>Forget</string>
        </property>
        <property name="checkable">
         <bool>false</bool>

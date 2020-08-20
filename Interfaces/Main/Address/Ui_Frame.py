@@ -53,12 +53,12 @@ class Ui_AddressFrame(object):
 
         self.verticalLayout.addWidget(self.pushButton_New)
 
-        self.pushButton_ForgetClose = QPushButton(AddressFrame)
-        self.pushButton_ForgetClose.setObjectName(u"pushButton_ForgetClose")
-        self.pushButton_ForgetClose.setEnabled(False)
-        self.pushButton_ForgetClose.setCheckable(False)
+        self.pushButton_Forget = QPushButton(AddressFrame)
+        self.pushButton_Forget.setObjectName(u"pushButton_ForgetClose")
+        self.pushButton_Forget.setEnabled(False)
+        self.pushButton_Forget.setCheckable(False)
 
-        self.verticalLayout.addWidget(self.pushButton_ForgetClose)
+        self.verticalLayout.addWidget(self.pushButton_Forget)
 
         self.pushButton_Import = QPushButton(AddressFrame)
         self.pushButton_Import.setObjectName(u"pushButton_Import")
@@ -86,7 +86,7 @@ class Ui_AddressFrame(object):
         self.pushButton_Balance.setText(QCoreApplication.translate("AddressFrame", u"Open\n"
 "Balance", None))
         self.pushButton_New.setText(QCoreApplication.translate("AddressFrame", u"New", None))
-        self.pushButton_ForgetClose.setText(QCoreApplication.translate("AddressFrame", u"Forget/Close", None))
+        self.pushButton_Forget.setText(QCoreApplication.translate("AddressFrame", u"Forget/Close", None))
         self.pushButton_Import.setText(QCoreApplication.translate("AddressFrame", u"Import", None))
         self.pushButton_Export.setText(QCoreApplication.translate("AddressFrame", u"Export", None))
     # retranslateUi

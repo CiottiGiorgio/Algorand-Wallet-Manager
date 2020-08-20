@@ -68,6 +68,22 @@ class Ui_Settings(object):
 
         self.verticalLayout.addItem(self.verticalSpacer_3)
 
+        self.radioButton_EnvVar = QRadioButton(Settings)
+        self.radioButton_EnvVar.setObjectName(u"radioButton_EnvVar")
+
+        self.verticalLayout.addWidget(self.radioButton_EnvVar)
+
+        self.lineEdit_EnvVar = QLineEdit(Settings)
+        self.lineEdit_EnvVar.setObjectName(u"lineEdit_EnvVar")
+        self.lineEdit_EnvVar.setEnabled(True)
+        self.lineEdit_EnvVar.setReadOnly(True)
+
+        self.verticalLayout.addWidget(self.lineEdit_EnvVar)
+
+        self.verticalSpacer_6 = QSpacerItem(20, 10, QSizePolicy.Minimum, QSizePolicy.Fixed)
+
+        self.verticalLayout.addItem(self.verticalSpacer_6)
+
         self.radioButton_Remote = QRadioButton(Settings)
         self.radioButton_Remote.setObjectName(u"radioButton_Remote")
 
@@ -240,7 +256,8 @@ class Ui_Settings(object):
         self.verticalLayout.addWidget(self.buttonBox)
 
         QWidget.setTabOrder(self.lineEdit_Local, self.pushButton_Folder)
-        QWidget.setTabOrder(self.pushButton_Folder, self.lineEdit_AlgodUrl)
+        QWidget.setTabOrder(self.pushButton_Folder, self.lineEdit_EnvVar)
+        QWidget.setTabOrder(self.lineEdit_EnvVar, self.lineEdit_AlgodUrl)
         QWidget.setTabOrder(self.lineEdit_AlgodUrl, self.lineEdit_AlgodPort)
         QWidget.setTabOrder(self.lineEdit_AlgodPort, self.lineEdit_AlgodToken)
         QWidget.setTabOrder(self.lineEdit_AlgodToken, self.lineEdit_KmdUrl)
@@ -250,7 +267,8 @@ class Ui_Settings(object):
         QWidget.setTabOrder(self.lineEdit_IndexerUrl, self.lineEdit_IndexerPort)
         QWidget.setTabOrder(self.lineEdit_IndexerPort, self.lineEdit_IndexerToken)
         QWidget.setTabOrder(self.lineEdit_IndexerToken, self.radioButton_Local)
-        QWidget.setTabOrder(self.radioButton_Local, self.radioButton_Remote)
+        QWidget.setTabOrder(self.radioButton_Local, self.radioButton_EnvVar)
+        QWidget.setTabOrder(self.radioButton_EnvVar, self.radioButton_Remote)
 
         self.retranslateUi(Settings)
         self.buttonBox.accepted.connect(Settings.accept)
@@ -264,6 +282,7 @@ class Ui_Settings(object):
         self.label.setText(QCoreApplication.translate("Settings", u"Select a method of connection to your Algorand node:", None))
         self.radioButton_Local.setText(QCoreApplication.translate("Settings", u"Local node", None))
         self.pushButton_Folder.setText(QCoreApplication.translate("Settings", u"Select folder", None))
+        self.radioButton_EnvVar.setText(QCoreApplication.translate("Settings", u"Environment variable \"ALGORAND_DATA\"", None))
         self.radioButton_Remote.setText(QCoreApplication.translate("Settings", u"Remote node", None))
         self.groupBox.setTitle(QCoreApplication.translate("Settings", u"algod", None))
         self.label_3.setText(QCoreApplication.translate("Settings", u"Port", None))

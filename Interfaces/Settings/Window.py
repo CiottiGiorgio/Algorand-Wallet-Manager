@@ -13,12 +13,12 @@ from misc.DataStructures import DictJsonSettings
 from Interfaces.Settings.Ui_Settings import Ui_Settings
 
 # Python standard libraries
-from os import path
+from os import path, environ
 from sys import stderr
 
 
 class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
-    settings_from_json_file = DictJsonSettings()
+    saved_json_settings = DictJsonSettings()
 
     rest_endpoints = {}
 
@@ -30,6 +30,7 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
 
         self.setupUi(self)
 
+        # Setup interface
         self.groupBox_3.setVisible(False)
 
         # Connections
@@ -37,16 +38,32 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
         self.radioButton_Remote.toggled.connect(self.radiobutton_change_enabled)
         self.pushButton_Folder.clicked.connect(self.pushbutton_folder_dialog)
 
+        # Shorthand for groups of widgets.
+        #   These will come in handy when enabling or disabling the respective groups.
+        self.local_widgets = [self.lineEdit_Local, self.pushButton_Folder]
+        self.envvar_widgets = [self.lineEdit_EnvVar]
+        self.remote_widgets = [self.lineEdit_AlgodUrl, self.lineEdit_AlgodPort, self.lineEdit_AlgodToken,
+                               self.lineEdit_KmdUrl, self.lineEdit_KmdPort, self.lineEdit_KmdToken,
+                               self.lineEdit_IndexerUrl, self.lineEdit_IndexerPort, self.lineEdit_IndexerToken]
+
         QtCore.QTimer.singleShot(0, self.setup_logic)
 
     def setup_logic(self):
-        settings = SettingsWindow.settings_from_json_file.memory  # Shortened
+        settings = SettingsWindow.saved_json_settings.memory  # Shortened
         if settings["selected"] == 0:
             self.radioButton_Local.setChecked(True)
         elif settings["selected"] == 1:
+            self.radioButton_EnvVar.setChecked(True)
+        elif settings["selected"] == 2:
             self.radioButton_Remote.setChecked(True)
+        else:
+            raise ProjectException(
+                f"settings['selected'] has unexpected value {settings['selected']}"
+            )
 
         self.lineEdit_Local.setText(settings["local"])
+
+        self.lineEdit_EnvVar.setText(environ["ALGORAND_DATA"] if "ALGORAND_DATA" in environ else "")
 
         self.lineEdit_AlgodUrl.setText(settings["algod"]["url"])
         self.lineEdit_AlgodPort.setText(settings["algod"]["port"])
@@ -58,15 +75,17 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
 
     @QtCore.Slot()
     def accept(self):
-        settings = SettingsWindow.settings_from_json_file.memory
+        settings = SettingsWindow.saved_json_settings.memory
 
         if self.radioButton_Local.isChecked():
             settings["selected"] = 0
-        elif self.radioButton_Remote.isChecked():
+        elif self.radioButton_EnvVar.isChecked():
             settings["selected"] = 1
+        elif self.radioButton_Remote.isChecked():
+            settings["selected"] = 2
         else:
             raise ProjectException(
-                f"self.radioButton_local.isChecked() has unexpected value: {self.radioButton_Local.isChecked()}"
+                "No radioButton seems to be selected inside SettingsWindow"
             )
 
         settings["local"] = self.lineEdit_Local.text()
@@ -84,21 +103,26 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
     @QtCore.Slot()
     def radiobutton_change_enabled(self):
         if self.radioButton_Local.isChecked():
-            for widget in [self.lineEdit_Local, self.pushButton_Folder]:
+            for widget in self.local_widgets:
                 widget.setEnabled(True)
 
-            for widget in [self.lineEdit_AlgodUrl, self.lineEdit_AlgodPort, self.lineEdit_AlgodToken,
-                           self.lineEdit_KmdUrl, self.lineEdit_KmdPort, self.lineEdit_KmdToken,
-                           self.lineEdit_IndexerUrl, self.lineEdit_IndexerPort, self.lineEdit_IndexerToken]:
+            for widget in self.envvar_widgets + self.remote_widgets:
                 widget.setEnabled(False)
+
+        elif self.radioButton_EnvVar.isChecked():
+            for widget in self.envvar_widgets:
+                widget.setEnabled(True)
+
+            for widget in self.local_widgets + self.remote_widgets:
+                widget.setEnabled(False)
+
         elif self.radioButton_Remote.isChecked():
-            for widget in [self.lineEdit_Local, self.pushButton_Folder]:
+            for widget in self.remote_widgets:
+                widget.setEnabled(True)
+
+            for widget in self.local_widgets + self.envvar_widgets:
                 widget.setEnabled(False)
 
-            for widget in [self.lineEdit_AlgodUrl, self.lineEdit_AlgodPort, self.lineEdit_AlgodToken,
-                           self.lineEdit_KmdUrl, self.lineEdit_KmdPort, self.lineEdit_KmdToken,
-                           self.lineEdit_IndexerUrl, self.lineEdit_IndexerPort, self.lineEdit_IndexerToken]:
-                widget.setEnabled(True)
         else:
             raise ProjectException(
                 f"self.RadioButton_local.isChecked() has unexpected value - {self.radioButton_Local.isChecked()}"
@@ -121,15 +145,19 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
 
         It's crucial that the pair (address, token) remains consistent. Meaning that either both exists or none does.
         """
-        settings = SettingsWindow.settings_from_json_file.memory
+        settings = SettingsWindow.saved_json_settings.memory
 
         temp = dict()
 
-        if settings["selected"] == 0:
-            # Get the rest endpoints through local files.
+        if settings["selected"] == 0 or settings["selected"] == 1:
+            # Get the rest endpoints through local files or environment variable.
+            node_path = settings["local"] if settings["selected"] == 0 else (
+                environ["ALGORAND_DATA"] if "ALGORAND_DATA" in environ else ""
+            )
+            
             try:
-                with open(path.join(settings["local"], ProjectConstants.filename_algod_net)) as f1, \
-                        open(path.join(settings["local"], ProjectConstants.filename_algod_token)) as f2:
+                with open(path.join(node_path, ProjectConstants.filename_algod_net)) as f1, \
+                        open(path.join(node_path, ProjectConstants.filename_algod_token)) as f2:
                     temp["algod"] = {
                         "address": "http://" + f1.readline().strip("\n"),
                         "token": f2.readline().strip("\n")
@@ -140,8 +168,8 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
                     del temp["algod"]
 
             try:
-                with open(path.join(settings["local"], ProjectConstants.filename_kmd_net)) as f3, \
-                        open(path.join(settings["local"], ProjectConstants.filename_kmd_token)) as f4:
+                with open(path.join(node_path, ProjectConstants.filename_kmd_net)) as f3, \
+                        open(path.join(node_path, ProjectConstants.filename_kmd_token)) as f4:
                     temp["kmd"] = {
                         "address": "http://" + f3.readline().strip("\n"),
                         "token": f4.readline().strip("\n")
@@ -151,7 +179,7 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
                 if "kmd" in temp:
                     del temp["kmd"]
 
-        elif settings["selected"] == 1:
+        elif settings["selected"] == 2:
             # Use rest endpoints directly.
             if settings["algod"]["url"] and settings["algod"]["port"] and settings["algod"]["token"]:
                 temp["algod"] = {
@@ -164,5 +192,8 @@ class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
                     "address": "http://" + settings["kmd"]["url"] + ':' + settings["kmd"]["port"],
                     "token": settings["kmd"]["token"]
                 }
+
+        else:
+            raise ProjectException(f"settings['selected'] has unexpected value: {settings['selected']}")
 
         SettingsWindow.rest_endpoints = temp

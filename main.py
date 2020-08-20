@@ -6,11 +6,15 @@ This main function will initialize PySide2 & Main and manage the starting of the
 # PySide2
 from PySide2 import QtWidgets
 
+# Python standard libraries
+import locale
+
 
 # TODO Maybe look into Qt model/view because management of contacts, wallets and addresses is getting out of hand
 #  especially in TransactionWindow
 # TODO deploying on linux is a NIGHTMARE. Find a way to freeze the app for Windows/MacOS/Linux.
 def main():
+    locale.setlocale(locale.LC_ALL, '')
     # Manager of all things regarding a widget-based Qt5 app.
     #  Eg.: mainloop, events, initialization, finalization, ...
     app = QtWidgets.QApplication([])

@@ -32,7 +32,7 @@ class Ui_TransactionWindow(object):
         self.formLayout.setWidget(0, QFormLayout.LabelRole, self.label)
 
         self.comboBox_Sender = QComboBox(TransactionWindow)
-        self.comboBox_Sender.setObjectName(u"comboBox_sender")
+        self.comboBox_Sender.setObjectName(u"comboBox_Sender")
         self.comboBox_Sender.setMinimumSize(QSize(0, 25))
         self.comboBox_Sender.setEditable(False)
 
@@ -44,19 +44,25 @@ class Ui_TransactionWindow(object):
         self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_2)
 
         self.comboBox_Receiver = QComboBox(TransactionWindow)
-        self.comboBox_Receiver.setObjectName(u"comboBox_receiver")
+        self.comboBox_Receiver.setObjectName(u"comboBox_Receiver")
         self.comboBox_Receiver.setMinimumSize(QSize(0, 25))
         self.comboBox_Receiver.setEditable(True)
 
         self.formLayout.setWidget(1, QFormLayout.FieldRole, self.comboBox_Receiver)
 
-        self.label_7 = QLabel(TransactionWindow)
-        self.label_7.setObjectName(u"label_7")
+        self.checkBox_CloseTo = QCheckBox(TransactionWindow)
+        self.checkBox_CloseTo.setObjectName(u"checkBox_CloseTo")
+        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.checkBox_CloseTo.sizePolicy().hasHeightForWidth())
+        self.checkBox_CloseTo.setSizePolicy(sizePolicy)
+        self.checkBox_CloseTo.setTristate(False)
 
-        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_7)
+        self.formLayout.setWidget(2, QFormLayout.LabelRole, self.checkBox_CloseTo)
 
         self.comboBox_CloseTo = QComboBox(TransactionWindow)
-        self.comboBox_CloseTo.setObjectName(u"comboBox_close_to")
+        self.comboBox_CloseTo.setObjectName(u"comboBox_CloseTo")
         self.comboBox_CloseTo.setEnabled(False)
         self.comboBox_CloseTo.setMinimumSize(QSize(0, 25))
         self.comboBox_CloseTo.setEditable(True)
@@ -74,12 +80,12 @@ class Ui_TransactionWindow(object):
         self.comboBox_Type = QComboBox(TransactionWindow)
         self.comboBox_Type.addItem("")
         self.comboBox_Type.addItem("")
-        self.comboBox_Type.setObjectName(u"comboBox_type")
+        self.comboBox_Type.setObjectName(u"comboBox_Type")
 
         self.horizontalLayout.addWidget(self.comboBox_Type)
 
         self.lineEdit_AssetId = QLineEdit(TransactionWindow)
-        self.lineEdit_AssetId.setObjectName(u"lineEdit_asset_id")
+        self.lineEdit_AssetId.setObjectName(u"lineEdit_AssetId")
         self.lineEdit_AssetId.setEnabled(False)
 
         self.horizontalLayout.addWidget(self.lineEdit_AssetId)
@@ -87,8 +93,7 @@ class Ui_TransactionWindow(object):
         self.comboBox_AssetMode = QComboBox(TransactionWindow)
         self.comboBox_AssetMode.addItem("")
         self.comboBox_AssetMode.addItem("")
-        self.comboBox_AssetMode.addItem("")
-        self.comboBox_AssetMode.setObjectName(u"comboBox_asset_mode")
+        self.comboBox_AssetMode.setObjectName(u"comboBox_AssetMode")
         self.comboBox_AssetMode.setEnabled(False)
 
         self.horizontalLayout.addWidget(self.comboBox_AssetMode)
@@ -111,10 +116,10 @@ class Ui_TransactionWindow(object):
         self.horizontalLayout_3.setSpacing(5)
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.lineEdit_Amount = QLineEdit(TransactionWindow)
-        self.lineEdit_Amount.setObjectName(u"lineEdit_amount")
+        self.lineEdit_Amount.setObjectName(u"lineEdit_Amount")
         self.lineEdit_Amount.setMinimumSize(QSize(100, 0))
         self.lineEdit_Amount.setMaximumSize(QSize(100, 16777215))
-        self.lineEdit_Amount.setAlignment(Qt.AlignRight | Qt.AlignTrailing | Qt.AlignVCenter)
+        self.lineEdit_Amount.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.horizontalLayout_3.addWidget(self.lineEdit_Amount)
 
@@ -122,7 +127,7 @@ class Ui_TransactionWindow(object):
         self.comboBox_AmountUnit.addItem("")
         self.comboBox_AmountUnit.addItem("")
         self.comboBox_AmountUnit.addItem("")
-        self.comboBox_AmountUnit.setObjectName(u"comboBox_amount_unit")
+        self.comboBox_AmountUnit.setObjectName(u"comboBox_AmountUnit")
 
         self.horizontalLayout_3.addWidget(self.comboBox_AmountUnit)
 
@@ -142,10 +147,10 @@ class Ui_TransactionWindow(object):
         self.horizontalLayout_2.setSpacing(5)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.lineEdit_Fee = QLineEdit(TransactionWindow)
-        self.lineEdit_Fee.setObjectName(u"lineEdit_fee")
+        self.lineEdit_Fee.setObjectName(u"lineEdit_Fee")
         self.lineEdit_Fee.setMinimumSize(QSize(100, 0))
         self.lineEdit_Fee.setMaximumSize(QSize(100, 16777215))
-        self.lineEdit_Fee.setAlignment(Qt.AlignRight | Qt.AlignTrailing | Qt.AlignVCenter)
+        self.lineEdit_Fee.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.horizontalLayout_2.addWidget(self.lineEdit_Fee)
 
@@ -153,12 +158,12 @@ class Ui_TransactionWindow(object):
         self.comboBox_FeeUnit.addItem("")
         self.comboBox_FeeUnit.addItem("")
         self.comboBox_FeeUnit.addItem("")
-        self.comboBox_FeeUnit.setObjectName(u"comboBox_fee_unit")
+        self.comboBox_FeeUnit.setObjectName(u"comboBox_FeeUnit")
 
         self.horizontalLayout_2.addWidget(self.comboBox_FeeUnit)
 
         self.pushButton_SuggestedFee = QPushButton(TransactionWindow)
-        self.pushButton_SuggestedFee.setObjectName(u"pushButton_sugg_fee")
+        self.pushButton_SuggestedFee.setObjectName(u"pushButton_SuggestedFee")
         self.pushButton_SuggestedFee.setEnabled(True)
 
         self.horizontalLayout_2.addWidget(self.pushButton_SuggestedFee)
@@ -175,11 +180,11 @@ class Ui_TransactionWindow(object):
 
         self.formLayout.setWidget(6, QFormLayout.LabelRole, self.label_6)
 
-        self.textEdit_note = QTextEdit(TransactionWindow)
-        self.textEdit_note.setObjectName(u"textEdit_note")
-        self.textEdit_note.setMaximumSize(QSize(16777215, 70))
+        self.textEdit_Note = QTextEdit(TransactionWindow)
+        self.textEdit_Note.setObjectName(u"textEdit_Note")
+        self.textEdit_Note.setMaximumSize(QSize(16777215, 70))
 
-        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.textEdit_note)
+        self.formLayout.setWidget(6, QFormLayout.FieldRole, self.textEdit_Note)
 
         self.buttonBox = QDialogButtonBox(TransactionWindow)
         self.buttonBox.setObjectName(u"buttonBox")
@@ -210,7 +215,7 @@ class Ui_TransactionWindow(object):
 #if QT_CONFIG(tooltip)
         self.comboBox_Receiver.setToolTip(QCoreApplication.translate("TransactionWindow", u"Addresses from contact list and unlocked wallets will be displayed here.", None))
 #endif // QT_CONFIG(tooltip)
-        self.label_7.setText(QCoreApplication.translate("TransactionWindow", u"Close to:", None))
+        self.checkBox_CloseTo.setText(QCoreApplication.translate("TransactionWindow", u"Close to", None))
         self.label_3.setText(QCoreApplication.translate("TransactionWindow", u"Type:", None))
         self.comboBox_Type.setItemText(0, QCoreApplication.translate("TransactionWindow", u"Algos", None))
         self.comboBox_Type.setItemText(1, QCoreApplication.translate("TransactionWindow", u"Asset", None))
@@ -218,7 +223,6 @@ class Ui_TransactionWindow(object):
         self.lineEdit_AssetId.setPlaceholderText(QCoreApplication.translate("TransactionWindow", u"Asset ID", None))
         self.comboBox_AssetMode.setItemText(0, QCoreApplication.translate("TransactionWindow", u"Transfer", None))
         self.comboBox_AssetMode.setItemText(1, QCoreApplication.translate("TransactionWindow", u"Opt-in", None))
-        self.comboBox_AssetMode.setItemText(2, QCoreApplication.translate("TransactionWindow", u"Close to", None))
 
         self.label_5.setText(QCoreApplication.translate("TransactionWindow", u"Amount:", None))
         self.comboBox_AmountUnit.setItemText(0, QCoreApplication.translate("TransactionWindow", u"microAlgos", None))
