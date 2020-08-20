@@ -22,14 +22,14 @@ class Ui_Contacts(object):
     def setupUi(self, Contacts):
         if not Contacts.objectName():
             Contacts.setObjectName(u"Contacts")
-        Contacts.resize(480, 600)
+        Contacts.resize(560, 600)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Contacts.sizePolicy().hasHeightForWidth())
         Contacts.setSizePolicy(sizePolicy)
-        Contacts.setMinimumSize(QSize(480, 600))
-        Contacts.setMaximumSize(QSize(480, 600))
+        Contacts.setMinimumSize(QSize(560, 600))
+        Contacts.setMaximumSize(QSize(560, 600))
         self.verticalLayout = QVBoxLayout(Contacts)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.lineEdit = QLineEdit(Contacts)

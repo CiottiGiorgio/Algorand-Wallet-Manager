@@ -54,7 +54,7 @@ class Ui_AddressFrame(object):
         self.verticalLayout.addWidget(self.pushButton_New)
 
         self.pushButton_Forget = QPushButton(AddressFrame)
-        self.pushButton_Forget.setObjectName(u"pushButton_ForgetClose")
+        self.pushButton_Forget.setObjectName(u"pushButton_Forget")
         self.pushButton_Forget.setEnabled(False)
         self.pushButton_Forget.setCheckable(False)
 
@@ -86,7 +86,7 @@ class Ui_AddressFrame(object):
         self.pushButton_Balance.setText(QCoreApplication.translate("AddressFrame", u"Open\n"
 "Balance", None))
         self.pushButton_New.setText(QCoreApplication.translate("AddressFrame", u"New", None))
-        self.pushButton_Forget.setText(QCoreApplication.translate("AddressFrame", u"Forget/Close", None))
+        self.pushButton_Forget.setText(QCoreApplication.translate("AddressFrame", u"Forget", None))
         self.pushButton_Import.setText(QCoreApplication.translate("AddressFrame", u"Import", None))
         self.pushButton_Export.setText(QCoreApplication.translate("AddressFrame", u"Export", None))
     # retranslateUi

@@ -21,14 +21,14 @@ class Ui_ContactsCreating(object):
         if not ContactsCreating.objectName():
             ContactsCreating.setObjectName(u"ContactsCreating")
         ContactsCreating.setWindowModality(Qt.ApplicationModal)
-        ContactsCreating.resize(450, 530)
+        ContactsCreating.resize(500, 550)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(ContactsCreating.sizePolicy().hasHeightForWidth())
         ContactsCreating.setSizePolicy(sizePolicy)
-        ContactsCreating.setMinimumSize(QSize(450, 530))
-        ContactsCreating.setMaximumSize(QSize(450, 530))
+        ContactsCreating.setMinimumSize(QSize(500, 550))
+        ContactsCreating.setMaximumSize(QSize(500, 550))
         self.verticalLayout = QVBoxLayout(ContactsCreating)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.label = QLabel(ContactsCreating)
@@ -37,7 +37,7 @@ class Ui_ContactsCreating(object):
         self.verticalLayout.addWidget(self.label)
 
         self.lineEdit_Name = QLineEdit(ContactsCreating)
-        self.lineEdit_Name.setObjectName(u"lineEdit_name")
+        self.lineEdit_Name.setObjectName(u"lineEdit_Name")
         self.lineEdit_Name.setMinimumSize(QSize(0, 25))
 
         self.verticalLayout.addWidget(self.lineEdit_Name)
@@ -52,7 +52,7 @@ class Ui_ContactsCreating(object):
         self.verticalLayout.addWidget(self.label_2)
 
         self.lineEdit_Address = QLineEdit(ContactsCreating)
-        self.lineEdit_Address.setObjectName(u"lineEdit_address")
+        self.lineEdit_Address.setObjectName(u"lineEdit_Address")
         self.lineEdit_Address.setMinimumSize(QSize(0, 25))
 
         self.verticalLayout.addWidget(self.lineEdit_Address)
@@ -78,10 +78,10 @@ class Ui_ContactsCreating(object):
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.verticalLayout_3.setContentsMargins(3, 3, 3, 3)
         self.label_Picture = QLabel(self.frame)
-        self.label_Picture.setObjectName(u"label_picture")
+        self.label_Picture.setObjectName(u"label_Picture")
         self.label_Picture.setMaximumSize(QSize(256, 256))
 
-        self.verticalLayout_3.addWidget(self.label_Picture, 0, Qt.AlignHCenter | Qt.AlignVCenter)
+        self.verticalLayout_3.addWidget(self.label_Picture, 0, Qt.AlignHCenter|Qt.AlignVCenter)
 
 
         self.horizontalLayout.addWidget(self.frame)
@@ -93,7 +93,7 @@ class Ui_ContactsCreating(object):
         self.verticalLayout_2.addItem(self.verticalSpacer_4)
 
         self.pushButton_Change = QPushButton(ContactsCreating)
-        self.pushButton_Change.setObjectName(u"pushButton_change")
+        self.pushButton_Change.setObjectName(u"pushButton_Change")
 
         self.verticalLayout_2.addWidget(self.pushButton_Change)
 
@@ -102,7 +102,7 @@ class Ui_ContactsCreating(object):
         self.verticalLayout_2.addItem(self.verticalSpacer_5)
 
         self.pushButton_Delete = QPushButton(ContactsCreating)
-        self.pushButton_Delete.setObjectName(u"pushButton_delete")
+        self.pushButton_Delete.setObjectName(u"pushButton_Delete")
         self.pushButton_Delete.setEnabled(False)
 
         self.verticalLayout_2.addWidget(self.pushButton_Delete)
@@ -147,7 +147,7 @@ class Ui_ContactsCreating(object):
         self.label_2.setText(QCoreApplication.translate("ContactsCreating", u"Address:", None))
         self.lineEdit_Address.setPlaceholderText(QCoreApplication.translate("ContactsCreating", u"Insert a valid Algorand address", None))
         self.label_3.setText(QCoreApplication.translate("ContactsCreating", u"Photo:", None))
-        self.label_Picture.setText(QCoreApplication.translate("ContactsCreating", u"TextLabel", None))
+        self.label_Picture.setText("")
         self.pushButton_Change.setText(QCoreApplication.translate("ContactsCreating", u"Change", None))
         self.pushButton_Delete.setText(QCoreApplication.translate("ContactsCreating", u"Delete", None))
     # retranslateUi

@@ -20,9 +20,9 @@ class Ui_TransactionWindow(object):
     def setupUi(self, TransactionWindow):
         if not TransactionWindow.objectName():
             TransactionWindow.setObjectName(u"TransactionWindow")
-        TransactionWindow.resize(700, 410)
-        TransactionWindow.setMinimumSize(QSize(700, 410))
-        TransactionWindow.setMaximumSize(QSize(700, 410))
+        TransactionWindow.resize(840, 450)
+        TransactionWindow.setMinimumSize(QSize(840, 450))
+        TransactionWindow.setMaximumSize(QSize(840, 450))
         self.formLayout = QFormLayout(TransactionWindow)
         self.formLayout.setObjectName(u"formLayout")
         self.formLayout.setVerticalSpacing(15)

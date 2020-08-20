@@ -20,9 +20,9 @@ class Ui_BalanceWindow(object):
     def setupUi(self, BalanceWindow):
         if not BalanceWindow.objectName():
             BalanceWindow.setObjectName(u"BalanceWindow")
-        BalanceWindow.resize(320, 430)
-        BalanceWindow.setMinimumSize(QSize(320, 430))
-        BalanceWindow.setMaximumSize(QSize(320, 430))
+        BalanceWindow.resize(420, 510)
+        BalanceWindow.setMinimumSize(QSize(420, 510))
+        BalanceWindow.setMaximumSize(QSize(420, 510))
         self.verticalLayout = QVBoxLayout(BalanceWindow)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.label = QLabel(BalanceWindow)
@@ -35,7 +35,7 @@ class Ui_BalanceWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 300, 69))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 400, 69))
         self.gridLayout = QGridLayout(self.scrollAreaWidgetContents)
         self.gridLayout.setObjectName(u"gridLayout")
         self.gridLayout.setVerticalSpacing(6)
@@ -45,8 +45,8 @@ class Ui_BalanceWindow(object):
         self.gridLayout.addWidget(self.label_3, 0, 0, 1, 1)
 
         self.label_Balance = QLabel(self.scrollAreaWidgetContents)
-        self.label_Balance.setObjectName(u"label_balance")
-        self.label_Balance.setAlignment(Qt.AlignRight | Qt.AlignTrailing | Qt.AlignVCenter)
+        self.label_Balance.setObjectName(u"label_Balance")
+        self.label_Balance.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.gridLayout.addWidget(self.label_Balance, 0, 1, 1, 1)
 
@@ -56,8 +56,8 @@ class Ui_BalanceWindow(object):
         self.gridLayout.addWidget(self.label_5, 1, 0, 1, 1)
 
         self.label_Pending = QLabel(self.scrollAreaWidgetContents)
-        self.label_Pending.setObjectName(u"label_pending_rewards")
-        self.label_Pending.setAlignment(Qt.AlignRight | Qt.AlignTrailing | Qt.AlignVCenter)
+        self.label_Pending.setObjectName(u"label_Pending")
+        self.label_Pending.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
 
         self.gridLayout.addWidget(self.label_Pending, 1, 1, 1, 1)
 
@@ -79,7 +79,7 @@ class Ui_BalanceWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 300, 274))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 400, 354))
         self.verticalLayout_assets = QVBoxLayout(self.scrollAreaWidgetContents_2)
         self.verticalLayout_assets.setObjectName(u"verticalLayout_assets")
         self.scrollArea_2.setWidget(self.scrollAreaWidgetContents_2)

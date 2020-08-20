@@ -99,6 +99,14 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
     def forget_address(self):
         item = self.listWidget.currentItem()
 
+        if QtWidgets.QMessageBox.question(
+            self, "Forget address from KMD",
+            "Are you sure you want to forget this address?",
+            QtWidgets.QMessageBox.StandardButton.Yes,
+            QtWidgets.QMessageBox.StandardButton.No
+        ) != QtWidgets.QDialogButtonBox.StandardButton.Yes:
+            return
+
         try:
             self.wallet.algo_wallet.delete_key(item.text())
         except Exception as e:
