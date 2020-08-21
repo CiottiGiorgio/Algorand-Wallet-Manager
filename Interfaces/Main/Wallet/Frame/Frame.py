@@ -10,21 +10,19 @@ from PySide2 import QtWidgets, QtCore, QtGui
 from algosdk import kmd
 from algosdk.v2client.algod import AlgodClient
 from algosdk.v2client.indexer import IndexerClient
-from algosdk.wallet import Wallet as AlgosdkWallet
 from algosdk.mnemonic import to_master_derivation_key
 
 # Local project
 from misc.Entities import Wallet
 from misc.Functions import find_main_window
-from Interfaces.Main.Wallet.Ui_Frame import Ui_WalletFrame
-from Interfaces.Main.Wallet.Ui_WalletUnlock import Ui_WalletUnlock
-from Interfaces.Main.Wallet.Ui_NewImportWallet import Ui_NewImportWallet
+from Interfaces.Main.Wallet.Frame.Ui_Frame import Ui_WalletFrame
+from Interfaces.Main.Wallet.UnlockWallet.UnlockWallet import UnlockWallet
+from Interfaces.Main.Wallet.NewImportWallet.NewImportWallet import NewImportWallet
 from Interfaces.Main.Wallet.Widgets import WalletListItem, WalletListWidget
-from Interfaces.Main.Address.Frame import AddressFrame
-from Interfaces.Settings.Window import SettingsWindow
+from Interfaces.Main.Address.Frame.Frame import AddressFrame
+from Interfaces.Settings.Window.Window import SettingsWindow
 
 # Python standard libraries
-from functools import partial
 from sys import stderr
 
 
@@ -244,7 +242,7 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
         if widget.wallet.algo_wallet:
             return True
 
-        unlock_wallet_dialog = UnlockingWallet(self, widget.wallet)
+        unlock_wallet_dialog = UnlockWallet(self, widget.wallet)
         if unlock_wallet_dialog.exec_() == QtWidgets.QDialog.Accepted:
             widget.wallet.algo_wallet = unlock_wallet_dialog.return_value
             widget.set_locked(False)
@@ -263,89 +261,3 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
         widget.set_locked(True)
 
 
-class UnlockingWallet(QtWidgets.QDialog, Ui_WalletUnlock):
-    def __init__(self, parent: QtWidgets.QWidget, wallet: Wallet):
-        super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
-
-        # Anti memory leak
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-
-        self.wallet = wallet
-        self.return_value = None
-
-        self.worker = None
-
-        self.setupUi(self)
-
-        self.widget.setVisible(False)
-
-    def closeEvent(self, arg__1: QtGui.QCloseEvent):
-        if self.worker:
-            self.worker.signals.success.disconnect()
-            self.worker.signals.error.disconnect()
-        arg__1.accept()
-
-    # We override accept of this class and don't use super().accept() inside.
-    #  This is because we just treat this method as a slot connected to the OK button.
-    #  Either super().accept() or super().reject() will be eventually called when the worker is done.
-    def accept(self):
-        self.lineEdit.setEnabled(False)
-        self.widget.setVisible(True)
-        self.buttonBox.setEnabled(False)
-
-        self.worker = find_main_window().start_worker(
-            # We have to use partial because for some reason the creation of an object is not considered a callable.
-            #  I still have to look into this.
-            partial(
-                AlgosdkWallet,
-                self.wallet.info["name"],
-                self.lineEdit.text(),
-                find_main_window().wallet_frame.kmd_client
-            ),
-            self.unlock_success,
-            self.unlock_failure
-        )
-
-    @QtCore.Slot(object)
-    def unlock_success(self, result: object):
-        self.return_value = result
-        super().accept()
-
-    @QtCore.Slot(Exception)
-    def unlock_failure(self, error: Exception):
-        QtWidgets.QMessageBox.critical(self, "Could not open wallet", str(error))
-        self.return_value = None
-        super().reject()
-
-
-class NewImportWallet(QtWidgets.QDialog, Ui_NewImportWallet):
-    def __init__(self, parent: QtWidgets.QWidget):
-        super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
-
-        # Anti memory leak
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-
-        self.return_value = None
-
-        self.setupUi(self)
-
-        # Connections
-        self.lineEdit_Name.textChanged.connect(self.validate_inputs)
-        self.lineEdit_Password.textChanged.connect(self.validate_inputs)
-        self.lineEdit_Password2.textChanged.connect(self.validate_inputs)
-        self.plainTextEdit_MDK.textChanged.connect(self.validate_inputs)
-
-        self.validate_inputs()
-
-    def validate_inputs(self):
-        self.buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setEnabled(
-            self.lineEdit_Name.text != "" and
-            self.lineEdit_Password.text() != "" and
-            self.lineEdit_Password.text() == self.lineEdit_Password2.text()
-        )
-
-    def accept(self):
-        self.return_value = (
-            self.lineEdit_Name.text(), self.lineEdit_Password.text(), self.plainTextEdit_MDK.toPlainText()
-        )
-        super().accept()

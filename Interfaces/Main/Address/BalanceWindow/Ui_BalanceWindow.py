@@ -94,12 +94,12 @@ class Ui_BalanceWindow(object):
     # setupUi
 
     def retranslateUi(self, BalanceWindow):
-        BalanceWindow.setWindowTitle(QCoreApplication.translate("BalanceWindow", u"Algos & Assets", None))
-        self.label.setText(QCoreApplication.translate("BalanceWindow", u"Algos:", None))
-        self.label_3.setText(QCoreApplication.translate("BalanceWindow", u"Balance:", None))
+        BalanceWindow.setWindowTitle(QCoreApplication.translate("", u"Algos & Assets", None))
+        self.label.setText(QCoreApplication.translate("", u"Algos:", None))
+        self.label_3.setText(QCoreApplication.translate("", u"Balance:", None))
         self.label_Balance.setText("")
-        self.label_5.setText(QCoreApplication.translate("BalanceWindow", u"Pending rewards:", None))
+        self.label_5.setText(QCoreApplication.translate("", u"Pending rewards:", None))
         self.label_Pending.setText("")
-        self.label_2.setText(QCoreApplication.translate("BalanceWindow", u"Assets:", None))
+        self.label_2.setText(QCoreApplication.translate("", u"Assets:", None))
     # retranslateUi
 

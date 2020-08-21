@@ -10,14 +10,14 @@ from PySide2 import QtWidgets, QtCore
 from misc.Functions import ProjectException
 import misc.Constants as ProjectConstants
 from misc.DataStructures import DictJsonSettings
-from Interfaces.Settings.Ui_Settings import Ui_Settings
+from Interfaces.Settings.Window.Ui_Window import Ui_SettingsWindow
 
 # Python standard libraries
 from os import path, environ
 from sys import stderr
 
 
-class SettingsWindow(QtWidgets.QDialog, Ui_Settings):
+class SettingsWindow(QtWidgets.QDialog, Ui_SettingsWindow):
     saved_json_settings = DictJsonSettings()
 
     rest_endpoints = {}

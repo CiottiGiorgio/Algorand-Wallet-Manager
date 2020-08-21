@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'Ui_Settings.ui'
+## Form generated from reading UI file 'Ui_Window.ui'
 ##
 ## Created by: Qt User Interface Compiler version 5.15.0
 ##
@@ -16,26 +16,26 @@ from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
 from PySide2.QtWidgets import *
 
 
-class Ui_Settings(object):
-    def setupUi(self, Settings):
-        if not Settings.objectName():
-            Settings.setObjectName(u"Settings")
-        Settings.setWindowModality(Qt.ApplicationModal)
-        Settings.resize(550, 700)
+class Ui_SettingsWindow(object):
+    def setupUi(self, SettingsWindow):
+        if not SettingsWindow.objectName():
+            SettingsWindow.setObjectName(u"SettingsWindow")
+        SettingsWindow.setWindowModality(Qt.ApplicationModal)
+        SettingsWindow.resize(550, 700)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(Settings.sizePolicy().hasHeightForWidth())
-        Settings.setSizePolicy(sizePolicy)
-        Settings.setMinimumSize(QSize(550, 700))
-        Settings.setMaximumSize(QSize(550, 700))
-        Settings.setBaseSize(QSize(0, 0))
-        Settings.setWindowOpacity(1.000000000000000)
-        Settings.setModal(True)
-        self.verticalLayout = QVBoxLayout(Settings)
+        sizePolicy.setHeightForWidth(SettingsWindow.sizePolicy().hasHeightForWidth())
+        SettingsWindow.setSizePolicy(sizePolicy)
+        SettingsWindow.setMinimumSize(QSize(550, 700))
+        SettingsWindow.setMaximumSize(QSize(550, 700))
+        SettingsWindow.setBaseSize(QSize(0, 0))
+        SettingsWindow.setWindowOpacity(1.000000000000000)
+        SettingsWindow.setModal(True)
+        self.verticalLayout = QVBoxLayout(SettingsWindow)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setSizeConstraint(QLayout.SetDefaultConstraint)
-        self.label = QLabel(Settings)
+        self.label = QLabel(SettingsWindow)
         self.label.setObjectName(u"label")
 
         self.verticalLayout.addWidget(self.label)
@@ -44,19 +44,19 @@ class Ui_Settings(object):
 
         self.verticalLayout.addItem(self.verticalSpacer_2)
 
-        self.radioButton_Local = QRadioButton(Settings)
+        self.radioButton_Local = QRadioButton(SettingsWindow)
         self.radioButton_Local.setObjectName(u"radioButton_Local")
 
         self.verticalLayout.addWidget(self.radioButton_Local)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.lineEdit_Local = QLineEdit(Settings)
+        self.lineEdit_Local = QLineEdit(SettingsWindow)
         self.lineEdit_Local.setObjectName(u"lineEdit_Local")
 
         self.horizontalLayout.addWidget(self.lineEdit_Local)
 
-        self.pushButton_Folder = QPushButton(Settings)
+        self.pushButton_Folder = QPushButton(SettingsWindow)
         self.pushButton_Folder.setObjectName(u"pushButton_Folder")
 
         self.horizontalLayout.addWidget(self.pushButton_Folder)
@@ -68,12 +68,12 @@ class Ui_Settings(object):
 
         self.verticalLayout.addItem(self.verticalSpacer_3)
 
-        self.radioButton_EnvVar = QRadioButton(Settings)
+        self.radioButton_EnvVar = QRadioButton(SettingsWindow)
         self.radioButton_EnvVar.setObjectName(u"radioButton_EnvVar")
 
         self.verticalLayout.addWidget(self.radioButton_EnvVar)
 
-        self.lineEdit_EnvVar = QLineEdit(Settings)
+        self.lineEdit_EnvVar = QLineEdit(SettingsWindow)
         self.lineEdit_EnvVar.setObjectName(u"lineEdit_EnvVar")
         self.lineEdit_EnvVar.setEnabled(True)
         self.lineEdit_EnvVar.setReadOnly(True)
@@ -84,12 +84,12 @@ class Ui_Settings(object):
 
         self.verticalLayout.addItem(self.verticalSpacer_6)
 
-        self.radioButton_Remote = QRadioButton(Settings)
+        self.radioButton_Remote = QRadioButton(SettingsWindow)
         self.radioButton_Remote.setObjectName(u"radioButton_Remote")
 
         self.verticalLayout.addWidget(self.radioButton_Remote)
 
-        self.groupBox = QGroupBox(Settings)
+        self.groupBox = QGroupBox(SettingsWindow)
         self.groupBox.setObjectName(u"groupBox")
         self.groupBox.setAlignment(Qt.AlignCenter)
         self.gridLayout = QGridLayout(self.groupBox)
@@ -142,7 +142,7 @@ class Ui_Settings(object):
 
         self.verticalLayout.addItem(self.verticalSpacer_4)
 
-        self.groupBox_2 = QGroupBox(Settings)
+        self.groupBox_2 = QGroupBox(SettingsWindow)
         self.groupBox_2.setObjectName(u"groupBox_2")
         self.groupBox_2.setAlignment(Qt.AlignCenter)
         self.gridLayout_2 = QGridLayout(self.groupBox_2)
@@ -195,7 +195,7 @@ class Ui_Settings(object):
 
         self.verticalLayout.addItem(self.verticalSpacer_5)
 
-        self.groupBox_3 = QGroupBox(Settings)
+        self.groupBox_3 = QGroupBox(SettingsWindow)
         self.groupBox_3.setObjectName(u"groupBox_3")
         self.groupBox_3.setAlignment(Qt.AlignCenter)
         self.gridLayout_4 = QGridLayout(self.groupBox_3)
@@ -248,7 +248,7 @@ class Ui_Settings(object):
 
         self.verticalLayout.addItem(self.verticalSpacer)
 
-        self.buttonBox = QDialogButtonBox(Settings)
+        self.buttonBox = QDialogButtonBox(SettingsWindow)
         self.buttonBox.setObjectName(u"buttonBox")
         self.buttonBox.setOrientation(Qt.Horizontal)
         self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
@@ -270,34 +270,34 @@ class Ui_Settings(object):
         QWidget.setTabOrder(self.radioButton_Local, self.radioButton_EnvVar)
         QWidget.setTabOrder(self.radioButton_EnvVar, self.radioButton_Remote)
 
-        self.retranslateUi(Settings)
-        self.buttonBox.accepted.connect(Settings.accept)
-        self.buttonBox.rejected.connect(Settings.reject)
+        self.retranslateUi(SettingsWindow)
+        self.buttonBox.accepted.connect(SettingsWindow.accept)
+        self.buttonBox.rejected.connect(SettingsWindow.reject)
 
-        QMetaObject.connectSlotsByName(Settings)
+        QMetaObject.connectSlotsByName(SettingsWindow)
     # setupUi
 
-    def retranslateUi(self, Settings):
-        Settings.setWindowTitle(QCoreApplication.translate("Settings", u"Settings", None))
-        self.label.setText(QCoreApplication.translate("Settings", u"Select a method of connection to your Algorand node:", None))
-        self.radioButton_Local.setText(QCoreApplication.translate("Settings", u"Local node", None))
-        self.pushButton_Folder.setText(QCoreApplication.translate("Settings", u"Select folder", None))
-        self.radioButton_EnvVar.setText(QCoreApplication.translate("Settings", u"Environment variable \"ALGORAND_DATA\"", None))
-        self.radioButton_Remote.setText(QCoreApplication.translate("Settings", u"Remote node", None))
-        self.groupBox.setTitle(QCoreApplication.translate("Settings", u"algod", None))
-        self.label_3.setText(QCoreApplication.translate("Settings", u"Port", None))
-        self.label_4.setText(QCoreApplication.translate("Settings", u"Token", None))
-        self.label_2.setText(QCoreApplication.translate("Settings", u"URL", None))
-        self.label_8.setText(QCoreApplication.translate("Settings", u"http://", None))
-        self.groupBox_2.setTitle(QCoreApplication.translate("Settings", u"kmd", None))
-        self.label_7.setText(QCoreApplication.translate("Settings", u"Token", None))
-        self.label_6.setText(QCoreApplication.translate("Settings", u"Port", None))
-        self.label_5.setText(QCoreApplication.translate("Settings", u"URL", None))
-        self.label_9.setText(QCoreApplication.translate("Settings", u"http://", None))
-        self.groupBox_3.setTitle(QCoreApplication.translate("Settings", u"indexer", None))
-        self.label_11.setText(QCoreApplication.translate("Settings", u"URL", None))
-        self.label_13.setText(QCoreApplication.translate("Settings", u"Token", None))
-        self.label_12.setText(QCoreApplication.translate("Settings", u"Port", None))
-        self.label_10.setText(QCoreApplication.translate("Settings", u"http://", None))
+    def retranslateUi(self, SettingsWindow):
+        SettingsWindow.setWindowTitle(QCoreApplication.translate("SettingsWindow", u"Settings", None))
+        self.label.setText(QCoreApplication.translate("SettingsWindow", u"Select a method of connection to your Algorand node:", None))
+        self.radioButton_Local.setText(QCoreApplication.translate("SettingsWindow", u"Local node", None))
+        self.pushButton_Folder.setText(QCoreApplication.translate("SettingsWindow", u"Select folder", None))
+        self.radioButton_EnvVar.setText(QCoreApplication.translate("SettingsWindow", u"Environment variable \"ALGORAND_DATA\"", None))
+        self.radioButton_Remote.setText(QCoreApplication.translate("SettingsWindow", u"Remote node", None))
+        self.groupBox.setTitle(QCoreApplication.translate("SettingsWindow", u"algod", None))
+        self.label_3.setText(QCoreApplication.translate("SettingsWindow", u"Port", None))
+        self.label_4.setText(QCoreApplication.translate("SettingsWindow", u"Token", None))
+        self.label_2.setText(QCoreApplication.translate("SettingsWindow", u"URL", None))
+        self.label_8.setText(QCoreApplication.translate("SettingsWindow", u"http://", None))
+        self.groupBox_2.setTitle(QCoreApplication.translate("SettingsWindow", u"kmd", None))
+        self.label_7.setText(QCoreApplication.translate("SettingsWindow", u"Token", None))
+        self.label_6.setText(QCoreApplication.translate("SettingsWindow", u"Port", None))
+        self.label_5.setText(QCoreApplication.translate("SettingsWindow", u"URL", None))
+        self.label_9.setText(QCoreApplication.translate("SettingsWindow", u"http://", None))
+        self.groupBox_3.setTitle(QCoreApplication.translate("SettingsWindow", u"indexer", None))
+        self.label_11.setText(QCoreApplication.translate("SettingsWindow", u"URL", None))
+        self.label_13.setText(QCoreApplication.translate("SettingsWindow", u"Token", None))
+        self.label_12.setText(QCoreApplication.translate("SettingsWindow", u"Port", None))
+        self.label_10.setText(QCoreApplication.translate("SettingsWindow", u"http://", None))
     # retranslateUi
 

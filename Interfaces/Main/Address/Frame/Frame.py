@@ -11,8 +11,8 @@ from algosdk.mnemonic import from_private_key, to_private_key
 # Local project
 from misc.Entities import Wallet
 from misc.Functions import find_main_window
-from Interfaces.Main.Address.Ui_Frame import Ui_AddressFrame
-from Interfaces.Main.Address.Ui_BalanceWindow import Ui_BalanceWindow
+from Interfaces.Main.Address.Frame.Ui_Frame import Ui_AddressFrame
+from Interfaces.Main.Address.BalanceWindow.Ui_BalanceWindow import Ui_BalanceWindow
 from Interfaces.Main.Address.Widgets import BalanceScrollWidget
 
 # Python standard libraries
@@ -116,7 +116,6 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
 
     @QtCore.Slot()
     def import_address(self):
-        # TODO make the text space way bigger
         if QtWidgets.QMessageBox.question(
                 self, "Importing address",
                 "Please keep in mind that, when recovering a wallet in the future, only the addresses derived from "
@@ -126,9 +125,9 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
         ) != QtWidgets.QMessageBox.StandardButton.Yes:
             return
 
-        new_address = QtWidgets.QInputDialog.getText(
+        new_address = QtWidgets.QInputDialog.getMultiLineText(
             self, "Importing address",
-            "Please fill in with the address mnemonic private key", QtWidgets.QLineEdit.EchoMode.Normal
+            "Please fill in with the address mnemonic private key"
         )
         if new_address[1]:
             try:
@@ -185,10 +184,10 @@ class BalanceWindow(QtWidgets.QDialog, Ui_BalanceWindow):
         self.setupUi(self)
 
         self.label_Balance.setText(
-            str(locale.currency(account_info["amount-without-pending-rewards"], False, True) + " microAlgos")
+            str(locale.currency(account_info["amount-without-pending-rewards"], False, True))[:-3] + " microAlgos"
         )
         self.label_Pending.setText(
-            str(locale.currency(account_info["pending-rewards"], False, True) + " microAlgos")
+            str(locale.currency(account_info["pending-rewards"], False, True))[:-3] + " microAlgos"
         )
 
         for asset in account_info["assets"]:

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>WalletUnlock</class>
- <widget class="QDialog" name="WalletUnlock">
+ <class>UnlockWallet</class>
+ <widget class="QDialog" name="UnlockWallet">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
@@ -90,7 +90,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>WalletUnlock</receiver>
+   <receiver>UnlockWallet</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -106,7 +106,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>WalletUnlock</receiver>
+   <receiver>UnlockWallet</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

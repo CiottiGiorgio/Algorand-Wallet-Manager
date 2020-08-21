@@ -13,8 +13,8 @@ from algosdk.future.transaction import SuggestedParams
 
 # Local project
 from misc.Functions import ProjectException, find_main_window
-from Interfaces.Transaction.Ui_Transaction import Ui_TransactionWindow
-from Interfaces.Contacts.Window import ContactsWindow
+from Interfaces.Transaction.Window.Ui_Window import Ui_TransactionWindow
+from Interfaces.Contacts.Window.Window import ContactsWindow
 
 
 class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
@@ -25,7 +25,6 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
         super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
 
         self.worker = None
-        self.sender_list = list()
 
         self.setupUi(self)
 
@@ -36,7 +35,6 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
 
         # Initial state
         self.comboBox_Sender.addItem("Select a valid Algorand address from the unlocked wallets...")
-        self.sender_list.append(None)
         self.comboBox_Receiver.addItem("Type in a valid Algorand address or select one...")
         self.comboBox_CloseTo.addItem("Type in a valid Algorand address or select one...")
 
@@ -47,9 +45,7 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
 
             if widget.wallet.algo_wallet:
                 for address in widget.wallet.algo_wallet.list_keys():
-                    # FIXME This is SUPER bad. Basically we rely on the position of the item to retrieve the wallet
-                    self.sender_list.append(widget.wallet.algo_wallet)
-                    self.comboBox_Sender.addItem(f"{widget.wallet.info['name']} - {address}")
+                    self.comboBox_Sender.addItem(f"{widget.wallet.info['name']} - {address}", widget.wallet.algo_wallet)
                     self.comboBox_Receiver.addItem(f"Wallet: {widget.wallet.info['name']} - {address}")
                     self.comboBox_CloseTo.addItem(f"Wallet: {widget.wallet.info['name']} - {address}")
 
@@ -79,7 +75,8 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
     def accept(self):
         try:
             sp = find_main_window().wallet_frame.algod_client.suggested_params()
-            s_txn = self.sender_list[self.comboBox_Sender.currentIndex()].sign_transaction(self.get_transaction(sp))
+            wallet = self.comboBox_Sender.currentData()
+            s_txn = wallet.sign_transaction(self.get_transaction(sp))
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Could not sign transaction", str(e))
             return
@@ -132,6 +129,7 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
             # Opt-in
             for widget in [self.comboBox_Receiver, self.checkBox_CloseTo, self.lineEdit_Amount]:
                 widget.setEnabled(False)
+            # This next line also triggers a slot that disabled self.comboBox_CloseTo
             self.checkBox_CloseTo.setChecked(False)
         else:
             raise ProjectException(
@@ -148,11 +146,11 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
         """
         try:
             sp = find_main_window().wallet_frame.algod_client.suggested_params()
+            temp_txn = self.get_transaction(sp)
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Could not load suggested fee", str(e))
             return
 
-        temp_txn = self.get_transaction(sp)
         # We do this because we don't want the current fee to change the size of the transaction.
         #  We are going to change this anyway and you can't get a smaller fee than the minimum.
         # Also we are changing the value directly into the instance but we are all grownups it's fine.
@@ -167,16 +165,19 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
 
     @QtCore.Slot()
     def validate_inputs(self):
+        # TODO Right now when a single widget changes all widgets get checked. Would be better to only update the state
+        #  of the changed widget. We would still need to check all states to decide OK button and "suggested fee" button
+        #  but at least we wouldn't have to calculate them.
         """
-        This method ensures that the correct subset of user inputs has a valid input.
+        This method ensures OK button and "suggested fee" button are enabled under the right conditions.
 
-        The subset changes based on the type of transaction the user is choosing.
+        This method checked the right subset of user inputs based on what type of transaction is taking place.
         """
         states = {
             "sender": self.comboBox_Sender.currentText() != "" and self.comboBox_Sender.currentIndex() != 0,
             "receiver": False,
             "close_to": False,
-            "asset_id": False,
+            "asset_id": self.lineEdit_AssetId.text() != "",
             "amount": self.lineEdit_Amount.text() != "",
             "fee": self.lineEdit_Fee.text() != ""
         }
@@ -198,12 +199,6 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
                     self.comboBox_CloseTo.itemText(self.comboBox_CloseTo.currentIndex()) == close_to_text
                 )):
             states["close_to"] = True
-
-        asset_id_text = self.lineEdit_AssetId.text()
-        if asset_id_text != "":
-            # At this point we are guaranteed to have an integer between 0 and 999999 because of QIntValidator.
-            if int(asset_id_text) < 999999999:  # TODO Make sure what is the range for an ASA ID.
-                states["asset_id"] = True
 
         # Here we save only the states that are compulsory for the OK button.
         if not self.checkBox_CloseTo.isChecked():
@@ -247,6 +242,9 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
         Because this method is used to build a transaction but also to calculate suggested fee we allow an incorrect
         fee parameter in the GUI.
         """
+        # TODO we should subclass QComboBox to encapsulate the method that returns the contained algorand address so to
+        #  avoid code duplication of the "[-58:]" bit.
+        # Here we fill in the fields that are compulsory across the different types of transactions.
         data = {
             "sender": self.comboBox_Sender.currentText()[-58:],
             "receiver": self.comboBox_Receiver.currentText()[-58:],
@@ -257,21 +255,30 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
             "gh": sp.gh,
             "note": self.textEdit_Note.toPlainText()
         }
+
+        # If the algosdk.transaction raises an error it will be simply propagated and dealt with outside of this
+        #  function.
         if self.comboBox_Type.currentIndex() == 0:
+            # Algos
             data["amt"] = self.get_microalgos_amount()
             if self.checkBox_CloseTo.isChecked():
                 data["close_remainder_to"] = self.comboBox_CloseTo.currentText()[-58:]
+
             temp_txn = transaction.PaymentTxn(**data)
         elif self.comboBox_Type.currentIndex() == 1:
+            # ASA
             if self.checkBox_CloseTo.isChecked():
                 data["close_assets_to"] = self.comboBox_CloseTo.currentText()[-58:]
             data["index"] = int(self.lineEdit_AssetId.text())
             if self.comboBox_AssetMode.currentIndex() == 0:
+                # Transfer
                 data["amt"] = int(self.lineEdit_Amount.text())
             elif self.comboBox_AssetMode.currentIndex() == 1:
+                # Opt-in
                 data["receiver"] = data["sender"]
                 data["amt"] = 0
             elif self.comboBox_AssetMode.currentIndex() == 2:
+                # Close
                 data["amt"] = int(self.lineEdit_Amount.text())
 
             temp_txn = transaction.AssetTransferTxn(**data)

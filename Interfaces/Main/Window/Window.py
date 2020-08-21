@@ -13,11 +13,11 @@ import misc.Constants as ProjectConstants
 from misc.Functions import load_json_file, dump_json_file
 from misc.Entities import AlgorandWorker
 from misc.Widgets import LoadingWidget
-from Interfaces.Transaction.Window import TransactionWindow
-from Interfaces.Main.Ui_Window import Ui_MainWindow
-from Interfaces.Main.Wallet.Frame import WalletsFrame
-from Interfaces.Contacts.Window import ContactsWindow, ListJsonContacts
-from Interfaces.Settings.Window import SettingsWindow, DictJsonSettings
+from Interfaces.Transaction.Window.Window import TransactionWindow
+from Interfaces.Main.Window.Ui_Window import Ui_MainWindow
+from Interfaces.Main.Wallet.Frame.Frame import WalletsFrame
+from Interfaces.Contacts.Window.Window import ContactsWindow, ListJsonContacts
+from Interfaces.Settings.Window.Window import SettingsWindow, DictJsonSettings
 from Interfaces.About.Window import InfoWindow, CreditsWindow
 
 # Python standard libraries

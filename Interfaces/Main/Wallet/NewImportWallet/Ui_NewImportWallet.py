@@ -98,12 +98,12 @@ class Ui_NewImportWallet(object):
     # setupUi
 
     def retranslateUi(self, NewImportWallet):
-        NewImportWallet.setWindowTitle(QCoreApplication.translate("NewImportWallet", u"New/Import wallet", None))
-        self.label.setText(QCoreApplication.translate("NewImportWallet", u"Name:", None))
-        self.label_2.setText(QCoreApplication.translate("NewImportWallet", u"Password:", None))
-        self.label_4.setText(QCoreApplication.translate("NewImportWallet", u"Mnemonic master derivation key:", None))
-        self.label_3.setText(QCoreApplication.translate("NewImportWallet", u"Only fill this input if you are\n"
+        NewImportWallet.setWindowTitle(QCoreApplication.translate("", u"New/Import wallet", None))
+        self.label.setText(QCoreApplication.translate("", u"Name:", None))
+        self.label_2.setText(QCoreApplication.translate("", u"Password:", None))
+        self.label_4.setText(QCoreApplication.translate("", u"Mnemonic master derivation key:", None))
+        self.label_3.setText(QCoreApplication.translate("", u"Only fill this input if you are\n"
 "importing a wallet", None))
-        self.label_5.setText(QCoreApplication.translate("NewImportWallet", u"Enter your password again:", None))
+        self.label_5.setText(QCoreApplication.translate("", u"Enter your password again:", None))
     # retranslateUi
 

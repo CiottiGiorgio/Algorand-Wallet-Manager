@@ -24,17 +24,14 @@ class InfoWindow(QtWidgets.QDialog, Ui_Info):
         # Anti memory leak
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
-        # Setup interface
         self.setupUi(self)
-        # End setup
 
 
 class CreditsWindow(QtWidgets.QDialog, Ui_Credits):
     def __init__(self, parent: QtWidgets.QWidget):
         super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
 
+        # Anti memory leak
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
-        # Setup interface
         self.setupUi(self)
-        # End setup

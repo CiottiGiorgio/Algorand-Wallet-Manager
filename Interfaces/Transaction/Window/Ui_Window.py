@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'Ui_Transaction.ui'
+## Form generated from reading UI file 'Ui_Window.ui'
 ##
 ## Created by: Qt User Interface Compiler version 5.15.0
 ##

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'Ui_Contacts.ui'
+## Form generated from reading UI file 'Ui_Window.ui'
 ##
 ## Created by: Qt User Interface Compiler version 5.15.0
 ##
@@ -18,41 +18,41 @@ from PySide2.QtWidgets import *
 from misc.Widgets import CustomListWidget
 
 
-class Ui_Contacts(object):
-    def setupUi(self, Contacts):
-        if not Contacts.objectName():
-            Contacts.setObjectName(u"Contacts")
-        Contacts.resize(560, 600)
+class Ui_ContactsWindow(object):
+    def setupUi(self, ContactsWindow):
+        if not ContactsWindow.objectName():
+            ContactsWindow.setObjectName(u"ContactsWindow")
+        ContactsWindow.resize(560, 700)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(Contacts.sizePolicy().hasHeightForWidth())
-        Contacts.setSizePolicy(sizePolicy)
-        Contacts.setMinimumSize(QSize(560, 600))
-        Contacts.setMaximumSize(QSize(560, 600))
-        self.verticalLayout = QVBoxLayout(Contacts)
+        sizePolicy.setHeightForWidth(ContactsWindow.sizePolicy().hasHeightForWidth())
+        ContactsWindow.setSizePolicy(sizePolicy)
+        ContactsWindow.setMinimumSize(QSize(560, 700))
+        ContactsWindow.setMaximumSize(QSize(560, 700))
+        self.verticalLayout = QVBoxLayout(ContactsWindow)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.lineEdit = QLineEdit(Contacts)
+        self.lineEdit = QLineEdit(ContactsWindow)
         self.lineEdit.setObjectName(u"lineEdit")
         self.lineEdit.setMinimumSize(QSize(0, 30))
         self.lineEdit.setClearButtonEnabled(True)
 
         self.verticalLayout.addWidget(self.lineEdit)
 
-        self.listWidget = CustomListWidget(Contacts)
+        self.listWidget = CustomListWidget(ContactsWindow)
         self.listWidget.setObjectName(u"listWidget")
         self.listWidget.setContextMenuPolicy(Qt.CustomContextMenu)
 
         self.verticalLayout.addWidget(self.listWidget)
 
 
-        self.retranslateUi(Contacts)
+        self.retranslateUi(ContactsWindow)
 
-        QMetaObject.connectSlotsByName(Contacts)
+        QMetaObject.connectSlotsByName(ContactsWindow)
     # setupUi
 
-    def retranslateUi(self, Contacts):
-        Contacts.setWindowTitle(QCoreApplication.translate("Contacts", u"Contacts", None))
-        self.lineEdit.setPlaceholderText(QCoreApplication.translate("Contacts", u"Search...", None))
+    def retranslateUi(self, ContactsWindow):
+        ContactsWindow.setWindowTitle(QCoreApplication.translate("ContactsWindow", u"Contacts", None))
+        self.lineEdit.setPlaceholderText(QCoreApplication.translate("ContactsWindow", u"Search...", None))
     # retranslateUi
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'Ui_ContactsCreating.ui'
+## Form generated from reading UI file 'Ui_ManageContact.ui'
 ##
 ## Created by: Qt User Interface Compiler version 5.15.0
 ##
@@ -16,27 +16,27 @@ from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
 from PySide2.QtWidgets import *
 
 
-class Ui_ContactsCreating(object):
-    def setupUi(self, ContactsCreating):
-        if not ContactsCreating.objectName():
-            ContactsCreating.setObjectName(u"ContactsCreating")
-        ContactsCreating.setWindowModality(Qt.ApplicationModal)
-        ContactsCreating.resize(500, 550)
+class Ui_ManageContact(object):
+    def setupUi(self, ManageContact):
+        if not ManageContact.objectName():
+            ManageContact.setObjectName(u"ManageContact")
+        ManageContact.setWindowModality(Qt.ApplicationModal)
+        ManageContact.resize(500, 550)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(ContactsCreating.sizePolicy().hasHeightForWidth())
-        ContactsCreating.setSizePolicy(sizePolicy)
-        ContactsCreating.setMinimumSize(QSize(500, 550))
-        ContactsCreating.setMaximumSize(QSize(500, 550))
-        self.verticalLayout = QVBoxLayout(ContactsCreating)
+        sizePolicy.setHeightForWidth(ManageContact.sizePolicy().hasHeightForWidth())
+        ManageContact.setSizePolicy(sizePolicy)
+        ManageContact.setMinimumSize(QSize(500, 550))
+        ManageContact.setMaximumSize(QSize(500, 550))
+        self.verticalLayout = QVBoxLayout(ManageContact)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.label = QLabel(ContactsCreating)
+        self.label = QLabel(ManageContact)
         self.label.setObjectName(u"label")
 
         self.verticalLayout.addWidget(self.label)
 
-        self.lineEdit_Name = QLineEdit(ContactsCreating)
+        self.lineEdit_Name = QLineEdit(ManageContact)
         self.lineEdit_Name.setObjectName(u"lineEdit_Name")
         self.lineEdit_Name.setMinimumSize(QSize(0, 25))
 
@@ -46,12 +46,12 @@ class Ui_ContactsCreating(object):
 
         self.verticalLayout.addItem(self.verticalSpacer_2)
 
-        self.label_2 = QLabel(ContactsCreating)
+        self.label_2 = QLabel(ManageContact)
         self.label_2.setObjectName(u"label_2")
 
         self.verticalLayout.addWidget(self.label_2)
 
-        self.lineEdit_Address = QLineEdit(ContactsCreating)
+        self.lineEdit_Address = QLineEdit(ManageContact)
         self.lineEdit_Address.setObjectName(u"lineEdit_Address")
         self.lineEdit_Address.setMinimumSize(QSize(0, 25))
 
@@ -61,14 +61,14 @@ class Ui_ContactsCreating(object):
 
         self.verticalLayout.addItem(self.verticalSpacer_3)
 
-        self.label_3 = QLabel(ContactsCreating)
+        self.label_3 = QLabel(ManageContact)
         self.label_3.setObjectName(u"label_3")
 
         self.verticalLayout.addWidget(self.label_3)
 
         self.horizontalLayout = QHBoxLayout()
         self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.frame = QFrame(ContactsCreating)
+        self.frame = QFrame(ManageContact)
         self.frame.setObjectName(u"frame")
         self.frame.setMinimumSize(QSize(270, 270))
         self.frame.setMaximumSize(QSize(270, 270))
@@ -92,7 +92,7 @@ class Ui_ContactsCreating(object):
 
         self.verticalLayout_2.addItem(self.verticalSpacer_4)
 
-        self.pushButton_Change = QPushButton(ContactsCreating)
+        self.pushButton_Change = QPushButton(ManageContact)
         self.pushButton_Change.setObjectName(u"pushButton_Change")
 
         self.verticalLayout_2.addWidget(self.pushButton_Change)
@@ -101,7 +101,7 @@ class Ui_ContactsCreating(object):
 
         self.verticalLayout_2.addItem(self.verticalSpacer_5)
 
-        self.pushButton_Delete = QPushButton(ContactsCreating)
+        self.pushButton_Delete = QPushButton(ManageContact)
         self.pushButton_Delete.setObjectName(u"pushButton_Delete")
         self.pushButton_Delete.setEnabled(False)
 
@@ -125,7 +125,7 @@ class Ui_ContactsCreating(object):
 
         self.verticalLayout.addItem(self.verticalSpacer)
 
-        self.buttonBox = QDialogButtonBox(ContactsCreating)
+        self.buttonBox = QDialogButtonBox(ManageContact)
         self.buttonBox.setObjectName(u"buttonBox")
         self.buttonBox.setOrientation(Qt.Horizontal)
         self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Ok)
@@ -133,22 +133,22 @@ class Ui_ContactsCreating(object):
         self.verticalLayout.addWidget(self.buttonBox)
 
 
-        self.retranslateUi(ContactsCreating)
-        self.buttonBox.accepted.connect(ContactsCreating.accept)
-        self.buttonBox.rejected.connect(ContactsCreating.reject)
+        self.retranslateUi(ManageContact)
+        self.buttonBox.accepted.connect(ManageContact.accept)
+        self.buttonBox.rejected.connect(ManageContact.reject)
 
-        QMetaObject.connectSlotsByName(ContactsCreating)
+        QMetaObject.connectSlotsByName(ManageContact)
     # setupUi
 
-    def retranslateUi(self, ContactsCreating):
-        ContactsCreating.setWindowTitle(QCoreApplication.translate("ContactsCreating", u"New Contact", None))
-        self.label.setText(QCoreApplication.translate("ContactsCreating", u"Name:", None))
-        self.lineEdit_Name.setPlaceholderText(QCoreApplication.translate("ContactsCreating", u"Insert a name for your contact", None))
-        self.label_2.setText(QCoreApplication.translate("ContactsCreating", u"Address:", None))
-        self.lineEdit_Address.setPlaceholderText(QCoreApplication.translate("ContactsCreating", u"Insert a valid Algorand address", None))
-        self.label_3.setText(QCoreApplication.translate("ContactsCreating", u"Photo:", None))
+    def retranslateUi(self, ManageContact):
+        ManageContact.setWindowTitle(QCoreApplication.translate("ManageContact", u"New Contact", None))
+        self.label.setText(QCoreApplication.translate("ManageContact", u"Name:", None))
+        self.lineEdit_Name.setPlaceholderText(QCoreApplication.translate("ManageContact", u"Insert a name for your contact", None))
+        self.label_2.setText(QCoreApplication.translate("ManageContact", u"Address:", None))
+        self.lineEdit_Address.setPlaceholderText(QCoreApplication.translate("ManageContact", u"Insert a valid Algorand address", None))
+        self.label_3.setText(QCoreApplication.translate("ManageContact", u"Photo:", None))
         self.label_Picture.setText("")
-        self.pushButton_Change.setText(QCoreApplication.translate("ContactsCreating", u"Change", None))
-        self.pushButton_Delete.setText(QCoreApplication.translate("ContactsCreating", u"Delete", None))
+        self.pushButton_Change.setText(QCoreApplication.translate("ManageContact", u"Change", None))
+        self.pushButton_Delete.setText(QCoreApplication.translate("ManageContact", u"Delete", None))
     # retranslateUi
 

@@ -13,6 +13,7 @@ import locale
 # TODO Maybe look into Qt model/view because management of contacts, wallets and addresses is getting out of hand
 #  especially in TransactionWindow
 # TODO deploying on linux is a NIGHTMARE. Find a way to freeze the app for Windows/MacOS/Linux.
+# TODO make so that every operation that calls algosdk happen on a thread and the application displays the loading icon
 def main():
     locale.setlocale(locale.LC_ALL, '')
     # Manager of all things regarding a widget-based Qt5 app.
@@ -22,7 +23,7 @@ def main():
     # This import has to be done here because there are several static resources inside this package which
     #  will be loaded during the import of the package itself. So because most misc are PySide2 objects
     #  QApplication needs to be running to perform all task needed.
-    from Interfaces.Main.Window import MainWindow
+    from Interfaces.Main.Window.Window import MainWindow
 
     MainWindow.initialize()
 

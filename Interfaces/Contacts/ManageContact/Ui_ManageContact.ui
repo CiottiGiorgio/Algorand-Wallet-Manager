@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ContactsCreating</class>
- <widget class="QDialog" name="ContactsCreating">
+ <class>ManageContact</class>
+ <widget class="QDialog" name="ManageContact">
   <property name="windowModality">
    <enum>Qt::ApplicationModal</enum>
   </property>
@@ -276,7 +276,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>ContactsCreating</receiver>
+   <receiver>ManageContact</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -292,7 +292,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>ContactsCreating</receiver>
+   <receiver>ManageContact</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
