@@ -14,6 +14,7 @@ import locale
 #  especially in TransactionWindow
 # TODO deploying on linux is a NIGHTMARE. Find a way to freeze the app for Windows/MacOS/Linux.
 # TODO make so that every operation that calls algosdk happen on a thread and the application displays the loading icon
+# TODO make the font on the address combobox monospace
 def main():
     locale.setlocale(locale.LC_ALL, '')
     # Manager of all things regarding a widget-based Qt5 app.

@@ -4,6 +4,11 @@
 This Python application is a graphic interface for the user who owns or has access to an Algorand
 node and would like to issue operations through a GUI rather than CLI.
 
+### File structure
+main.py is the file that runs the application.  
+ui_compile.py is the file that searches for any .ui file and then
+compiles it into a python file that represents the interface.
+
 ### Requirements
 * Python 3
 

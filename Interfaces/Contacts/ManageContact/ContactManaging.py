@@ -81,9 +81,25 @@ class ContactManaging(QtWidgets.QDialog, Ui_ManageContact):
 
     @QtCore.Slot()
     def accept(self):
+        """
+        This method sets the return value of self with a valid widget constructed following user inputs and then calls
+        super().accept()
+        """
+        # If there is a picture for the widget
         if self.external_pic_full_path:
-            if not (
-                    self.pre_filled.contact.pic_name or
+            # Picture has to be updated if:
+            # - widget had no picture or
+            # - widget picture is different from the one selected now
+            # This truth evaluation is risky because at this point self.pre_filled.contact.pic_name could be None
+            #  so trying to concatenate a string + NoneType would result in an error. However if
+            #  self.pre_filled.contact.pic_name is None the first condition would return True and, since it's an
+            #  or statement, that's enough to stop evaluating the truth and the second evaluation should never
+            #  take place.
+            #  If it does take place then self.pre_filled.contact.pic_name was not None and the concatenation
+            #  can take place.
+            #  I am just learning not that this process is called short-circuit.
+            if (
+                    not self.pre_filled.contact.pic_name or
                     self.external_pic_full_path != ProjectConstants.fullpath_thumbnails + self.pre_filled.contact.pic_name
             ):
                 old_extension = "." + self.external_pic_full_path.split(".")[-1]
