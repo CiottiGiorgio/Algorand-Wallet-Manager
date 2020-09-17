@@ -12,12 +12,10 @@ from algosdk.mnemonic import from_private_key, to_private_key
 from misc.Entities import Wallet
 from misc.Functions import find_main_window
 from Interfaces.Main.Address.Frame.Ui_Frame import Ui_AddressFrame
-from Interfaces.Main.Address.BalanceWindow.Ui_BalanceWindow import Ui_BalanceWindow
-from Interfaces.Main.Address.Widgets import BalanceScrollWidget
+from Interfaces.Main.Address.BalanceWindow.BalanceWindow import BalanceWindow
 
 # Python standard libraries
 from functools import partial
-import locale
 
 
 class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
@@ -167,34 +165,3 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
 
         queued_widget.remove_top_widget()
         queued_widget.add_widget(AddressFrame(queued_widget, self.wallet))
-
-
-class BalanceWindow(QtWidgets.QDialog, Ui_BalanceWindow):
-    """
-    This class implements the balance window. It displays current balance, pending rewards and assets.
-    """
-    def __init__(self, parent: QtWidgets.QWidget, account_info: dict):
-        super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)
-
-        # Anti memory leak
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
-
-        self.account_info = account_info
-
-        self.setupUi(self)
-
-        self.label_Balance.setText(
-            str(locale.currency(account_info["amount-without-pending-rewards"], False, True))[:-3] + " microAlgos"
-        )
-        self.label_Pending.setText(
-            str(locale.currency(account_info["pending-rewards"], False, True))[:-3] + " microAlgos"
-        )
-
-        for asset in account_info["assets"]:
-            self.verticalLayout_assets.addWidget(
-                BalanceScrollWidget(
-                    "id - " + str(asset["asset-id"]),
-                    str(asset["amount"])
-                )
-            )
-        self.verticalLayout_assets.addStretch(1)
