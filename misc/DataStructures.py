@@ -4,64 +4,105 @@ This file contains some classes that implement functionality for some data struc
 
 
 from typing import Dict
+from collections.abc import MutableSequence, MutableMapping
 
 
-# TODO rethink the way this wrapper checks if a mutable structure underneath has changed.
-#  Using hash could be problematic because there is a small chance that a changed in time structure gives out the same
-#  hash as the first time it was hashed.
-class ChangeContainer:
+class ChangeDetectable:
     """
-    This is a wrapper for whatever mutable data structure that implements the functionality to save the state of
-    the container in order to decide if it has changed over time.
+    This class implements functionality for detecting changes in a data structure between two points in time.
+    Namely from the last time .save_state() was called and the last time has_changed() was called.
+
+    One would need to structure this a little better if we knew what kind of underlying data structure we have.
+    I'm going to use this for a MutableSequence and a MutableMapping so i'm not going to write abstract methods that
+    have to be defined because write operation on data structure differ. I'm going to rely on the child classes
+    to implement correctly their version of write operation that correctly signal the changed flag.
     """
+
     def __init__(self):
-        self.memory = None
-        self.old_hash = None
+        self._changed = False
 
     def __getstate__(self) -> Dict:
-        """
-        Method used in jsonpickle.encode
-        """
         result = self.__dict__.copy()
-        del result["old_hash"]
+        del result["_changed"]
         return result
 
     def __setstate__(self, state: Dict):
-        """
-        Method used in jsonpickle.decode.
-
-        Looks useless but actually has to be implemented because __getstate__ is.
-        """
         self.__dict__.update(state)
 
     def save_state(self):
-        self.old_hash = str(self.memory).__hash__()
+        self._changed = False
 
     def has_changed(self) -> bool:
-        return str(self.memory).__hash__() != self.old_hash
+        return self._changed
 
 
-class ListJsonContacts(ChangeContainer):
+class ListJsonContacts(MutableSequence, ChangeDetectable):
     """
-    This class will be used to hold the information of contacts.json file.
-    """
-    def __init__(self):
-        super().__init__()
-        self.memory = list()
+    This class implements a list-like object that is used to hold the content of contacts.json file and is able to
+    tell if content is changed.
 
 
-class DictJsonSettings(ChangeContainer):
-    """
-    This class will be used to hold the information of settings.json file.
+    Beware that maybe not all write operation on a normal list are implemented. I implemented only those that are used
+    within this project. If one was to make this more generic maybe it would be advisable to get even more abstract and
+    deal with collections.abc.Container or something like that.
     """
     def __init__(self):
         super().__init__()
-        self.memory = dict()
+        self._list = list()
 
-        self.memory["selected"] = 0
+    def __getitem__(self, item):
+        return self._list.__getitem__(item)
 
-        self.memory["local"] = ""
+    def __setitem__(self, key, value):
+        self._list.__setitem__(key, value)
+        self._changed = True
 
-        self.memory["algod"] = {"url": "", "port": "", "token": ""}
-        self.memory["kmd"] = {"url": "", "port": "", "token": ""}
-        self.memory["indexer"] = {"url": "", "port": "", "token": ""}
+    def __delitem__(self, key):
+        self._list.__delitem__(key)
+        self._changed = True
+
+    def __len__(self):
+        return self._list.__len__()
+
+    def insert(self, index, item):
+        self._list.insert(index, item)
+        self._changed = True
+
+    def append(self, item: object) -> None:
+        self._list.append(item)
+        self._changed = True
+
+
+class DictJsonSettings(MutableMapping, ChangeDetectable):
+    """
+    This class implements a dict-like object that is used to hold the content of settings.json file and is able to tell
+    if content is changed.
+
+    Same advice as ListJsonContacts.
+    """
+    def __init__(self):
+        super().__init__()
+        self._dict = {
+            "selected": 0,
+            "local": "",
+            "algod": {"url": "", "port": "", "token": ""},
+            "kmd": {"url": "", "port": "", "token": ""},
+            "indexer": {"url": "", "port": "", "token": ""}
+        }
+
+    def __getitem__(self, key):
+        return self._dict.__getitem__(key)
+
+    def __setitem__(self, key, value):
+        self._dict.__setitem__(key, value)
+        self._changed = True
+
+    def __delitem__(self, key):
+        self._dict.__delitem__(key)
+        self._changed = True
+
+    def __iter__(self):
+        return self._dict.__iter__()
+
+    def __len__(self):
+        return self._dict.__len__()

@@ -79,7 +79,7 @@ class ContactsWindow(QtWidgets.QDialog, Ui_ContactsWindow):
     def setup_logic(self):
         # Populate contact_widgets with info from json file.
         if not ContactsWindow.contact_widgets:
-            for contact in ContactsWindow.contacts_from_json_file.memory:
+            for contact in ContactsWindow.contacts_from_json_file:
                 ContactsWindow.contact_widgets.append(ContactListWidget(contact))
 
         # Populate list
@@ -150,7 +150,7 @@ class ContactsWindow(QtWidgets.QDialog, Ui_ContactsWindow):
         if new_contact_window.exec_() == QtWidgets.QDialog.Accepted:
             new_widget = new_contact_window.return_value
 
-            self.contacts_from_json_file.memory.append(new_widget.contact)
+            self.contacts_from_json_file.append(new_widget.contact)
             self.contact_widgets.append(new_widget)
             self.listWidget.add_widget(new_widget)
 
@@ -165,10 +165,10 @@ class ContactsWindow(QtWidgets.QDialog, Ui_ContactsWindow):
             old_contact, new_contact = old_widget.contact, new_widget.contact
 
             self.remove_item(item)
-            self.contacts_from_json_file.memory.remove(old_contact)
+            self.contacts_from_json_file.remove(old_contact)
             if old_contact.pic_name != new_contact.pic_name:
                 old_contact.release()
-            self.contacts_from_json_file.memory.append(new_contact)
+            self.contacts_from_json_file.append(new_contact)
             ContactsWindow.contact_widgets.append(new_widget)
             self.listWidget.add_widget(new_widget)
 
@@ -179,7 +179,7 @@ class ContactsWindow(QtWidgets.QDialog, Ui_ContactsWindow):
         contact = self.listWidget.itemWidget(item).contact
 
         self.remove_item(item)
-        self.contacts_from_json_file.memory.remove(contact)
+        self.contacts_from_json_file.remove(contact)
         contact.release()
 
     # N.B.: The next method that end in "_item" is only "macro" to manage items in the list

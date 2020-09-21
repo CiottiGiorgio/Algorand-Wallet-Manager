@@ -5,15 +5,12 @@ This file contains some function that are used in multiple classes but belong to
 # PySide2
 from PySide2 import QtWidgets
 
-# Local project
-from misc.DataStructures import ChangeContainer
-
 # Python standard libraries
 import jsonpickle
 from sys import stderr
 
 
-def load_json_file(file: str) -> ChangeContainer:
+def load_json_file(file: str) -> object:
     """
     This method takes a json file and returns the data structure contained in it.
 
@@ -28,7 +25,7 @@ def load_json_file(file: str) -> ChangeContainer:
         quit()
 
 
-def dump_json_file(file: str, structure: ChangeContainer):
+def dump_json_file(file: str, structure: object):
     """
     This function takes a data structure and writes it to the json file.
 

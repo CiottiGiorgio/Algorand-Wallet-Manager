@@ -49,7 +49,7 @@ class SettingsWindow(QtWidgets.QDialog, Ui_SettingsWindow):
         QtCore.QTimer.singleShot(0, self.setup_logic)
 
     def setup_logic(self):
-        settings = SettingsWindow.saved_json_settings.memory  # Shortened
+        settings = SettingsWindow.saved_json_settings  # Shortened
         if settings["selected"] == 0:
             self.radioButton_Local.setChecked(True)
         elif settings["selected"] == 1:
@@ -75,7 +75,7 @@ class SettingsWindow(QtWidgets.QDialog, Ui_SettingsWindow):
 
     @QtCore.Slot()
     def accept(self):
-        settings = SettingsWindow.saved_json_settings.memory
+        settings = SettingsWindow.saved_json_settings
 
         if self.radioButton_Local.isChecked():
             settings["selected"] = 0
@@ -145,7 +145,7 @@ class SettingsWindow(QtWidgets.QDialog, Ui_SettingsWindow):
 
         It's crucial that the pair (address, token) remains consistent. Meaning that either both exists or none does.
         """
-        settings = SettingsWindow.saved_json_settings.memory
+        settings = SettingsWindow.saved_json_settings
 
         temp = dict()
 
