@@ -22,11 +22,17 @@ class ChangeDetectable:
         self._changed = False
 
     def __getstate__(self) -> Dict:
+        """
+        We hide this runtime flag from being saved in persistent memory when jsonpickle.encode() is called.
+        """
         result = self.__dict__.copy()
         del result["_changed"]
         return result
 
     def __setstate__(self, state: Dict):
+        """
+        This method has to be implemented because __getstate__ is.
+        """
         self.__dict__.update(state)
 
     def save_state(self):
@@ -40,11 +46,6 @@ class ListJsonContacts(MutableSequence, ChangeDetectable):
     """
     This class implements a list-like object that is used to hold the content of contacts.json file and is able to
     tell if content is changed.
-
-
-    Beware that maybe not all write operation on a normal list are implemented. I implemented only those that are used
-    within this project. If one was to make this more generic maybe it would be advisable to get even more abstract and
-    deal with collections.abc.Container or something like that.
     """
     def __init__(self):
         super().__init__()
@@ -68,17 +69,11 @@ class ListJsonContacts(MutableSequence, ChangeDetectable):
         self._list.insert(index, item)
         self._changed = True
 
-    def append(self, item: object) -> None:
-        self._list.append(item)
-        self._changed = True
-
 
 class DictJsonSettings(MutableMapping, ChangeDetectable):
     """
     This class implements a dict-like object that is used to hold the content of settings.json file and is able to tell
     if content is changed.
-
-    Same advice as ListJsonContacts.
     """
     def __init__(self):
         super().__init__()
