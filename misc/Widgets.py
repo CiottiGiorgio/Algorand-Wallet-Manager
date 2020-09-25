@@ -47,8 +47,7 @@ class CustomListWidget(QtWidgets.QListWidget):
         """
         This method cleans the list from a possible LoadingWidget.
         """
-        # FIXME if self.timer = None
-        if self.timer.isActive():
+        if self.timer and self.timer.isActive():
             self.timer.stop()
             self.timer.timeout.disconnect()
         elif isinstance(self.itemWidget(self.item(0)), LoadingWidget):

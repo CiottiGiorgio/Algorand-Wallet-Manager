@@ -10,7 +10,6 @@ import locale
 
 
 class BalanceWindow(QtWidgets.QDialog, Ui_BalanceWindow):
-    # TODO make a polling call that updates the content of this window every 5 seconds.
     """
     This class implements the balance window. It displays current balance, pending rewards and assets.
     """

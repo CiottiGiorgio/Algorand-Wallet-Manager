@@ -17,6 +17,7 @@ from Interfaces.Transaction.Window.Ui_Window import Ui_TransactionWindow
 from Interfaces.Contacts.Window.Window import ContactsWindow
 
 
+# TODO use monospaced font to make all addresses long the same amount.
 class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
     """
     This class implements the transaction window.
@@ -49,7 +50,7 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
                     self.comboBox_Receiver.addItem(f"Wallet: {widget.wallet.info['name']} - {address}")
                     self.comboBox_CloseTo.addItem(f"Wallet: {widget.wallet.info['name']} - {address}")
 
-        for contact in ContactsWindow.contacts_from_json_file.memory:
+        for contact in ContactsWindow.contacts_from_json_file:
             self.comboBox_Receiver.addItem(f"Contact: {contact.name} - {contact.info}")
             self.comboBox_CloseTo.addItem(f"Contact: {contact.name} - {contact.info}")
 

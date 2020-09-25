@@ -38,6 +38,9 @@ class ChangeDetectable:
     def save_state(self):
         self._changed = False
 
+    def set_changed(self):
+        self._changed = True
+
     def has_changed(self) -> bool:
         return self._changed
 
@@ -56,18 +59,18 @@ class ListJsonContacts(MutableSequence, ChangeDetectable):
 
     def __setitem__(self, key, value):
         self._list.__setitem__(key, value)
-        self._changed = True
+        self.set_changed()
 
     def __delitem__(self, key):
         self._list.__delitem__(key)
-        self._changed = True
+        self.set_changed()
 
     def __len__(self):
         return self._list.__len__()
 
     def insert(self, index, item):
         self._list.insert(index, item)
-        self._changed = True
+        self.set_changed()
 
 
 class DictJsonSettings(MutableMapping, ChangeDetectable):
@@ -90,11 +93,11 @@ class DictJsonSettings(MutableMapping, ChangeDetectable):
 
     def __setitem__(self, key, value):
         self._dict.__setitem__(key, value)
-        self._changed = True
+        self.set_changed()
 
     def __delitem__(self, key):
         self._dict.__delitem__(key)
-        self._changed = True
+        self.set_changed()
 
     def __iter__(self):
         return self._dict.__iter__()

@@ -17,6 +17,8 @@ import os
 from functools import partial
 
 
+# TODO Make sure the window is narrower and the address get collapsed like "AAAAAA.....AAAAAA" if the width exceeds
+#  the window
 class ContactsWindow(QtWidgets.QDialog, Ui_ContactsWindow):
     """
     This class is the contact window.
