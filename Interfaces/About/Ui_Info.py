@@ -76,6 +76,6 @@ class Ui_Info(object):
         self.label.setText(QCoreApplication.translate("Info", u"Algorand Wallet Manager", None))
         self.label_2.setText(QCoreApplication.translate("Info", u"This software is released under MIT licence", None))
         self.label_3.setText(QCoreApplication.translate("Info", u"Author: Ciotti Giorgio", None))
-        self.label_4.setText(QCoreApplication.translate("Info", u"email: <a href=\"mailto:ciotti.giorgio.96@gmail.com\">ciotti.giorgio.96@gmail.com</a>", None))
+        self.label_4.setText(QCoreApplication.translate("Info", u"email: <a href=\"mailto:gciotti.dev@gmail.com\">gciotti.dev@gmail.com</a>", None))
     # retranslateUi
 

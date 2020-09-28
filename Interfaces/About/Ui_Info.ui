@@ -85,7 +85,7 @@
    <item>
     <widget class="QLabel" name="label_4">
      <property name="text">
-      <string>email: &lt;a href=&quot;mailto:ciotti.giorgio.96@gmail.com&quot;&gt;ciotti.giorgio.96@gmail.com&lt;/a&gt;</string>
+      <string>email: &lt;a href=&quot;mailto:gciotti.dev@gmail.com&quot;&gt;gciotti.dev@gmail.com&lt;/a&gt;</string>
      </property>
      <property name="textFormat">
       <enum>Qt::MarkdownText</enum>
