@@ -7,7 +7,6 @@ This file contains subclasses of PySide2 widgets that are used throughout this p
 from PySide2 import QtWidgets, QtCore, QtGui
 
 # Python standard libraries
-from os import path
 from typing import Type
 
 
@@ -102,7 +101,7 @@ class LoadingWidget(QtWidgets.QWidget):
         # Setup interface
         main_layout = QtWidgets.QHBoxLayout(self)
 
-        movie = QtGui.QMovie("graphics/loading.webp")
+        movie = QtGui.QMovie(":/animations/loading.webp")
         movie.setScaledSize(QtCore.QSize(30, 30))
         movie.setCacheMode(QtGui.QMovie.CacheAll)
 

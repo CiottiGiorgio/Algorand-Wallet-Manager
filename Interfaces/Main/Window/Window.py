@@ -9,10 +9,13 @@ Main class is the fundamental interface from which the program offers its functi
 from PySide2 import QtWidgets, QtGui, QtCore
 
 # Local project
+from graphics import resources
+
 import misc.Constants as ProjectConstants
 from misc.Functions import load_json_file, dump_json_file
 from misc.Entities import AlgorandWorker
 from misc.Widgets import LoadingWidget
+
 from Interfaces.Transaction.Window.Window import TransactionWindow
 from Interfaces.Main.Window.Ui_Window import Ui_MainWindow
 from Interfaces.Main.Wallet.Frame.Frame import WalletsFrame
@@ -54,7 +57,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.wallet_frame = None
 
-        self.setWindowIcon(QtGui.QIcon(path.abspath("graphics/python_icon.ico")))
+        self.setWindowIcon(QtGui.QIcon(":/icons/python.ico"))
 
         # This has to be done here because Qt Creator doesn't allow action on the menuBar itself.
         self.menuAction_NewTransaction = self.menuBar().addAction("New transaction")

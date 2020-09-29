@@ -31,8 +31,8 @@ class ContactManaging(QtWidgets.QDialog, Ui_ManageContact):
         return "".join(sample(ContactManaging.character_pool, length))
 
     # Static images to avoid IO bottleneck
-    icon_valid = QtGui.QPixmap(os.path.abspath("graphics/valid.png"))
-    icon_not_valid = QtGui.QPixmap(os.path.abspath("graphics/not_valid.png"))
+    icon_valid = QtGui.QPixmap(":icons/valid.png")
+    icon_not_valid = QtGui.QPixmap(":/icons/not_valid.png")
 
     def __init__(self, parent: QtWidgets.QWidget, pre_filled: ContactListWidget = None):
         super().__init__(parent, QtCore.Qt.WindowCloseButtonHint)

@@ -32,8 +32,8 @@ class ContactListWidget(QtWidgets.QWidget):
     """
     This widget represents a contact inside ContactWindow.
     """
-    pixmap_generic_user = QtGui.QPixmap(path.abspath("graphics/generic_user.png"))
-    bitmap_user_mask = QtGui.QBitmap.fromImage(QtGui.QImage(path.abspath("graphics/user_pic_mask.png")))
+    pixmap_generic_user = QtGui.QPixmap(":/icons/generic_user.png")
+    bitmap_user_mask = QtGui.QBitmap.fromImage(QtGui.QImage(":/masks/user_pic_mask.png"))
 
     def __init__(self, contact: Contact):
         super().__init__()

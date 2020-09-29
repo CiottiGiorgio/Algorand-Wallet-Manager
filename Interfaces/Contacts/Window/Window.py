@@ -13,7 +13,6 @@ from Interfaces.Contacts.ManageContact.ContactManaging import ContactManaging
 from Interfaces.Contacts.Widgets import ContactListItem, ContactListWidget
 
 # Python standard libraries
-import os
 from functools import partial
 
 
@@ -28,9 +27,9 @@ class ContactsWindow(QtWidgets.QDialog, Ui_ContactsWindow):
     """
     # These icons are static because we want to avoid having to reload them from the disk each time this class is
     #  instantiated.
-    icon_search = QtGui.QIcon(os.path.abspath("graphics/search.png"))
-    icon_edit = QtGui.QIcon(os.path.abspath("graphics/edit.png"))
-    icon_delete = QtGui.QIcon(os.path.abspath("graphics/delete.png"))
+    icon_search = QtGui.QIcon(":/icons/search.png")
+    icon_edit = QtGui.QIcon(":/icons/edit.png")
+    icon_delete = QtGui.QIcon(":/icons/delete.png")
 
     # This list will host the content of the contacts.json file. This is static because other classes might need to
     #  read contacts and create their own widgets.

@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>delete.png</file>
+        <file>edit.png</file>
+        <file>generic_user.png</file>
+        <file>not_valid.png</file>
+        <file>search.png</file>
+        <file>valid.png</file>
+        <file>python.ico</file>
+    </qresource>
+    <qresource prefix="/masks">
+        <file>user_pic_mask.png</file>
+    </qresource>
+    <qresource prefix="/animations">
+        <file>loading.webp</file>
+    </qresource>
+</RCC>
