@@ -12,7 +12,7 @@ from PySide2 import QtWidgets, QtGui, QtCore
 from graphics import resources
 
 import misc.Constants as ProjectConstants
-from misc.Functions import load_json_file, dump_json_file
+from misc.Functions import load_json_file, dump_json_file, find_main_window
 from misc.Entities import AlgorandWorker
 from misc.Widgets import LoadingWidget
 
@@ -219,5 +219,5 @@ class ClosingWindow(QtWidgets.QDialog):
         closing_timer.start(500)
 
     def terminate(self):
-        if self.parent().thread_pool.activeThreadCount() == 0:
+        if find_main_window().thread_pool.activeThreadCount() == 0:
             self.close()

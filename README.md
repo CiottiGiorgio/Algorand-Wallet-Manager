@@ -7,10 +7,14 @@ send transactions, save a contact list)
 
 ![alt text](Screenshots/main_window.png)
 
+### Standalone versions
+The user will find a version for each platform of this application that does not require
+having a Python interpreter and installed packages.
+
 ### File structure
 main.py is the file that runs the application.  
-ui_compile.py is the file that searches for any .ui file and then
-compiles it into a python file that represents the interface.
+ui&rcc_compile.py is the file that searches for any .ui or .qrc file and then
+compiles it into a python (a GUI class or a resource file).
 
 ### Requirements
 * Python 3

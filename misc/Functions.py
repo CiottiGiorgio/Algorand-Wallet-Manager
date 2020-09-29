@@ -7,6 +7,7 @@ from PySide2 import QtWidgets
 
 # Python standard libraries
 import jsonpickle
+from functools import lru_cache
 from sys import stderr
 
 
@@ -48,6 +49,7 @@ class ProjectException(Exception):
         self.message = message
 
 
+@lru_cache(1)
 def find_main_window() -> QtWidgets.QMainWindow:
     """
     This function returns a reference to MainWindow
