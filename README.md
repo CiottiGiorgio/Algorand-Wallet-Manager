@@ -8,8 +8,10 @@ send transactions, save a contact list)
 ![alt text](Screenshots/main_window.png)
 
 ### Standalone versions
-The user will find a version for each platform of this application that does not require
-having a Python interpreter and installed packages.
+The user will find below a version of this application that does not require having
+a Python interpreter and installed packages.
+
+Windows: Self-extracting 7zip archive. Then just run main.exe
 
 ### File structure
 main.py is the file that runs the application.  
