@@ -75,7 +75,7 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
             )
         else:
             self.listWidget.clear_loading()
-            QtWidgets.QMessageBox.critical(self, "kmd settings", "kmd settings not valid.")
+            find_main_window().exec_settings()
 
         if "algod" in SettingsWindow.rest_endpoints:
             self.algod_client = AlgodClient(

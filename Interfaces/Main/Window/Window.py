@@ -199,6 +199,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         SettingsWindow.saved_json_settings.save_state()
 
 
+# TODO disconnect all threads from their signals since they could raise an error that we don't care about
+#  because the application is about to close.
 class ClosingWindow(QtWidgets.QDialog):
     """
     This class is a window that signals to the user that some tasks are still running and
