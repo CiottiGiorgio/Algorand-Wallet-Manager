@@ -34,8 +34,9 @@ class Contact:
             try:
                 remove(path.join(ProjectConstants.fullpath_thumbnails, self.pic_name))
             except Exception as e:
+                if __debug__:
+                    print(type(e), str(e), file=stderr)
                 print("Could not delete profile picture for %s" % self.name, file=stderr)
-                print(e, file=stderr)
 
 
 class Wallet:

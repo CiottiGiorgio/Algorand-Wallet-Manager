@@ -163,7 +163,8 @@ class SettingsWindow(QtWidgets.QDialog, Ui_SettingsWindow):
                         "token": f2.readline().strip("\n")
                     }
             except Exception as e:
-                print(str(e), file=stderr)
+                if __debug__:
+                    print(type(e), str(e), file=stderr)
                 if "algod" in temp:
                     del temp["algod"]
 
@@ -175,7 +176,8 @@ class SettingsWindow(QtWidgets.QDialog, Ui_SettingsWindow):
                         "token": f4.readline().strip("\n")
                     }
             except Exception as e:
-                print(str(e), file=stderr)
+                if __debug__:
+                    print(type(e), str(e), file=stderr)
                 if "kmd" in temp:
                     del temp["kmd"]
 

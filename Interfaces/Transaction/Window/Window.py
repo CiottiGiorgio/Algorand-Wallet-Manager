@@ -16,6 +16,9 @@ from misc.Functions import ProjectException, find_main_window
 from Interfaces.Transaction.Window.Ui_Window import Ui_TransactionWindow
 from Interfaces.Contacts.Window.Window import ContactsWindow
 
+# Python standard libraries
+from sys import stderr
+
 
 # TODO use monospaced font to make all addresses long the same amount.
 class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
@@ -79,12 +82,16 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
             wallet = self.comboBox_Sender.currentData()
             s_txn = wallet.sign_transaction(self.get_transaction(sp))
         except Exception as e:
+            if __debug__:
+                print(type(e), str(e), file=stderr)
             QtWidgets.QMessageBox.critical(self, "Could not sign transaction", str(e))
             return
 
         try:
             addr_txn = find_main_window().wallet_frame.algod_client.send_transaction(s_txn)
         except Exception as e:
+            if __debug__:
+                print(type(e), str(e), file=stderr)
             QtWidgets.QMessageBox.critical(self, "Could not send transaction", str(e))
             return
 
@@ -149,6 +156,8 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
             sp = find_main_window().wallet_frame.algod_client.suggested_params()
             temp_txn = self.get_transaction(sp)
         except Exception as e:
+            if __debug__:
+                print(type(e), str(e), file=stderr)
             QtWidgets.QMessageBox.critical(self, "Could not load suggested fee", str(e))
             return
 
@@ -158,10 +167,18 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
         temp_txn.fee = sp.min_fee
 
         self.comboBox_FeeUnit.setCurrentIndex(0)
+
+        # Since sp.fee is constantly 0.
+        #  Also there seems to be a bug in the sdk with the method .estimate_size().
+        #  We implement, for now, suggested fee as the minimum fee possible. Just for sake of deployment.
+        # TODO Investigate this issue.
+        # self.lineEdit_Fee.setText(
+        #     str(
+        #         max(sp.min_fee, temp_txn.estimate_size() * sp.fee)
+        #     )
+        # )
         self.lineEdit_Fee.setText(
-            str(
-                max(sp.min_fee, temp_txn.estimate_size() * sp.fee)
-            )
+            str(sp.min_fee)
         )
 
     @QtCore.Slot()
@@ -254,7 +271,7 @@ class TransactionWindow(QtWidgets.QDialog, Ui_TransactionWindow):
             "first": sp.first,
             "last": sp.last,
             "gh": sp.gh,
-            "note": self.textEdit_Note.toPlainText()
+            "note": self.textEdit_Note.toPlainText().encode()
         }
 
         # If the algosdk.transaction raises an error it will be simply propagated and dealt with outside of this

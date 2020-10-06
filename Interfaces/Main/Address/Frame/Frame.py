@@ -79,6 +79,8 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
         try:
             account_info = find_main_window().wallet_frame.algod_client.account_info(item.text())
         except Exception as e:
+            if __debug__:
+                print(type(e), str(e), file=stderr)
             QtWidgets.QMessageBox.critical(self, "Could not load balance", str(e))
         else:
             dialog = BalanceWindow(self, account_info)
@@ -89,6 +91,8 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
         try:
             self.wallet.algo_wallet.generate_key()
         except Exception as e:
+            if __debug__:
+                print(type(e), str(e), file=stderr)
             QtWidgets.QMessageBox.critical(self, "Could not generate new address", str(e))
         else:
             self.restart()
@@ -108,6 +112,8 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
         try:
             self.wallet.algo_wallet.delete_key(item.text())
         except Exception as e:
+            if __debug__:
+                print(type(e), str(e), file=stderr)
             QtWidgets.QMessageBox.critical(self, "Could not forget address", str(e))
         else:
             self.restart()
@@ -131,6 +137,8 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
             try:
                 self.wallet.algo_wallet.import_key(to_private_key(new_address[0]))
             except Exception as e:
+                if __debug__:
+                    print(type(e), str(e), file=stderr)
                 QtWidgets.QMessageBox.critical(self, "Could not import address", str(e))
             else:
                 self.restart()
@@ -142,6 +150,8 @@ class AddressFrame(QtWidgets.QFrame, Ui_AddressFrame):
         try:
             private_key = self.wallet.algo_wallet.export_key(item.text())
         except Exception as e:
+            if __debug__:
+                print(type(e), str(e), file=stderr)
             QtWidgets.QMessageBox.critical(self, "Could not export address", str(e))
         else:
             QtGui.QGuiApplication.clipboard().setText(from_private_key(private_key))

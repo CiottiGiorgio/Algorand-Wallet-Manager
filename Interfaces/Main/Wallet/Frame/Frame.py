@@ -140,6 +140,8 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
                     widget.wallet.algo_wallet.rename(new_name[0])
                     widget.wallet.info = widget.wallet.algo_wallet.info()["wallet"]
                 except Exception as e:
+                    if __debug__:
+                        print(type(e), str(e), file=stderr)
                     QtWidgets.QMessageBox.critical(self, "Could not rename", str(e))
                 else:
                     widget.label_primary.setText(new_name[0])
@@ -158,6 +160,8 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
                     )
                 )
             except Exception as e:
+                if __debug__:
+                    print(type(e), str(e), file=stderr)
                 QtWidgets.QMessageBox.critical(self, "Could not create wallet", str(e))
             else:
                 self.listWidget.add_widget(
@@ -176,6 +180,8 @@ class WalletsFrame(QtWidgets.QFrame, Ui_WalletFrame):
             try:
                 mnemonic_mdk = widget.wallet.algo_wallet.get_mnemonic()
             except Exception as e:
+                if __debug__:
+                    print(type(e), str(e), file=stderr)
                 QtWidgets.QMessageBox.critical(self, "Could not export wallet", str(e))
             else:
                 QtGui.QGuiApplication.clipboard().setText(mnemonic_mdk)
