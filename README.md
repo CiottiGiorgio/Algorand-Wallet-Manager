@@ -15,7 +15,7 @@ Windows: Self-extracting 7zip archive. Then just run main.exe
 
 ### File structure
 main.py is the file that runs the application.  
-ui&rcc_compile.py is the file that searches for any .ui or .qrc file and then
+ui_rcc_compile.py is the file that searches for any .ui or .qrc file and then
 compiles it into a python (a GUI class or a resource file).
 
 ### Requirements
