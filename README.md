@@ -28,4 +28,4 @@ Packages:
 
 ### Installation
 on Ubuntu 18.04
-- python3 -m pip install PySide2 py-algorand-sdk jsonpickle
+- python3 -m pip install PySide2 py-algorand-sdk==1.4.0 jsonpickle
